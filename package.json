@@ -13,5 +13,14 @@
     "gm": "1.23.0",
     "kue": "0.11.6",
     "short-hash": "1.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "3.5.0",
+    "nodemon": "1.12.1"
+  },
+  "scripts": {
+    "start": "concurrently \"yarn run worker\" \"yarn run server\"",
+    "worker": "nodemon ./src/workers/media.js --ignore node_modules --ext js",
+    "server": "nodemon ./src/server/index.js --ignore node_modules --ext js"
   }
 }
