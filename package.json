@@ -1,0 +1,17 @@
+{
+  "name": "media-on-demand",
+  "version": "1.0.0",
+  "description": "Easy-integrated online service to create media real time from original media",
+  "main": "index.js",
+  "repository": "git@github.com:MediaSocialNetwork/media-on-demand.git",
+  "author": "LongLH <d@dapps.me>",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "2.125.0",
+    "bluebird": "3.5.0",
+    "express": "4.16.1",
+    "gm": "1.23.0",
+    "kue": "0.11.6",
+    "short-hash": "1.0.0"
+  }
+}
