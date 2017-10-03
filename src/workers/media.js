@@ -3,8 +3,24 @@ const queue = kue.createQueue();
 
 console.log('Worker [media] started...');
 
-queue.process('media', function(job, done) {
-  console.log(job);
+queue.process('rpc', (job, done) => {
+  let { data } = job;
+  let cid = job.id;
 
-  setTimeout(done, 500);
+  console.log('on worker', cid, data);
+
+  setTimeout(() => reply(cid, data), 5000);
+
+  done();
 });
+
+function reply(cid, data) {
+  queue
+    .create('rpc:reply', {
+      cid: cid,
+      reply: data
+    })
+    .events(false)
+    .removeOnComplete(true)
+    .save();
+}
