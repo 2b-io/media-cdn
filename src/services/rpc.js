@@ -9,9 +9,14 @@ queue.process('rpc:reply', 1000, (job, done) => {
   let { cid, reply } = data;
 
   let cb = callbacks[cid];
+  delete callbacks[cid];
+
+  console.log(callbacks);
 
   if (typeof cb === 'function') {
-    setTimeout(() => cb(reply));
+    setTimeout(() => {
+      cb(reply);
+    });
   }
 
   done();

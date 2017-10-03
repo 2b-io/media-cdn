@@ -1,3 +1,4 @@
+const bluebird = require('bluebird');
 const shortHash = require('short-hash');
 const kue = require('kue');
 const Redis = require('ioredis');
@@ -8,44 +9,46 @@ const redis = new Redis();
 
 kue.app.listen(3001);
 
-function init(cb) {
+function init(done) {
   // listen RPC
   queue.process('rpc', (job, done) => {
-    registerTask(job, () => {
-      done();
-    });
+    registerTask(job, () => done());
   });
 
-  cb();
+  // register other processes here
+
+  done();
 }
 
 function reply(cid, reply) {
-  queue
-    .create('rpc:reply', {
-      cid,
-      reply
-    })
-    .ttl(1000)
-    .events(false)
-    .removeOnComplete(true)
-    .save();
+  return new bluebird((resolve, reject) => {
+    queue
+      .create('rpc:reply', {
+        cid,
+        reply
+      })
+      .ttl(1000)
+      .events(false)
+      .removeOnComplete(true)
+      .save(() => {
+        resolve();
+      });
+  });
 }
 
 function replyAll(hash) {
-  redis
+  return redis
     .lrange(`w:${hash}`, 0, -1)
-    .then(arr => {
-      console.log(arr);
-
-      for (let i = 0; i < arr.length; i++) {
-        let id = arr[i];
-        console.log(id);
-
-        reply(id, {
+    .then(jobs => {
+      let waits = jobs.map(
+        id => reply(id, {
           salt: uuid.v4()
-        });
-      }
+        })
+      );
 
+      return bluebird.all(waits);
+    })
+    .then(() => {
       return redis.del(`w:${hash}`);
     });
 }
