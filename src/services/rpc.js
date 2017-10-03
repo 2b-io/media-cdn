@@ -4,16 +4,14 @@ const uuid = require('uuid');
 const queue = kue.createQueue();
 const callbacks = {};
 
-queue.process('rpc:reply', (job, done) => {
+queue.process('rpc:reply', 1000, (job, done) => {
   let { data } = job;
   let { cid, reply } = data;
-
-  console.log('on server:', cid, data);
 
   let cb = callbacks[cid];
 
   if (typeof cb === 'function') {
-    return cb(done, reply);
+    setTimeout(() => cb(reply));
   }
 
   done();
@@ -25,8 +23,6 @@ module.exports = function(data, cb) {
     .events(false)
     .removeOnComplete(true)
     .save(err => {
-      console.log('queue', job.id);
-
       callbacks[job.id] = cb;
     });
 };
