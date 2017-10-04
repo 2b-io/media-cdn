@@ -6,6 +6,8 @@ const app = express();
 const port = 3000;
 
 const rpc = require('../services/rpc');
+const storage = require('../services/storage');
+const Media = require('../entities/Media');
 
 app.use(nocache());
 
@@ -13,13 +15,46 @@ app.get('/', (req, res, next) => {
   let id = uuid.v4();
   console.log('handle request...', id);
 
-  const src = 'https://assets.stuffs.cool/2017/10/the.cool.stuffs_2fa5bfc0-bc7e-4ddc-aeca-776f06d05b18.jpg';
+  const src = 'https://assets.stuffs.cool/2017/09/the.cool.stuffs_d35544b6-f3c4-4f14-81c0-48d8e2e96a0d.jpg';
 
-  rpc({
-    demand: src
-  }, (reply) => {
-    res.json(reply);
-  });
+  storage
+    .meta(Media.create({
+      tenant: 'thecoolstuffs',
+      url: src,
+      width: 360
+    }))
+    .then(media => {
+      let exists = !!media.meta;
+
+      if (exists) {
+        // pipe media from storage to response
+        storage
+          .get(media)
+          .then(media => {
+            res.set('Content-Type', media.meta.ContentType);
+            res.set('Content-Length', media.meta.ContentLength);
+            res.set('Last-Modified', media.meta.LastModified);
+            res.set('ETag', media.meta.ETag);
+
+            media.toStream().pipe(res);
+          });
+
+        return;
+      }
+
+      // request background prepare media
+      // then pipe media from storage to response
+      rpc({
+        command: 'prepare-media',
+        media: media.toJSON()
+      }, reply => {
+        storage
+          .get(media)
+          .then(media => {
+            media.toStream().pipe(res);
+          });
+      });
+    });
 });
 
 app.listen(port, () => console.log(`Server started at ${port}`));

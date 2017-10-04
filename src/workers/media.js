@@ -4,6 +4,9 @@ const kue = require('kue');
 const Redis = require('ioredis');
 const uuid = require('uuid');
 
+const storage = require('../services/storage');
+const Media = require('../entities/Media');
+
 const queue = kue.createQueue();
 const redis = new Redis();
 
