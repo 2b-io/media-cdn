@@ -1,8 +1,6 @@
 const bluebird = require('bluebird');
-const shortHash = require('short-hash');
 const kue = require('kue');
 const Redis = require('ioredis');
-const uuid = require('uuid');
 
 const storage = require('../services/storage');
 const Media = require('../entities/Media');
@@ -55,12 +53,14 @@ function replyAll(hash, response) {
 }
 
 function beginProcess(hash, media) {
-  setTimeout(() => replyAll(hash, media), 5000);
+  setTimeout(() => replyAll(hash, media), 0);
 }
 
 function registerTask(job, done) {
   console.log('registerTask...', job.id);
-  const hash = shortHash(JSON.stringify(job.data.media));
+
+  const media = Media.create(job.data.media);
+  const hash = media.hash;
 
   redis
     .llen(`w:${hash}`)
@@ -68,7 +68,7 @@ function registerTask(job, done) {
       console.log(`w:${hash}`, length);
 
       if (length === 0) {
-        beginProcess(hash, job.data.media);
+        beginProcess(hash, media);
       }
 
       return redis.lpush(`w:${hash}`, job.id);

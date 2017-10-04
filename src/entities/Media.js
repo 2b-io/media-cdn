@@ -1,3 +1,6 @@
+const path = require('path');
+const shortHash = require('short-hash');
+
 class Media {
   static create(props) {
     return new Media(props);
@@ -25,6 +28,37 @@ class Media {
 
   toStream() {
     return this._request.createReadStream();
+  }
+
+  get uniquePath() {
+    let {
+      tenant,
+      url,
+      preset = 'default',
+      width = 'auto',
+      height = 'auto'
+    } = this;
+
+    let hash = shortHash(url);
+    let filename = path.basename(url);
+
+    return `media/${tenant}/${hash}/${preset}/${width}/${height}/${filename}`;
+  }
+
+  get originalPath() {
+    let {
+      tenant,
+      url,
+    } = this;
+
+    let hash = shortHash(url);
+    let filename = path.basename(url);
+
+    return `media/${tenant}/${hash}/${filename}`;
+  }
+
+  get hash() {
+    return shortHash(JSON.stringify(this.toJSON()));
   }
 }
 
