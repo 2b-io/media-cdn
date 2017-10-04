@@ -4,7 +4,13 @@ class Media {
   }
 
   constructor(props) {
-    let { tenant, url, preset = 'default', width = 'auto', height = 'auto' } = props;
+    let {
+      tenant,
+      url,
+      preset = 'default',
+      width = 'auto',
+      height = 'auto'
+    } = props;
 
     this.tenant = tenant;
     this.url = url;

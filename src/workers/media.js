@@ -39,14 +39,12 @@ function reply(cid, reply) {
   });
 }
 
-function replyAll(hash) {
+function replyAll(hash, response) {
   return redis
     .lrange(`w:${hash}`, 0, -1)
     .then(jobs => {
       let waits = jobs.map(
-        id => reply(id, {
-          salt: uuid.v4()
-        })
+        id => reply(id, response)
       );
 
       return bluebird.all(waits);
@@ -56,13 +54,13 @@ function replyAll(hash) {
     });
 }
 
-function beginProcess(hash) {
-  setTimeout(() => replyAll(hash), 5000);
+function beginProcess(hash, media) {
+  setTimeout(() => replyAll(hash, media), 5000);
 }
 
 function registerTask(job, done) {
   console.log('registerTask...', job.id);
-  const hash = shortHash(job.data.demand);
+  const hash = shortHash(JSON.stringify(job.data.media));
 
   redis
     .llen(`w:${hash}`)
@@ -70,7 +68,7 @@ function registerTask(job, done) {
       console.log(`w:${hash}`, length);
 
       if (length === 0) {
-        beginProcess(hash);
+        beginProcess(hash, job.data.media);
       }
 
       return redis.lpush(`w:${hash}`, job.id);

@@ -48,6 +48,8 @@ app.get('/', (req, res, next) => {
         command: 'prepare-media',
         media: media.toJSON()
       }, reply => {
+        return res.json(reply);
+
         storage
           .get(media)
           .then(media => {

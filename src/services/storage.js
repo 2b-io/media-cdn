@@ -22,9 +22,21 @@ function _uniquePath({
   return `media/${tenant}/${hash}/${preset}/${width}/${height}/${filename}`;
 }
 
-function meta(media) {
+function _originalPath({
+  tenant,
+  url,
+}) {
+  let hash = shortHash(url);
+  let filename = path.basename(url);
+
+  return `media/${tenant}/${hash}/${filename}`;
+}
+
+function meta(media, original = false) {
   return new bluebird((resolve, reject) => {
-    let key = _uniquePath(media);
+    let key = original ?
+      _originalPath(media) :
+      _uniquePath(media);
 
     s3.headObject({
       Bucket: s3Config.bucket,
@@ -39,9 +51,11 @@ function meta(media) {
   });
 }
 
-function get(media) {
+function get(media, original = false) {
   return new bluebird((resolve, reject) => {
-    let key = _uniquePath(media);
+    let key = original ?
+      _originalPath(media) :
+      _uniquePath(media);
 
     media._request = s3.getObject({
       Bucket: s3Config.bucket,
@@ -52,7 +66,7 @@ function get(media) {
   });
 }
 
-function set(media) {
+function set(media, original = false) {
 
 }
 
