@@ -9,10 +9,12 @@
   "dependencies": {
     "aws-sdk": "2.125.0",
     "bluebird": "3.5.0",
+    "download": "6.2.5",
     "express": "4.16.1",
     "gm": "1.23.0",
     "ioredis": "3.1.4",
     "kue": "0.11.6",
+    "mime": "2.0.3",
     "nocache": "2.0.0",
     "short-hash": "1.0.0",
     "uuid": "3.1.0"

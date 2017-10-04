@@ -1,4 +1,6 @@
 const bluebird = require('bluebird');
+const fs = require('fs');
+const mime = require('mime');
 const path = require('path');
 const S3 = require('aws-sdk/clients/s3');
 const shortHash = require('short-hash');
@@ -6,8 +8,6 @@ const shortHash = require('short-hash');
 const s3Config = {
   bucket: 'media-on-demand',
   region: 'us-east-1',
-  accessKeyId: '',
-  secretAccessKey: ''
 };
 const s3 = new S3(s3Config);
 
@@ -46,7 +46,28 @@ function get(media, original = false) {
 }
 
 function set(media, original = false) {
+  return new bluebird((resolve, reject) => {
+    let key = original ?
+      media.originalPath :
+      media.uniquePath;
 
+    s3.putObject({
+      Bucket: s3Config.bucket,
+      Key: key,
+      ContentType: mime.getType(media.url),
+      Body: fs.createReadStream(media.local)
+    }, (err, result) => {
+      console.log(err, result);
+
+      if (err) {
+        reject(err);
+
+        return;
+      }
+
+      resolve(media);
+    });
+  });
 }
 
 module.exports = {

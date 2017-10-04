@@ -1,3 +1,6 @@
+const bluebird = require('bluebird');
+const download = require('download');
+const fs = require('fs');
 const path = require('path');
 const shortHash = require('short-hash');
 
@@ -23,11 +26,59 @@ class Media {
   }
 
   toJSON() {
-    return this;
+    return {
+      tenant: this.tenant,
+      url: this.url,
+      preset: this.preset,
+      width: this.width,
+      height: this.height,
+      meta: this.meta
+    };
   }
 
   toStream() {
-    return this._request.createReadStream();
+    return this._request.createReadStream ?
+      this._request.createReadStream() :
+      this._request;
+  }
+
+  createLocalPath() {
+    return path.join(__dirname, 'tmp', shortHash(this.url));
+  }
+
+  fetch(original = true) {
+    return new bluebird((resolve, reject) => {
+      let outPath = this.createLocalPath();
+
+      download(this.url)
+        .pipe(fs.createWriteStream(outPath))
+        .on('finish', () => {
+          this.local = outPath;
+
+          resolve(this);
+        });
+    });
+  }
+
+  save() {
+    return new bluebird((resolve, reject) => {
+      let outPath = path.join(__dirname, 'tmp', shortHash(this.url));
+
+      this
+        .toStream()
+        .pipe(fs.createWriteStream(outPath))
+        .on('finish', () => {
+          this.local = outPath;
+
+          resolve(this);
+        });
+    });
+  }
+
+  dispose() {
+    if (this.local) {
+      fs.unlink(this.local);
+    }
   }
 
   get uniquePath() {

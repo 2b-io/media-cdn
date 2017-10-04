@@ -5,14 +5,15 @@ const queue = kue.createQueue();
 const callbacks = {};
 
 queue.process('rpc:reply', (job, done) => {
+  console.log('rpc:reply', job.id);
   let { data } = job;
-  let { cid, reply } = data;
+  let { cid, response } = data;
 
   let cb = callbacks[cid];
   delete callbacks[cid]; // -> should change to immutable or set undefined for better performance
 
   if (typeof cb === 'function') {
-    process.nextTick(() => cb(reply));
+    process.nextTick(() => cb(response));
   }
 
   done();

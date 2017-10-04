@@ -11,11 +11,11 @@ const Media = require('../entities/Media');
 
 app.use(nocache());
 
-app.get('/', (req, res, next) => {
+function handle(req, res, next) {
   let id = uuid.v4();
   console.log('handle request...', id);
 
-  const src = 'https://assets.stuffs.cool/2017/09/the.cool.stuffs_d35544b6-f3c4-4f14-81c0-48d8e2e96a0d.jpg';
+  const src = 'https://assets.stuffs.cool/2017/08/the.cool.stuffs_2c450418-cd3d-4724-8316-69274dc15720.jpg';
 
   storage
     .meta(Media.create({
@@ -47,16 +47,12 @@ app.get('/', (req, res, next) => {
       rpc({
         command: 'prepare-media',
         media: media.toJSON()
-      }, reply => {
-        return res.json(reply);
-
-        storage
-          .get(media)
-          .then(media => {
-            media.toStream().pipe(res);
-          });
+      }, response => {
+        handle(req, res, next);
       });
     });
-});
+}
+
+app.get('/', handle);
 
 app.listen(port, () => console.log(`Server started at ${port}`));
