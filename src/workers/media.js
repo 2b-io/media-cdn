@@ -37,22 +37,12 @@ function reply(cid, response) {
 }
 
 function replyAll(hash, response) {
-  console.log('replyAll');
-
   return redis
     .lrange(`w:${hash}`, 0, -1)
-    .then(jobs => {
-      console.log(jobs);
-
-      let waits = jobs.map(
-        id => reply(id, response)
-      );
-
-      return bluebird.all(waits);
-    })
-    .then(() => {
-      return redis.del(`w:${hash}`);
-    });
+    .then(jobs => bluebird.all(
+      jobs.map(id => reply(id, response))
+    ))
+    .then(() => redis.del(`w:${hash}`));
 }
 
 function beginProcess(hash, media) {
@@ -79,9 +69,8 @@ function beginProcess(hash, media) {
         gm(media.local)
           .resize(media.width)
           .strip()
+          .interlace('Line')
           .write(outPath, err => {
-            console.log('optimize done', err);
-
             media.local = outPath;
 
             resolve(media);
@@ -89,11 +78,19 @@ function beginProcess(hash, media) {
       })
       .then(media => storage.set(media));
     })
-    .finally(() => {
-      media.dispose();
-
-      replyAll(hash, media.toJSON());
-    });
+    .then(() => {
+      replyAll(hash, {
+        succeed: true,
+        media: media.toJSON()
+      });
+    })
+    .catch(err => {
+      replyAll(hash, {
+        succeed: false,
+        media: media.toJSON()
+      });
+    })
+    .finally(() => media.dispose());
 }
 
 function registerTask(job, done) {
@@ -105,13 +102,9 @@ function registerTask(job, done) {
   redis
     .llen(`w:${hash}`)
     .then(length => {
-      console.log(`w:${hash}`, length);
-
       return redis
         .lpush(`w:${hash}`, job.id)
-        .then(result => {
-          return length === 0;
-        })
+        .then(result => length === 0)
         .finally(() => done());;
     })
     .then(isFirst => {

@@ -8,6 +8,8 @@ const shortHash = require('short-hash');
 const s3Config = {
   bucket: 'media-on-demand',
   region: 'us-east-1',
+  // accessKeyId: '',
+  // secretAccessKey: ''
 };
 const s3 = new S3(s3Config);
 

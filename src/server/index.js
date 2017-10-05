@@ -12,16 +12,18 @@ const Media = require('../entities/Media');
 app.use(nocache());
 
 function handle(req, res, next) {
-  let id = uuid.v4();
-  console.log('handle request...', id);
+  let { url, width } = req.query;
+  let { tenant } = req.params;
 
-  const src = 'https://assets.stuffs.cool/2017/08/the.cool.stuffs_2c450418-cd3d-4724-8316-69274dc15720.jpg';
+  if (!url || !width || !tenant) {
+    return res.sendStatus(400);
+  }
 
   storage
     .meta(Media.create({
-      tenant: 'thecoolstuffs',
-      url: src,
-      width: 360
+      tenant,
+      url,
+      width
     }))
     .then(media => {
       let exists = !!media.meta;
@@ -48,11 +50,15 @@ function handle(req, res, next) {
         command: 'prepare-media',
         media: media.toJSON()
       }, response => {
-        handle(req, res, next);
+        if (response.succeed) {
+          return handle(req, res, next);
+        }
+
+        res.sendStatus(404);
       });
     });
 }
 
-app.get('/', handle);
+app.get('/p/:tenant/media', handle);
 
 app.listen(port, () => console.log(`Server started at ${port}`));

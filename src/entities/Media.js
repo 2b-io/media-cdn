@@ -2,6 +2,7 @@ const bluebird = require('bluebird');
 const download = require('download');
 const fs = require('fs');
 const path = require('path');
+const pick = require('object.pick');
 const shortHash = require('short-hash');
 
 class Media {
@@ -26,14 +27,14 @@ class Media {
   }
 
   toJSON() {
-    return {
-      tenant: this.tenant,
-      url: this.url,
-      preset: this.preset,
-      width: this.width,
-      height: this.height,
-      meta: this.meta
-    };
+    return pick(this, [
+      'tenant',
+      'url',
+      'preset',
+      'width',
+      'height',
+      'meta'
+    ]);
   }
 
   toStream() {
