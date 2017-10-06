@@ -61,4 +61,24 @@ function handle(req, res, next) {
 
 app.get('/p/:tenant/media', handle);
 
+// for testing purpose
+app.get('/test', (req, res, next) => {
+  let media = Media.create({
+    tenant: 'thecoolstuffs',
+    url: 'https://assets.stuffs.cool/2017/10/the.cool.stuffs_a50e04cd-b5fb-43c7-a39c-9b2d0cc56965.jpg',
+    width: 320
+  });
+
+  rpc({
+    command: 'prepare-media',
+    media: media.toJSON()
+  }, response => {
+    if (response.succeed) {
+      return res.json(media.toJSON());
+    }
+
+    res.sendStatus(404);
+  });
+});
+
 app.listen(port, () => console.log(`Server started at ${port}`));

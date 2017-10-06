@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "concurrently \"yarn run worker\" \"yarn run server\"",
-    "worker": "nodemon ./src/workers/media.js --ignore node_modules --ext js",
+    "worker": "nodemon ./src/workers/index.js --ignore node_modules --ext js",
     "server": "nodemon ./src/server/index.js --ignore node_modules --ext js"
   }
 }

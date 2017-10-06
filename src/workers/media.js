@@ -19,6 +19,14 @@ function init(done) {
   });
 
   // register other processes here
+  queue.process('prepare-image', (job, done) => {
+    let media = Media.create(job.data.media);
+    let hash = media.hash;
+
+    beginProcess(hash, media)
+      .then(() => done());
+  });
+
   done();
 }
 
@@ -46,7 +54,7 @@ function replyAll(hash, response) {
 }
 
 function beginProcess(hash, media) {
-  storage
+  return storage
     .meta(media, true)
     .then(media => {
       let exists = !!media.meta;
@@ -99,22 +107,25 @@ function registerTask(job, done) {
   const media = Media.create(job.data.media);
   const hash = media.hash;
 
-  redis
-    .llen(`w:${hash}`)
-    .then(length => {
-      return redis
-        .lpush(`w:${hash}`, job.id)
-        .then(result => length === 0)
-        .finally(() => done());;
-    })
-    .then(isFirst => {
-      if (!isFirst) {
-        return;
-      }
+  kue.Job.rangeByType('prepare-image', 'active', 0, 1, 'asc', (err, jobs) => {
+    redis
+      .lpush(`w:${hash}`, job.id)
+      .then(result => jobs.length === 0)
+      .then(isFirst => {
+        if (!isFirst) {
+          return;
+        }
 
-      beginProcess(hash, media);
-    });
-
+        queue
+          .create('prepare-image', {
+            media: media.toJSON()
+          })
+          .events(false)
+          .removeOnComplete(true)
+          .save();
+      })
+      .finally(() => done());
+  });
 }
 
-init(() => console.log('Worker [media] started...'));
+module.exports = init;
