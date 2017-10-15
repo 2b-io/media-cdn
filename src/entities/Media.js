@@ -43,8 +43,12 @@ class Media {
       this._request;
   }
 
-  createLocalPath() {
-    return path.join(__dirname, 'tmp', shortHash(this.url));
+  createLocalPath(original = true) {
+    if (original) {
+      return path.join(__dirname, 'tmp', shortHash(this.url));
+    } else {
+      return path.join(__dirname, 'tmp', this.hash);
+    }
   }
 
   fetch(original = true) {
@@ -76,10 +80,14 @@ class Media {
     });
   }
 
-  dispose() {
-    if (this.local) {
-      fs.unlink(this.local);
-    }
+  disposeOriginal() {
+    let originalPath = this.createLocalPath(true);
+    fs.unlink(originalPath, err => {});
+  }
+
+  disposeOptimize() {
+    let optimizePath = this.createLocalPath(false);
+    fs.unlink(optimizePath, err => {});
   }
 
   get uniquePath() {

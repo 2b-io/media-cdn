@@ -57,7 +57,7 @@ function set(media, original = false) {
       Bucket: s3Config.bucket,
       Key: key,
       ContentType: mime.getType(media.url),
-      Body: fs.createReadStream(media.local)
+      Body: fs.createReadStream(media.createLocalPath(original))
     }, (err, result) => {
       console.log(err, result);
 

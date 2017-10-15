@@ -1,4 +1,4 @@
-const rpc = require('../../services/rpc');
+// const rpc = require('../../services/rpc');
 const storage = require('../../services/storage');
 const Media = require('../../entities/Media');
 
@@ -37,16 +37,34 @@ function generate(req, res, next) {
 
       // request background prepare media
       // then pipe media from storage to response
-      rpc({
-        command: 'prepare-media',
-        media: media.toJSON()
-      }, response => {
-        if (response.succeed) {
-          return generate(req, res, next);
-        }
+      let channel = req.app.get('rpc');
 
-        res.sendStatus(404);
-      });
+      channel
+        .request('prepare-media', {
+          media: media.toJSON()
+        })
+        .waitFor(media.hash)
+        .onResponse(message => {
+          console.log(message);
+
+          if (message && message.data && message.data.succeed) {
+            return generate(req, res, next);
+          }
+
+          res.sendStatus(404);
+        })
+        .call();
+
+      // rpc({
+      //   command: 'prepare-media',
+      //   media: media.toJSON()
+      // }, response => {
+      //   if (response.succeed) {
+      //     return generate(req, res, next);
+      //   }
+
+      //   res.sendStatus(404);
+      // });
     });
 }
 

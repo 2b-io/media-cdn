@@ -1,5 +1,6 @@
 const express = require('express');
 const nocache = require('nocache');
+const rpc = require('one-doing-the-rest-waiting');
 
 init(app => {
   let port = 3000;
@@ -14,7 +15,13 @@ function init(done) {
   require('./routes')(app);
 
   // after all initializations
-  done(app);
+  const producer = rpc.createProducer();
+
+  producer.discovery(channel => {
+    app.set('rpc', channel);
+
+    done(app);
+  });
 }
 
 
