@@ -101,6 +101,8 @@ function init(done) {
     console.log('discovery', output.id);
 
     channel = output;
+
+    done();
   });
 }
 
