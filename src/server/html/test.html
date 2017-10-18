@@ -20,22 +20,18 @@
       width: 200px;
     }
 
-  </style>
-  <script>
-    console.log('in head', document);
+    .container img {
+      width: 100%;
+    }
 
-    var domInsertionObserver = new MutationObserver(function(mutation) {
-      for (var node = 0; node < mutation.addedNodes.length; node++) {
-        //do what you need to do with the added nodes
-        console.log(mutation.addedNodes[node]);
-      }
-    });
-    domInsertionObserver.observe(document, { childList: true });
-  </script>
+  </style>
 </head>
 <body>
-  <div class="small container">
-    <img data-src="http://imgsv.imaging.nikon.com/lineup/lens/zoom/normalzoom/af-s_dx_18-140mmf_35-56g_ed_vr/img/sample/sample1_l.jpg">
+  <div class="container">
+    <img data-src="https://kbob.github.io/images/sample-5.jpg">
+    <noscript>
+      <img src="https://kbob.github.io/images/sample-5.jpg">
+    </noscript>
   </div>
   <!--
   <div class="big container">
@@ -56,30 +52,39 @@
   -->
 
   <script>
-    var imgs = document.querySelectorAll('img');
 
-    imgs.forEach(function(img) {
-      console.log(img.clientWidth, img.parentElement.clientWidth);
+    function replaceImage() {
+      var imgs = document.querySelectorAll('img');
 
-      var parent = img.parentElement;
+      imgs.forEach(function(img) {
+        console.log(img.clientWidth, img.parentElement.clientWidth);
 
-      var src = img.getAttribute('data-src');
+        var parent = img.parentElement;
 
-      if (!src) {
-        return;
-      }
+        var src = img.getAttribute('data-src');
 
-      if (parent === document.body) {
-        img.src = src;
-      } else {
-        // img.src = `//server1.mn-cdn.com/p/test/media?width=${parent.clientWidth}&url=${src}`;
-        img.src = `/p/test/media?width=${parent.clientWidth}&url=${src}`;
-      }
+        if (!src) {
+          return;
+        }
 
-      // var noscript = document.createElement('noscript');
-      // parent.insertBefore(noscript, img.nextSibling);
-      // noscript.appendChild(img);
+        if (parent === document.body) {
+          img.src = src;
+        } else {
+          // img.src = `//server1.mn-cdn.com/p/test/media?width=${parent.clientWidth}&url=${src}`;
+          img.src = `/p/test/media?width=${parent.clientWidth}&url=${src}`;
+        }
+      });
+    }
+
+    var resizeTimeout;
+
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+
+      resizeTimeout = setTimeout(replaceImage, 200);
     });
+
+    replaceImage();
   </script>
 </body>
 </html>

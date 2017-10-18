@@ -3,8 +3,6 @@ function optimizeWidth(width, step) {
 }
 
 module.exports = (req, res, next) => {
-  console.log('in params/width');
-
   let { width = 'auto' } = req.query;
   let { preset } = req._params;
 
