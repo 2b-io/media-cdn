@@ -1,6 +1,85 @@
-<img src="/p/test/media?width=100&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_a50e04cd-b5fb-43c7-a39c-9b2d0cc56965.jpg">
-<img src="/p/test/media?width=120&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_112d3898-79ec-477c-bd29-972029d96597.jpg">
-<img src="/p/test/media?width=140&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_64f27152-3e5e-4a96-b7ad-06ce1559ba0c.jpg">
-<img src="/p/test/media?width=100&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_8b1e204e-e92e-41c6-956c-5b587bc59e45.jpg">
-<img src="/p/test/media?width=120&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_8eb92ee4-5192-48c6-a961-8f7da21c90c2.jpg">
-<img src="/p/test/media?width=140&url=https://assets.stuffs.cool/2017/10/the.cool.stuffs_538ca034-b8a4-45b1-98ff-44b9e4551215.jpg">
+<!doctype html>
+<html>
+<head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .small.container {
+      width: 100px;
+    }
+
+    .big.container {
+      width: 200px;
+    }
+
+  </style>
+  <script>
+    console.log('in head', document);
+
+    var domInsertionObserver = new MutationObserver(function(mutation) {
+      for (var node = 0; node < mutation.addedNodes.length; node++) {
+        //do what you need to do with the added nodes
+        console.log(mutation.addedNodes[node]);
+      }
+    });
+    domInsertionObserver.observe(document, { childList: true });
+  </script>
+</head>
+<body>
+  <div class="small container">
+    <img data-src="http://imgsv.imaging.nikon.com/lineup/lens/zoom/normalzoom/af-s_dx_18-140mmf_35-56g_ed_vr/img/sample/sample1_l.jpg">
+  </div>
+  <!--
+  <div class="big container">
+    <img data-src="https://kbob.github.io/images/sample-5.jpg">
+  </div>
+  <p>
+    <img data-src="http://imgsv.imaging.nikon.com/lineup/lens/zoom/normalzoom/af-s_dx_18-140mmf_35-56g_ed_vr/img/sample/sample1_l.jpg">
+  </p>
+  <p>
+    <img data-src="https://kbob.github.io/images/sample-5.jpg">
+  </p>
+  <p>
+    <img data-src="http://imgsv.imaging.nikon.com/lineup/lens/zoom/normalzoom/af-s_dx_18-140mmf_35-56g_ed_vr/img/sample/sample1_l.jpg">
+  </p>
+  -->
+  <!--<img src="https://www.gstatic.com/webp/gallery/4.sm.jpg">
+  <img src="https://www.gstatic.com/webp/gallery/4.sm.jpg">
+  -->
+
+  <script>
+    var imgs = document.querySelectorAll('img');
+
+    imgs.forEach(function(img) {
+      console.log(img.clientWidth, img.parentElement.clientWidth);
+
+      var parent = img.parentElement;
+
+      var src = img.getAttribute('data-src');
+
+      if (!src) {
+        return;
+      }
+
+      if (parent === document.body) {
+        img.src = src;
+      } else {
+        // img.src = `//server1.mn-cdn.com/p/test/media?width=${parent.clientWidth}&url=${src}`;
+        img.src = `/p/test/media?width=${parent.clientWidth}&url=${src}`;
+      }
+
+      // var noscript = document.createElement('noscript');
+      // parent.insertBefore(noscript, img.nextSibling);
+      // noscript.appendChild(img);
+    });
+  </script>
+</body>
+</html>

@@ -14,7 +14,9 @@ class Media {
     let {
       tenant,
       url,
-      preset = 'default',
+      preset = {
+        id: 'default'
+      },
       width = 'auto',
       height = 'auto'
     } = props;
@@ -102,7 +104,7 @@ class Media {
     let hash = shortHash(url);
     let filename = path.basename(url);
 
-    return `media/${tenant}/${hash}/${preset}/${width}/${height}/${filename}`;
+    return `media/${tenant}/${hash}/${preset.id}/${width}/${height}/${filename}`;
   }
 
   get originalPath() {

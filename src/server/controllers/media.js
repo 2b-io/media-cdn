@@ -3,8 +3,12 @@ const storage = require('../../services/storage');
 const Media = require('../../entities/Media');
 
 function generate(req, res, next) {
-  let { url, width } = req.query;
-  let { tenant } = req.params;
+  let {
+    tenant,
+    preset,
+    width,
+    url,
+  } = req._params;
 
   if (!url || !width || !tenant) {
     return res.sendStatus(400);
@@ -53,18 +57,7 @@ function generate(req, res, next) {
 
           res.sendStatus(404);
         })
-        .call();
-
-      // rpc({
-      //   command: 'prepare-media',
-      //   media: media.toJSON()
-      // }, response => {
-      //   if (response.succeed) {
-      //     return generate(req, res, next);
-      //   }
-
-      //   res.sendStatus(404);
-      // });
+        .send();
     });
 }
 
