@@ -10,7 +10,7 @@ init(app => {
 function init(done) {
   const app = express();
 
-  app.use(nocache());
+  // app.use(nocache());
 
   require('./routes')(app);
 
