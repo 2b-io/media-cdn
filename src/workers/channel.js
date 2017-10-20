@@ -5,16 +5,20 @@ const storage = require('../services/storage');
 const Media = require('../entities/Media');
 
 function init(done) {
-  const consumer = rpc.createConsumer();
-  const producer = rpc.createProducer();
+  const config = require('../services/config');
+  const consumer = rpc.createConsumer({
+    prefix: config.queuePrefix,
+    redis: config.redis
+  });
+  const producer = rpc.createProducer({
+    prefix: config.queuePrefix,
+    redis: config.redis
+  });
 
   let channel;
 
   consumer.register(input => {
-    console.log('register', input.id);
-
     input.onRequest((message, done) => {
-      // console.log('need channel', channel.id);
       console.log(message.type);
 
       let media = Media.create(message.data.media);
@@ -97,9 +101,7 @@ function init(done) {
     });
   });
 
-  producer.discovery(output => {
-    console.log('discovery', output.id);
-
+  producer.discover(output => {
     channel = output;
 
     done();

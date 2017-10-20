@@ -10,7 +10,6 @@ function init(app) {
   );
 
   app.get('/test/html', test.html);
-  app.get('/test/worker', test.worker);
 };
 
 module.exports = init;
