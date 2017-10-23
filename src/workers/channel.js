@@ -1,3 +1,4 @@
+const bluebird = require('bluebird');
 const gm = require('gm');
 const rpc = require('one-doing-the-rest-waiting');
 
@@ -19,11 +20,7 @@ function init(done) {
 
   consumer.register(input => {
     input.onRequest((message, done) => {
-      console.log(message.type);
-
       let media = Media.create(message.data.media);
-
-      // console.log(media);
 
       switch (message.type) {
         case 'prepare-media':
@@ -33,9 +30,11 @@ function init(done) {
             })
             .waitFor(media.originalPath)
             .onResponse(response => {
-              console.log('download-origin done');
-
-              // done(response);
+              if (!response.data) {
+                return done({
+                  succeed: false
+                });
+              }
 
               channel
                 .request('optimize-media', {
@@ -43,17 +42,21 @@ function init(done) {
                 })
                 .waitFor(media.uniquePath)
                 .onResponse(response => {
-                  console.log('optimize-media done');
-
                   media.disposeOriginal();
+
+                  if (!response.data) {
+                    return done({
+                      succeed: false
+                    });
+                  }
 
                   done({
                     succeed: true
                   });
                 })
-                .call();
+                .send();
             })
-            .call();
+            .send();
 
         case 'download-origin':
           return storage
@@ -62,8 +65,6 @@ function init(done) {
               let exists = !!media.meta;
 
               if (!exists) {
-                console.log('download from origin');
-
                 return media
                   .fetch(true)
                   .then(media => storage.set(media, true));
@@ -75,28 +76,31 @@ function init(done) {
                 .get(media, true)
                 .then(media => media.save());
             })
-            .finally(() => {
-              done();
-            });
+            .then(() => done(true))
+            .catch(() => done(false));
 
         case 'optimize-media':
-          let originalPath = media.createLocalPath(true);
-          let optimizePath = media.createLocalPath(false);
+          return new bluebird((resolve, reject) => {
+            let originalPath = media.createLocalPath(true);
+            let optimizePath = media.createLocalPath(false);
 
-          console.log(`optimize-media from ${originalPath} to ${optimizePath}`);
+            gm(originalPath)
+              .resize(media.width)
+              .strip()
+              .interlace('Line')
+              .write(optimizePath, err => {
+                if (err) {
+                  return reject(err);
+                }
 
-          return gm(originalPath)
-            .resize(media.width)
-            .strip()
-            .interlace('Line')
-            .write(optimizePath, err => {
-              storage
-                .set(media)
-                .then(() => done())
-                .finally(() => {
-                  media.disposeOptimize();
-                });
-            });
+                resolve(storage.set(media));
+              });
+          })
+          .then(() => done(true))
+          .catch(() => done(false))
+          .finally(() => {
+            media.disposeOptimize();
+          });
       }
     });
   });
