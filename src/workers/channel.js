@@ -7,6 +7,8 @@ const Media = require('../entities/Media');
 
 function init(done) {
   const config = require('../services/config');
+  storage.init(config.aws.s3);
+
   const consumer = rpc.createConsumer({
     prefix: config.queuePrefix,
     redis: config.redis

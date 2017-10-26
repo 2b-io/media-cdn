@@ -10,8 +10,6 @@ init(app => {
 function init(done) {
   const config = require('../services/config');
 
-  console.log(config);
-
   const app = express();
   app.set('config', config);
 
@@ -23,6 +21,8 @@ function init(done) {
 
   producer.discover(channel => {
     app.set('rpc', channel);
+
+    require('./prepare')(app);
 
     require('./routes')(app);
 

@@ -1,4 +1,3 @@
-// const rpc = require('../../services/rpc');
 const storage = require('../../services/storage');
 const Media = require('../../entities/Media');
 
