@@ -1,11 +1,15 @@
 {
   "presets": [
-    "env",
+    [ "env", {
+      "target": {
+        "node": "current"
+      }
+    } ],
     "stage-2"
   ],
   "plugins": [
     ["module-resolver", {
-      "root": ["./app"],
+      "root": ["./"],
     }],
     ["transform-runtime", {
       "polyfill": false,

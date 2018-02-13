@@ -6,14 +6,33 @@
   "repository": "git@github.com:MediaNetwork/media-on-demand-cdn.git",
   "author": "LongLH <d@dapps.me>",
   "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "2.191.0",
+    "bluebird": "3.5.1",
+    "download": "6.2.5",
+    "express": "4.16.2",
+    "gm": "1.23.1",
+    "mime": "2.2.0",
+    "mongoose": "5.0.4",
+    "nocache": "2.0.0",
+    "object.pick": "1.3.0",
+    "one-doing-the-rest-waiting": "1.0.9",
+    "recursive-config": "1.0.1",
+    "short-hash": "1.0.0",
+    "uuid": "3.2.1"
+  },
   "devDependencies": {
     "babel-cli": "6.26.0",
+    "babel-plugin-module-resolver": "3.0.0",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-stage-2": "6.24.1",
     "concurrently": "3.5.0",
     "nodemon": "1.12.1"
   },
   "scripts": {
-    "start": "concurrently \"yarn run worker\" \"yarn run server\"",
-    "worker": "nodemon ./src/workers/index.js --CONFIG=config.example.json --ignore node_modules --ext js,json",
-    "server": "nodemon ./src/server/index.js --CONFIG=config.example.json --ignore node_modules --ext js,json"
+    "start": "concurrently \"yarn dev:server\" \"yarn dev:worker\"",
+    "dev:server": "cd app && nodemon server/ --exec babel-node --CONFIG=../internals/config.example.js",
+    "dev:worker": "cd app && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.example.js"
   }
 }
