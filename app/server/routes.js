@@ -3,13 +3,31 @@ import project from './middlewares/args/project'
 import src from './middlewares/args/src'
 import width from './middlewares/args/width'
 
+import Media from 'entities/Media'
+
 const handler = [
   project,
   preset,
   src,
   width,
   (req, res, next) => {
-    res.json(req._args)
+    const { preset, project, src, width } = req._args
+
+    if (!preset || !project || !src || !width) {
+      return res.sendStatus(400)
+    }
+
+    next()
+  },
+  (req, res, next) => {
+    const { preset, project, src, width } = req._args
+
+    res.json(Media.create({
+      preset,
+      project,
+      src,
+      width
+    }))
   }
 ]
 
@@ -23,6 +41,8 @@ export default app => {
     '/p/:slug/media',
     handler
   )
+
+  app.use((error, req, res, next) => res.sendStatus(500))
 
   return app
 }

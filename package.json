@@ -17,6 +17,7 @@
     "nocache": "2.0.0",
     "object.pick": "1.3.0",
     "one-doing-the-rest-waiting": "1.0.9",
+    "parse-domain": "2.0.0",
     "recursive-config": "1.0.1",
     "short-hash": "1.0.0",
     "uuid": "3.2.1"
