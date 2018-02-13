@@ -22,12 +22,24 @@ const handler = [
   (req, res, next) => {
     const { preset, project, src, width } = req._args
 
-    res.json(Media.create({
+    const media = Media.create({
       preset,
       project,
       src,
       width
-    }))
+    })
+
+    const rpc = req.app.get('rpc')
+
+    rpc.request('process-media', {
+      media: media.toJSON(),
+      options: preset.values
+    })
+    .waitFor(media.props.uid)
+    .onResponse(message => {
+      res.json(message)
+    })
+    .send()
   }
 ]
 

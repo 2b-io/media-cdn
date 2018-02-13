@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   serverPort: 3002,
   queuePrefix: 'mod',
@@ -13,5 +15,6 @@ module.exports = {
       secretAccessKey: ''
     }
   },
-  mongodb: 'mongodb://localhost/myapp'
+  mongodb: 'mongodb://localhost/myapp',
+  tmpDir: path.resolve(__dirname, '../tmp')
 }
