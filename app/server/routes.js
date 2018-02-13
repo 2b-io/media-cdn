@@ -44,12 +44,12 @@ const mediaHandler = (req, res, next) => {
       })
       .waitFor(media.props.uid)
       .onResponse(message => {
-        mediaHandler(req, res, next)
-
         console.log('clearing tmp files...')
         fs.unlinkSync(media.props.localOriginal)
         fs.unlinkSync(media.props.localTarget)
         console.log('clear tmp files done')
+
+        mediaHandler(req, res, next)
       })
       .send()
     })
