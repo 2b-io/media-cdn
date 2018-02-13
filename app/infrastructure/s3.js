@@ -19,26 +19,18 @@ export default {
       Key: key
     }).promise()
   },
-  receive: (media, original = false) => {
-    const key = getKey(media, original)
-
-    media._receiveRequest = s3.getObject({
+  receive: remote => {
+    return s3.getObject({
       Bucket: s3.config.bucket,
-      Key: key
-    })
-
-    return media
+      Key: remote
+    }).createReadStream()
   },
-  store: async (media, original = false) => {
-    const key = getKey(media, original)
-
-    await s3.putObject({
+  store: async (local, remote) => {
+    return await s3.putObject({
       Bucket: s3.config.bucket,
-      Key: key,
-      ContentType: mime.getType(media.url),
-      Body: fs.createReadStream(media.createLocalPath(original))
+      Key: remote,
+      ContentType: mime.getType(local),
+      Body: fs.createReadStream(local)
     }).promise()
-
-    return media
   }
 }

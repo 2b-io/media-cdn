@@ -1,5 +1,6 @@
 import dl from 'download'
 import fs from 'fs'
+import gm from 'gm'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import rpc from 'one-doing-the-rest-waiting'
@@ -35,11 +36,25 @@ Promise.all([
 
         return output
           .request('download-original', {
-            media: media.toJSON()
+            media: message.data.media
           })
           .waitFor(media.props.localOriginal)
           .onResponse(response => {
-            done({ succeed: true, response, media })
+            console.log('download-original done')
+
+            output
+              .request('optimize-original', {
+                media: message.data.media,
+                options: message.data.options
+              })
+              .waitFor(media.props.localTarget)
+              .onResponse(response => {
+                console.log('optimize-original done')
+
+                done(response)
+              })
+              .send()
+
           })
           .send()
 
@@ -51,7 +66,7 @@ Promise.all([
           .catch(() => null)
           .then(meta => {
             if (!meta) {
-              console.log('download from src')
+              console.log('downloading from src...')
 
               return new Promise((resolve, reject) => {
                 const dir = path.dirname(media.props.localOriginal)
@@ -68,11 +83,65 @@ Promise.all([
                   })
               })
               .then(() => {
-                console.log('download done')
+                console.log('download from src done, uploading to s3...')
+                return s3.store(
+                  media.props.localOriginal,
+                  media.props.remoteOriginal
+                )
+              })
+              .then(() => {
+                console.log('upload to s3 done')
               })
             }
+
+            console.log('downloading from s3...')
+
+            return new Promise((resolve, reject) => {
+              const dir = path.dirname(media.props.localOriginal)
+
+              mkdirp.sync(dir)
+
+              s3
+                .receive(media.props.remoteOriginal)
+                .pipe(fs.createWriteStream(media.props.localOriginal))
+                .on('finish', () => {
+                  resolve()
+                })
+            })
+            .then(() => {
+              console.log('download from s3 done')
+            })
           })
           .finally(done)
+
+      case 'optimize-original':
+        const options = message.data.options
+
+        return new Promise((resolve, reject) => {
+          const dir = path.dirname(media.props.localTarget)
+
+          mkdirp.sync(dir)
+
+          gm(media.props.localOriginal)
+            .resize(media.props.width)
+            .strip()
+            .interlace('Line')
+            .quality(options.quality)
+            .write(media.props.localTarget, error => {
+              if (error) {
+                return reject(error)
+              }
+
+              resolve()
+            })
+        })
+        .then(() => {
+          return s3.store(
+            media.props.localTarget,
+            media.props.remoteTarget
+          )
+        })
+        .finally(() => done())
     }
 
     done({
