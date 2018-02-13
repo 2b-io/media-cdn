@@ -1,7 +1,7 @@
-import preset from './middlewares/preset'
-import project from './middlewares/project'
-import src from './middlewares/src'
-import width from './middlewares/width'
+import preset from './middlewares/args/preset'
+import project from './middlewares/args/project'
+import src from './middlewares/args/src'
+import width from './middlewares/args/width'
 
 const handler = [
   project,
