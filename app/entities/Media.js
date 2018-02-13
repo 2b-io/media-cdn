@@ -41,7 +41,8 @@ export default class Media {
       'localOriginal',
       'localTarget',
       'remoteOriginal',
-      'remoteTarget'
+      'remoteTarget',
+      'src'
     ])
   }
 }

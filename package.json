@@ -13,6 +13,7 @@
     "express": "4.16.2",
     "gm": "1.23.1",
     "mime": "2.2.0",
+    "mkdirp": "0.5.1",
     "mongoose": "5.0.4",
     "nocache": "2.0.0",
     "object.pick": "1.3.0",
@@ -33,7 +34,7 @@
   },
   "scripts": {
     "start": "concurrently \"yarn dev:server\" \"yarn dev:worker\"",
-    "dev:server": "cd app && nodemon server/ --exec babel-node --CONFIG=../internals/config.example.js",
-    "dev:worker": "cd app && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.example.js"
+    "dev:server": "cd app && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
+    "dev:worker": "cd app && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.dev.js"
   }
 }
