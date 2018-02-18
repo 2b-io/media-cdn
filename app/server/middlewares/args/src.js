@@ -22,7 +22,7 @@ export default (req, res, next) => {
     parsed.tld
   ].filter(Boolean).join('.')
 
-  const allowOrigin = project.origins.some(o => isMatch(o, domain))
+  const allowOrigin = project.origins.length === 0 || project.origins.some(o => isMatch(o, domain))
 
   if (!allowOrigin) {
     // return next(new Error('invalid origin'))

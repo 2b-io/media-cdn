@@ -1,4 +1,5 @@
 import fs from 'fs'
+import morgan from 'morgan'
 
 import preset from './middlewares/args/preset'
 import project from './middlewares/args/project'
@@ -22,7 +23,6 @@ const mediaHandler = (req, res, next) => {
     .meta(media.props.remoteTarget)
     .catch(() => null)
     .then(meta => {
-
       if (meta) {
         res.set('Content-Type', meta.ContentType);
         res.set('Content-Length', meta.ContentLength);
@@ -73,17 +73,24 @@ const flow = [
 ]
 
 export default app => {
-  app.get(
-    '/p/:slug/:hash/media',
-    flow
-  )
+  // devlopment log
+  app.use(morgan('dev'))
 
-  app.get(
-    '/p/:slug/media',
-    flow
-  )
+  // register hook
+  app.use((req, res, next) => {
+    // req.on('end', () => console.log('end', res.statusCode))
 
-  app.use((error, req, res, next) => res.sendStatus(500))
+    next()
+  })
+
+  // supported endpoints
+  app.get('/p/:slug/:hash/media', flow)
+  app.get('/p/:slug/media', flow)
+
+  // otherwise
+  app.use((error, req, res, next) => {
+    res.sendStatus(500)
+  })
 
   return app
 }
