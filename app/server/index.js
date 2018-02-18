@@ -4,16 +4,14 @@ import rpc from 'one-doing-the-rest-waiting'
 import config from 'infrastructure/config'
 import initRoutes from './routes'
 
-const app = initRoutes(express())
-const { queuePrefix, redis, serverPort } = config
+const { queuePrefix:prefix, redis, serverPort } = config
 
-const producer = rpc.createProducer({
-  prefix: queuePrefix,
-  redis: redis
-})
+rpc
+  .createProducer({ prefix, redis })
+  .discover(channel => {
+    const app = initRoutes(express())
 
-producer.discover(channel => {
-  app.set('rpc', channel)
+    app.set('rpc', channel)
 
-  app.listen(serverPort, () => console.log(`Server start ap :${serverPort}`))
-})
+    app.listen(serverPort, () => console.log(`Server start ap :${serverPort}`))
+  })

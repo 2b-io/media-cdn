@@ -9,24 +9,16 @@ import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
-const { queuePrefix, redis } = config
+const { queuePrefix:prefix, redis } = config
 
 Promise.all([
   new Promise(resolve => {
-    rpc.createConsumer({
-      prefix: queuePrefix,
-      redis: redis
-    }).register(resolve)
+    rpc.createConsumer({ prefix, redis }).register(resolve)
   }),
   new Promise(resolve => {
-    rpc.createProducer({
-      prefix: queuePrefix,
-      redis: redis
-    }).discover(resolve)
+    rpc.createProducer({ prefix, redis }).discover(resolve)
   })
 ]).then(([ input, output ]) => {
-  console.log('worker [media] done')
-
   input.onRequest((message, done) => {
     const media = Media.from(message.data.media)
 
