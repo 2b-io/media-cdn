@@ -1,12 +1,12 @@
 export default (req, res, next) => {
-  const { w = 'auto' } = req.query
+  const width = req.query.w || req.query.width || 'auto'
 
   req._args = {
     ...req._args,
-    w,
-    width: w === 'auto' ?
-      w :
-      Math.ceil(parseInt(w, 10) / req._args.preset.values.step) * req._args.preset.values.step
+    width,
+    width: width === 'auto' ?
+      width :
+      Math.ceil(parseInt(width, 10) / req._args.preset.values.step) * req._args.preset.values.step
   }
 
   next()

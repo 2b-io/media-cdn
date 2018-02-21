@@ -97,7 +97,7 @@ export default app => {
 
   // otherwise
   app.use((error, req, res, next) => {
-    res.sendStatus(500)
+    res.sendStatus(400)
   })
 
   return app

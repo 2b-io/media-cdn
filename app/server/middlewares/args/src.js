@@ -11,7 +11,7 @@ const isMatch = (origin, domain) => {
 }
 
 export default (req, res, next) => {
-  const { src } = req.query
+  const src = req.query.url || req.query.src
   const { project } = req._args
 
   const parsed = parseDomain(src)
