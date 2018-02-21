@@ -43,13 +43,21 @@ const mediaHandler = (req, res, next) => {
         options: preset.values
       })
       .waitFor(media.props.uid)
-      .onResponse(message => {
+      .onResponse(response => {
         console.log('clearing tmp files...')
-        fs.unlinkSync(media.props.localOriginal)
-        fs.unlinkSync(media.props.localTarget)
+        fs.unlink(media.props.localOriginal, () => {})
+        fs.unlink(media.props.localTarget, () => {})
         console.log('clear tmp files done')
 
-        mediaHandler(req, res, next)
+        if (response.data.succeed) {
+          return mediaHandler(req, res, next)
+        }
+
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+        res.set('Pragma', 'no-cache')
+        res.set('Expires', '0')
+        res.set('Surrogate-Control', 'no-store')
+        res.status(400).json(response.data)
       })
       .send()
     })

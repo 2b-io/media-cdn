@@ -34,6 +34,10 @@ Promise.all([
           .onResponse(response => {
             console.log('download-original done')
 
+            if (!response.data.succeed) {
+              return done(response.data)
+            }
+
             output
               .request('optimize-original', {
                 media: message.data.media,
@@ -43,7 +47,7 @@ Promise.all([
               .onResponse(response => {
                 console.log('optimize-original done')
 
-                done(response)
+                done(response.data)
               })
               .send()
 
@@ -66,12 +70,12 @@ Promise.all([
                 mkdirp.sync(dir)
 
                 dl(media.props.src)
+                  .on('error', error => {
+                    reject(error)
+                  })
                   .pipe(fs.createWriteStream(media.props.localOriginal))
                   .on('finish', () => {
                     resolve()
-                  })
-                  .on('error', error => {
-                    reject(error)
                   })
               })
               .then(() => {
@@ -104,7 +108,13 @@ Promise.all([
               console.log('download from s3 done')
             })
           })
-          .finally(done)
+          .then(() => done({
+            succeed: true
+          }))
+          .catch(() => done({
+            succeed: false,
+            reason: 'download-original failed'
+          }))
 
       case 'optimize-original':
         const options = message.data.options
@@ -133,7 +143,13 @@ Promise.all([
             media.props.remoteTarget
           )
         })
-        .finally(() => done())
+        .then(() => done({
+          succeed: true
+        }))
+        .catch(() => done({
+          succeed: false,
+          reason: 'optimize-original failed'
+        }))
     }
 
     done({

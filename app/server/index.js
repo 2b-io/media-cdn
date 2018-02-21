@@ -11,6 +11,8 @@ rpc
   .discover(channel => {
     const app = initRoutes(express())
 
+    app.enable('trust proxy')
+    app.disable('x-powered-by')
     app.set('rpc', channel)
 
     app.listen(serverPort, () => console.log(`Server start ap :${serverPort}`))
