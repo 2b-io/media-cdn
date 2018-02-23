@@ -11,6 +11,33 @@ import Media from 'entities/Media'
 
 const { queuePrefix:prefix, redis } = config
 
+const optimize = async (media, options) => {
+  const dir = path.dirname(media.props.localTarget)
+
+  mkdirp.sync(dir)
+
+  let image = sharp(media.props.localOriginal)
+
+  const meta = await image.metadata()
+  console.log(meta)
+
+  if (meta.format === 'jpeg') {
+    image = image.jpeg({
+      quality: options.quality,
+      progressive: true,
+      force: false
+    })
+  }
+
+  // TODO support generate new image with args:
+  // - width
+  // - height
+  // - mode (cover|contain|crop)
+  image = image.resize(media.props.width)
+
+  return await image.toFile(media.props.localTarget)
+}
+
 Promise.all([
   new Promise(resolve => {
     rpc.createConsumer({ prefix, redis }).register(resolve)
@@ -119,22 +146,7 @@ Promise.all([
           }))
 
       case 'optimize-original':
-        const options = message.data.options
-        const dir = path.dirname(media.props.localTarget)
-
-        mkdirp.sync(dir)
-
-        return sharp(media.props.localOriginal)
-          .resize(media.props.width)
-          .jpeg({
-            quality: options.quality,
-            progressive: true
-          })
-          .png({
-            progressive: true,
-            force: false
-          })
-          .toFile(media.props.localTarget)
+        return optimize(media, message.data.options)
           .then(() => {
             return s3.store(
               media.props.localTarget,
