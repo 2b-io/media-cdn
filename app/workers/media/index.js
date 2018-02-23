@@ -1,15 +1,56 @@
 import dl from 'download'
 import fs from 'fs'
-import gm from 'gm'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import rpc from 'one-doing-the-rest-waiting'
+import sharp from 'sharp'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
 const { queuePrefix:prefix, redis } = config
+
+const optimize = async (media, options) => {
+  const dir = path.dirname(media.props.localTarget)
+
+  mkdirp.sync(dir)
+
+  let image = sharp(media.props.localOriginal)
+
+  const meta = await image.metadata()
+  console.log(meta)
+
+  if (meta.format === 'jpeg') {
+    image = image.jpeg({
+      quality: options.quality,
+      progressive: true,
+      force: false
+    })
+  }
+
+  // resize logic
+  const { mode, height, width } = media.props
+
+  image = image.resize(
+    width === 'auto' ? null : width,
+    height === 'auto' ? null: height
+  )
+
+  if (mode === 'cover') {
+    image = image.min()
+  }
+
+  if (mode === 'contain') {
+    image = image.max()
+  }
+
+  if (mode === 'crop') {
+    image = image.crop()
+  }
+
+  return await image.toFile(media.props.localTarget)
+}
 
 Promise.all([
   new Promise(resolve => {
@@ -26,6 +67,8 @@ Promise.all([
       case 'process-media':
         console.log('process-media')
 
+        console.log('download-original...')
+
         return output
           .request('download-original', {
             media: message.data.media
@@ -37,6 +80,8 @@ Promise.all([
             if (!response.data.succeed) {
               return done(response.data)
             }
+
+            console.log('optimize-original...')
 
             output
               .request('optimize-original', {
@@ -55,8 +100,6 @@ Promise.all([
           .send()
 
       case 'download-original':
-        console.log('download-original')
-
         return s3
           .meta(media.props.remoteOriginal)
           .catch(() => null)
@@ -117,39 +160,20 @@ Promise.all([
           }))
 
       case 'optimize-original':
-        const options = message.data.options
-
-        return new Promise((resolve, reject) => {
-          const dir = path.dirname(media.props.localTarget)
-
-          mkdirp.sync(dir)
-
-          gm(media.props.localOriginal)
-            .resize(media.props.width)
-            .strip()
-            .interlace('Line')
-            .quality(options.quality)
-            .write(media.props.localTarget, error => {
-              if (error) {
-                return reject(error)
-              }
-
-              resolve()
-            })
-        })
-        .then(() => {
-          return s3.store(
-            media.props.localTarget,
-            media.props.remoteTarget
-          )
-        })
-        .then(() => done({
-          succeed: true
-        }))
-        .catch(() => done({
-          succeed: false,
-          reason: 'optimize-original failed'
-        }))
+        return optimize(media, message.data.options)
+          .then(() => {
+            return s3.store(
+              media.props.localTarget,
+              media.props.remoteTarget
+            )
+          })
+          .then(() => done({
+            succeed: true
+          }))
+          .catch(() => done({
+            succeed: false,
+            reason: 'optimize-original failed'
+          }))
     }
 
     done({

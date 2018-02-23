@@ -15,5 +15,5 @@ rpc
     app.disable('x-powered-by')
     app.set('rpc', channel)
 
-    app.listen(serverPort, () => console.log(`Server start ap :${serverPort}`))
+    app.listen(serverPort, () => console.log(`Server start at :${serverPort}`))
   })
