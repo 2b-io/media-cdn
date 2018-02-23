@@ -3,7 +3,7 @@ const SUPPORTED_MODES = [ 'cover', 'contain', 'crop' ]
 export default (req, res, next) => {
   const height = req.query.h || req.query.height || 'auto'
   const width = req.query.w || req.query.width || 'auto'
-  const mode = req.query.m || req.query.mode
+  const mode = (req.query.m || req.query.mode || '').toLowerCase()
 
   req._args = {
     ...req._args,

@@ -11,17 +11,16 @@ import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
 const mediaHandler = (req, res, next) => {
-  const { force, preset, project, src, height, width } = req._args
+  const { force, preset, project, src, mode, height, width } = req._args
 
   const media = Media.create({
     preset,
     project,
     src,
     height,
-    width
+    width,
+    mode
   })
-
-  console.log(media)
 
   const getMeta = force ?
     Promise.resolve(null) :
