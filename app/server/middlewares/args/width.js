@@ -3,7 +3,6 @@ export default (req, res, next) => {
 
   req._args = {
     ...req._args,
-    width,
     width: width === 'auto' ?
       width :
       Math.ceil(parseInt(width, 10) / req._args.preset.values.step) * req._args.preset.values.step
