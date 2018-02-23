@@ -29,13 +29,8 @@ const optimize = async (media, options) => {
     })
   }
 
-  // TODO support generate new image with args:
-  // - width
-  // - height
-  // - mode (cover|contain|crop)
+  // resize logic
   const { mode, height, width } = media.props
-
-  console.log(mode, height, width)
 
   image = image.resize(
     width === 'auto' ? null : width,
