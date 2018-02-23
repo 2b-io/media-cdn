@@ -4,21 +4,24 @@ import morgan from 'morgan'
 import force from './middlewares/args/force'
 import preset from './middlewares/args/preset'
 import project from './middlewares/args/project'
+import size from './middlewares/args/size'
 import src from './middlewares/args/src'
-import width from './middlewares/args/width'
 
 import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
 const mediaHandler = (req, res, next) => {
-  const { force, preset, project, src, width } = req._args
+  const { force, preset, project, src, height, width } = req._args
 
   const media = Media.create({
     preset,
     project,
     src,
+    height,
     width
   })
+
+  console.log(media)
 
   const getMeta = force ?
     Promise.resolve(null) :
@@ -71,12 +74,12 @@ const flow = [
   project,
   preset,
   src,
-  width,
+  size,
   force,
   (req, res, next) => {
-    const { preset, project, src, width } = req._args
+    const { preset, project, src } = req._args
 
-    if (!preset || !project || !src || !width) {
+    if (!preset || !project || !src) {
       return res.sendStatus(400)
     }
 

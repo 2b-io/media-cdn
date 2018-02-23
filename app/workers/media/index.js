@@ -33,7 +33,14 @@ const optimize = async (media, options) => {
   // - width
   // - height
   // - mode (cover|contain|crop)
-  image = image.resize(media.props.width)
+  const { mode, height, width } = media.props
+
+  console.log(height, width)
+
+  image = image.resize(
+    width === 'auto' ? null : width,
+    height === 'auto' ? null: height
+  )
 
   return await image.toFile(media.props.localTarget)
 }

@@ -19,7 +19,7 @@ export default class Media {
   }
 
   _generate() {
-    const { project, src, preset, width } = this.props
+    const { project, src, preset, height, width } = this.props
     const ext = path.extname(src)
     const presetValuesHash = shortHash(JSON.stringify(preset.values), Object.keys(preset.values).sort())
 
@@ -30,8 +30,8 @@ export default class Media {
     this.props.remoteOriginal = `media/${this.props.uid}/original${ext}`
 
     // target
-    this.props.localTarget = `${config.tmpDir}/${this.props.uid}/${preset.hash}/${presetValuesHash}/${width}${ext}`
-    this.props.remoteTarget = `media/${this.props.uid}/${preset.hash}/${presetValuesHash}/${width}${ext}`
+    this.props.localTarget = `${config.tmpDir}/${this.props.uid}/${preset.hash}/${presetValuesHash}/${width}_${height}${ext}`
+    this.props.remoteTarget = `media/${this.props.uid}/${preset.hash}/${presetValuesHash}/${width}_${height}${ext}`
 
     return this
   }
@@ -44,7 +44,9 @@ export default class Media {
       'remoteOriginal',
       'remoteTarget',
       'src',
-      'width'
+      'width',
+      'height',
+      'mode'
     ])
   }
 }
