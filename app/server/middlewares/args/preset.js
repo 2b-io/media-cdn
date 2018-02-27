@@ -1,7 +1,7 @@
 import Preset from 'models/Preset'
 
 export default (req, res, next) => {
-  let { hash = 'default' } = req.params
+  const hash = req.query.p || req.query.preset || 'default'
 
   Preset.findOne({
     hash,
