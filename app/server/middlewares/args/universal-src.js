@@ -1,4 +1,4 @@
-import parseDomain from 'parse-domain'
+import { URL } from 'url'
 
 const isMatch = (origin, domain) => {
   const pattern = origin
@@ -11,22 +11,14 @@ const isMatch = (origin, domain) => {
 }
 
 export default (req, res, next) => {
-  const src = req.query.url || req.query.src
+  const src = new URL(req.query.url || req.query.src)
   const { project } = req._args
 
-  const parsed = parseDomain(src)
-
-  const domain = [
-    parsed.subdomain,
-    parsed.domain,
-    parsed.tld
-  ].filter(Boolean).join('.')
-
-  const allowOrigin = project.origins.length === 0 || project.origins.some(o => isMatch(o, domain))
+  const allowOrigin = project.origins.length === 0 || project.origins.some(o => isMatch(o, src.hostname))
 
   if (!allowOrigin) {
     // return next(new Error('invalid origin'))
-    return next()
+    return next(new Error('invalid origin'))
   }
 
   req._args.src = src

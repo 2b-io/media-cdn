@@ -1,34 +1,33 @@
 import express from 'express'
 
-import force from '../middlewares/args/force'
-import preset from '../middlewares/args/preset'
+import flow from '../middlewares/args/flow'
+import mime from '../middlewares/args/mime'
 import project from '../middlewares/args/project'
-import size from '../middlewares/args/size'
-import src from '../middlewares/args/src'
+import universalSrc from '../middlewares/args/universal-src'
 
-import serveMedia from '../middlewares/serve-media'
+import createMediaEntity from '../middlewares/create-media-entity'
+import fetchMediaMeta from '../middlewares/fetch-media-meta'
+import processFlow from '../middlewares/process-flow'
+import returnMedia from '../middlewares/return-media'
 
 const router = express()
 
-router.get([
-  '/u/:slug/:hash/media',
-  '/u/:slug/media'
-], [
+router.get([ '/:slug', '/:slug/media' ], [
+  // collect general args
   project,
-  preset,
-  src,
-  size,
-  force,
-  (req, res, next) => {
-    const { preset, project, src } = req._args
+  universalSrc,
+  mime,
+  flow,
+   // collect general args - END
 
-    if (!preset || !project || !src) {
-      return res.sendStatus(400)
-    }
-
-    next()
-  },
-  serveMedia
+  // serve media
+  createMediaEntity,
+  fetchMediaMeta,
+  processFlow,
+  fetchMediaMeta,
+  returnMedia
+  // serve media - END
 ])
 
 export default router
+
