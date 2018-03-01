@@ -34,6 +34,12 @@ const optimize = async (media) => {
       progressive: true,
       force: false
     })
+  } else if (meta.format === 'png') {
+    image = image.png({
+      compressionLevel: Math.ceil(quality / 100 * 9),
+      progressive: true,
+      force: false
+    })
   }
 
   // resize logic
