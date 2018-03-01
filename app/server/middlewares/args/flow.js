@@ -5,20 +5,24 @@ import size from './size'
 import series from '../series'
 
 export default (req, res, next) => {
-  const { mime } = req._args
+  try {
+    const { mime } = req._args
 
-  if (match(mime, '*/css')) {
-    req._args.flow = [ 'download', 'cssmin' ]
-    req._args.type = 'css'
-  } else if (match(mime, '*/javascript')) {
-    req._args.flow = [ 'download', 'uglify' ]
-    req._args.type = 'javascript'
-  } else if (match(mime, 'image/*')) {
-    req._args.flow = [ 'download', 'optimize' ]
-    req._args.type = 'image'
+    if (match(mime, 'text/css')) {
+      req._args.flow = [ 'download', 'cssmin' ]
+      req._args.type = 'css'
+    } else if (match(mime, 'application/javascript')) {
+      req._args.flow = [ 'download', 'uglify' ]
+      req._args.type = 'javascript'
+    } else if (match(mime, 'image/jpeg') || match(mime, 'image/png')) {
+      req._args.flow = [ 'download', 'optimize' ]
+      req._args.type = 'image'
 
-    return series(preset, size)(req, res, next)
-  } else {
+      return series(preset, size)(req, res, next)
+    } else {
+      req._args.flow = [ 'download' ]
+    }
+  } catch (error) {
     req._args.flow = [ 'download' ]
   }
 

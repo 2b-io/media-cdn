@@ -20,15 +20,21 @@ Promise.all([
   console.log('worker bootstrapped')
 
   input.onRequest((message, done) => {
-    const handler = handlers[message.type]
+    try {
 
-    if (!handler) {
-      return done({
-        succeed: false
+      const handler = handlers[message.type]
+
+      if (!handler) {
+        throw new Error(`Unsupported job: ${message.type}`)
+      }
+
+      handler(message.data, output, done)
+    } catch (error) {
+      done({
+        succeed: false,
+        reason: error
       })
     }
-
-    handler(message.data, output, done)
   })
 })
 

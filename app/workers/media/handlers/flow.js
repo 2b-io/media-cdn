@@ -38,8 +38,12 @@ export default (data, rpc, done) => {
   series(
     [
       ...data.flow.map(job => handle(job, media, rpc)),
-      done => fs.unlink(path.join(config.tmpDir, source), done),
-      done => fs.unlink(path.join(config.tmpDir, target), done)
+      done => source ?
+        fs.unlink(path.join(config.tmpDir, source), done) :
+        done(),
+      done => target ?
+        fs.unlink(path.join(config.tmpDir, target), done) :
+        done()
     ],
     (error) => {
       if (error) {
