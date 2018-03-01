@@ -6,7 +6,9 @@ import shortHash from 'short-hash'
 
 import config from 'infrastructure/config'
 
-const s3 = new aws.S3(config.aws.s3)
+const s3 = new aws.S3({
+  ...config.aws.s3
+})
 
 const getKey = (media, original) => {
   return original ? media.originalPath : media.uniquePath

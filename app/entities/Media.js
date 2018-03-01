@@ -1,52 +1,35 @@
-import path from 'path'
-import pick from 'object.pick'
-import shortHash from 'short-hash'
-import config from 'infrastructure/config'
+import Asset from './Asset'
+import Image from './Image'
+import JavaScript from './JavaScript'
+import StyleSheet from './StyleSheet'
 
-export default class Media {
-  static create(props) {
-    const media = new Media(props)
+const create = (props) => {
+  return raw(props).generate()
+}
 
-    return media._generate()
+const from = (state) => {
+  return raw({ type: state.type }, state)
+}
+
+const raw = (props, state) => {
+  const { type } = props
+
+  switch (type) {
+    case 'image':
+      return new Image(props, state)
+
+    case 'css':
+      return new StyleSheet(props, state)
+
+    case 'javascript':
+      return new JavaScript(props, state)
+
+    default:
+      return new Asset(props, state)
   }
+}
 
-  static from(props) {
-    return new Media(props)
-  }
-
-  constructor(props) {
-    this.props = props
-  }
-
-  _generate() {
-    const { project, src, preset, mode, height, width } = this.props
-    const ext = path.extname(src)
-    const presetValuesHash = shortHash(JSON.stringify(preset.values), Object.keys(preset.values).sort())
-
-    this.props.uid = `${project.slug}/${shortHash(src)}`
-
-    // original
-    this.props.localOriginal = `${config.tmpDir}/${this.props.uid}/original${ext}`
-    this.props.remoteOriginal = `media/${this.props.uid}/original${ext}`
-
-    // target
-    this.props.localTarget = `${config.tmpDir}/${this.props.uid}/${preset.hash}/${presetValuesHash}/${mode}_${width}_${height}${ext}`
-    this.props.remoteTarget = `media/${this.props.uid}/${preset.hash}/${presetValuesHash}/${mode}_${width}_${height}${ext}`
-
-    return this
-  }
-
-  toJSON() {
-    return pick(this.props, [
-      'uid',
-      'localOriginal',
-      'localTarget',
-      'remoteOriginal',
-      'remoteTarget',
-      'src',
-      'width',
-      'height',
-      'mode'
-    ])
-  }
+export default {
+  create,
+  from
 }

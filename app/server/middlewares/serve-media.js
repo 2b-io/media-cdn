@@ -1,16 +1,9 @@
 import fs from 'fs'
-import morgan from 'morgan'
-
-import force from './middlewares/args/force'
-import preset from './middlewares/args/preset'
-import project from './middlewares/args/project'
-import size from './middlewares/args/size'
-import src from './middlewares/args/src'
 
 import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
-const mediaHandler = (req, res, next) => {
+const serveMedia = (req, res, next) => {
   const { force, preset, project, src, mode, height, width } = req._args
 
   const media = Media.create({
@@ -56,7 +49,7 @@ const mediaHandler = (req, res, next) => {
       if (response.data.succeed) {
         req._args.force = false
 
-        return mediaHandler(req, res, next)
+        return serveMedia(req, res, next)
       }
 
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
@@ -69,43 +62,4 @@ const mediaHandler = (req, res, next) => {
   })
 }
 
-const flow = [
-  project,
-  preset,
-  src,
-  size,
-  force,
-  (req, res, next) => {
-    const { preset, project, src } = req._args
-
-    if (!preset || !project || !src) {
-      return res.sendStatus(400)
-    }
-
-    next()
-  },
-  mediaHandler
-]
-
-export default app => {
-  // devlopment log
-  app.use(morgan('dev'))
-
-  // register hook
-  app.use((req, res, next) => {
-    // req.on('end', () => console.log('end', res.statusCode))
-
-    next()
-  })
-
-  // supported endpoints
-  app.get('/p/:slug/:hash/media', flow)
-  app.get('/p/:slug/media', flow)
-
-  // otherwise
-  app.use((error, req, res, next) => {
-    res.sendStatus(400)
-  })
-
-  return app
-}
+export default serveMedia
