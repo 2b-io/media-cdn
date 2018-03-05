@@ -1,3 +1,4 @@
+import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import sharp from 'sharp'
@@ -6,11 +7,26 @@ import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import Media from 'entities/Media'
 
-const putToCache = async (file) => {
-  const local = path.join(config.tmpDir, file)
-  const remote = `media/${file}`
+const getStat = async (file) => {
+  return new Promise((resolve, reject) => {
+    fs.stat(
+      path.join(config.tmpDir, file),
+      (error, stat) => {
+        if (error) {
+          return reject(error)
+        }
 
-  await s3.store(local, remote)
+        resolve(stat)
+      }
+    )
+  })
+}
+
+const putToCache = async (target, source) => {
+  return await s3.store(
+    path.join(config.tmpDir, source || target),
+    `media/${target}`
+  )
 }
 
 const optimize = async (media) => {
@@ -45,26 +61,40 @@ const optimize = async (media) => {
   // resize logic
   const { mode, height, width } = media.state
 
-  image = image.resize(
-    width === 'auto' ? null : width,
-    height === 'auto' ? null: height
-  )
+  const resize = !(width === 'auto' && height === 'auto')
 
-  if (mode === 'cover') {
-    image = image.min()
+  if (resize) {
+    image = image.resize(
+      width === 'auto' ? null : width,
+      height === 'auto' ? null: height
+    )
+
+    if (mode === 'cover') {
+      image = image.min()
+    }
+
+    if (mode === 'contain') {
+      image = image.max()
+    }
+
+    if (mode === 'crop') {
+      image = image.crop()
+    }
   }
 
-  if (mode === 'contain') {
-    image = image.max()
+  const targetMeta = await image.toFile(output)
+
+  if (!resize) {
+    // compare file sizes
+    const state = await getStat(media.state.source)
+
+    if (state.size < targetMeta.size) {
+      // source is better, cache source
+      return await putToCache(media.state.target, media.state.source)
+    }
   }
 
-  if (mode === 'crop') {
-    image = image.crop()
-  }
-
-  await image.toFile(output)
-
-  await putToCache(media.state.target)
+  return await putToCache(media.state.target)
 }
 
 export default (data, rpc, done) => {
