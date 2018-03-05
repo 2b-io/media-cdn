@@ -16,13 +16,13 @@ const getMeta = async (media) => {
 }
 
 const crawl = async (media) => {
-  const { source, url } = media.state
-  const output = path.join(config.tmpDir, source)
-  const outputDir = path.dirname(output)
-
-  mkdirp.sync(outputDir)
-
   return new Promise((resolve, reject) => {
+    const { source, url } = media.state
+    const output = path.join(config.tmpDir, source)
+    const outputDir = path.dirname(output)
+
+    mkdirp.sync(outputDir)
+
     dl(url)
       .on('error', reject)
       .pipe(fs.createWriteStream(output))
@@ -74,7 +74,7 @@ export default (data, rpc, done) => {
 
   download(media)
     .then(() => done({ succeed: true }))
-    .catch(error => done({ succeed: false, reason: error }))
+    .catch(error => done({ succeed: false, reason: error.toString() }))
     .finally(() => console.log('download done'))
 }
 

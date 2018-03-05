@@ -1,8 +1,8 @@
-import CleanCSS from 'clean-css'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
-import { Transform } from 'stream'
+import minifyTransform from 'minify-stream'
+import UglifyJS from 'uglify-js'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -15,20 +15,8 @@ const putToCache = async (file) => {
   await s3.store(local, remote)
 }
 
-const createMinifyTransform = minifier => {
-    return new Transform({
-        transform(chunk, encoding, callback) {
-            const output = minifier.minify(chunk.toString());
-            this.push(output.styles);
-            callback();
-        }
-    });
-}
-
 const minify = async (media) => {
   return new Promise((resolve, reject) => {
-    const minifier = new CleanCSS()
-
     const { source, target } = media.state
 
     const input = path.join(config.tmpDir, source)
@@ -39,25 +27,31 @@ const minify = async (media) => {
 
     fs.createReadStream(input)
       .on('error', reject)
-      .pipe(createMinifyTransform(minifier))
+      .pipe(minifyTransform({
+        uglify: UglifyJS
+      }))
       .pipe(fs.createWriteStream(output))
       .on('finish', () => resolve())
   })
 }
 
-const cssmin = async (media) => {
+const jsmin = async (media) => {
   await minify(media)
 
   await putToCache(media.state.target)
 }
 
 export default (data, rpc, done) => {
-  console.log('cssmin...')
+  console.log('jsmin...')
 
   const media = Media.from(data.media)
 
-  cssmin(media)
+  jsmin(media)
     .then(() => done({ succeed: true }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
-    .finally(() => console.log('cssmin done'))
+    .catch(error => {
+      console.log(error)
+
+      done({ succeed: false, reason: error.toString() })
+    })
+    .finally(() => console.log('jsmin done'))
 }
