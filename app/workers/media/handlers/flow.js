@@ -44,20 +44,6 @@ export default (data, rpc, done) => {
       } else {
         done({ succeed: true })
       }
-
-      console.log('clear tmp files...')
-
-      parallel(
-        [
-          done => source ?
-            fs.unlink(path.join(config.tmpDir, source), done) :
-            done(),
-          done => target ?
-            fs.unlink(path.join(config.tmpDir, target), done) :
-            done()
-        ],
-        () => console.log('clear tmp files done')
-      )
     }
   )
 }

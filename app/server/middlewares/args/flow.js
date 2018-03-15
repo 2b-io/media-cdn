@@ -10,22 +10,22 @@ export default (req, res, next) => {
 
     if (match(mime, 'text/css')) {
       // req._args.flow = [ 'download', 'cssmin' ]
-      req._args.flow = [ 'download' ]
+      req._args.flow = [ 'download', 'clear' ]
       req._args.type = 'css'
     } else if (match(mime, 'application/javascript')) {
       // req._args.flow = [ 'download', 'jsmin' ]
-      req._args.flow = [ 'download' ]
+      req._args.flow = [ 'download', 'clear' ]
       req._args.type = 'javascript'
     } else if (match(mime, 'image/jpeg') || match(mime, 'image/png')) {
-      req._args.flow = [ 'download', 'optimize' ]
+      req._args.flow = [ 'download', 'optimize', 'clear' ]
       req._args.type = 'image'
 
       return series(preset, size)(req, res, next)
     } else {
-      req._args.flow = [ 'download' ]
+      req._args.flow = [ 'download', 'clear' ]
     }
   } catch (error) {
-    req._args.flow = [ 'download' ]
+    req._args.flow = [ 'download', 'clear' ]
   }
 
   next()
