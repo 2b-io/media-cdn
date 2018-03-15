@@ -103,7 +103,7 @@ export default (data, rpc, done) => {
   const media = Media.from(data.media)
 
   optimize(media)
-    .then(() => done({ succeed: true }))
+    .then(() => done({ succeed: true, media }))
     .catch(error => done({ succeed: false, reason: error.toString() }))
     .finally(() => console.log('optimize done'))
 }
