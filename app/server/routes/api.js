@@ -1,6 +1,7 @@
 import express from 'express'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
+import mime from 'mime'
 import multer from 'multer'
 import path from 'path'
 import request from 'superagent'
@@ -12,30 +13,16 @@ import flow from '../middlewares/args/flow'
 import project from '../middlewares/args/project'
 
 const router = express()
+const upload = multer({
+  dest: config.tmpDir,
+})
 
 router.post('/:slug/media', [
   project,
   (req, res, next) => {
     const { project } = req._args
 
-    multer({
-      storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-          const dest = path.join(
-            config.tmpDir,
-            project.slug,
-            uuid.v4()
-          )
-
-          mkdirp.sync(dest)
-
-          cb(null, dest)
-        },
-        filename: (req, file, cb) => {
-          cb(null, file.originalname)
-        }
-      })
-    }).single('media')(req, res, next)
+    upload.single('media')(req, res, next)
   },
   (req, res, next) => {
     req._args.mime = req.file.mimetype
@@ -54,10 +41,36 @@ router.post('/:slug/media', [
       ...req._args
     })
 
-    media.state.source = req.file.path
+    const ext = mime.getExtension(media.state.mime)
+
+    media.state.ext = `.${ext}`
+    media.state.source = `${media.state.source}.${ext}`
+    media.state.target = `${media.state.target}.${ext}`
+
+    req._media = media
+
+    next()
+  },
+  (req, res, next) => {
+    const media = req._media
+    const source = path.join(config.tmpDir, media.state.source)
+    const sourceDir = path.dirname(source)
+
+    mkdirp.sync(sourceDir)
+
+    fs.createReadStream(media.state.url)
+      .pipe(fs.createWriteStream(source, { flags: 'w' }))
+      .on('finish', () => {
+        fs.unlinkSync(media.state.url)
+
+        next()
+      })
+  },
+  (req, res, next) => {
+    const { media } = req
 
     res.json({
-      media
+      media: req._media
     })
   }
 ])
