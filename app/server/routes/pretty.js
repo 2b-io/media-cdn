@@ -2,8 +2,8 @@ import express from 'express'
 
 import flow from '../middlewares/args/flow'
 import mime from '../middlewares/args/mime'
-import project from '../middlewares/args/project'
 import prettySrc from '../middlewares/args/pretty-src'
+import project from '../middlewares/args/project'
 
 import createMediaEntity from '../middlewares/create-media-entity'
 import fetchMediaMeta from '../middlewares/fetch-media-meta'

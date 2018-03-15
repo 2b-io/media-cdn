@@ -1,6 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 
+import api from './routes/api'
 import pretty from './routes/pretty'
 import universal from './routes/universal'
 
@@ -10,8 +11,9 @@ app.use(morgan('dev'))
 app.enable('trust proxy')
 app.disable('x-powered-by')
 
-app.use('/u', universal)
+app.use('/a', api)
 app.use('/p', pretty)
+app.use('/u', universal)
 
 app.use((error, req, res, next) => {
   console.log(error)
