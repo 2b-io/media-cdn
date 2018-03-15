@@ -6,7 +6,9 @@ import path from 'path'
 import request from 'superagent'
 import uuid from 'uuid'
 import config from 'infrastructure/config'
+import Media from 'entities/Media'
 
+import flow from '../middlewares/args/flow'
 import project from '../middlewares/args/project'
 
 const router = express()
@@ -36,12 +38,26 @@ router.post('/:slug/media', [
     }).single('media')(req, res, next)
   },
   (req, res, next) => {
+    req._args.mime = req.file.mimetype
+
+    next()
+  },
+  flow,
+  (req, res, next) => {
+    const media = Media.create({
+      src: {
+        pathname: req.file.path,
+        toString() {
+          return req.file.path
+        }
+      },
+      ...req._args
+    })
+
+    media.state.source = req.file.path
+
     res.json({
-      file: req.file,
-      body: req.body,
-      params: req.params,
-      query: req.query,
-      args: req._args
+      media
     })
   }
 ])
@@ -50,6 +66,8 @@ router.get('/test', [
   (req, res, next) => {
     const file = path.join(config.tmpDir, 'test.jpg')
     const url = 'http://d-14:3002/a/the-cool-stuffs/media'
+
+    console.log(file, url)
 
     request
       .post(url)
