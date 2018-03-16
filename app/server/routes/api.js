@@ -1,3 +1,5 @@
+import parallel from 'async/parallel'
+import reflect from 'async/reflect'
 import express from 'express'
 import fs from 'fs'
 import mime from 'mime'
@@ -61,8 +63,6 @@ router.post('/:slug/media', [
         'optimize'
       ] })
       .onResponse(message => {
-        console.log(message)
-
         const { media } = message.data
 
         const source = path.join(config.tmpDir, media.source)
@@ -76,8 +76,15 @@ router.post('/:slug/media', [
         res.sendFile(target)
 
         res.on('finish', () => {
-          fs.unlink(source, () => {})
-          fs.unlink(target, () => {})
+          parallel(
+            media.tmp.map(f => reflect(done => {
+              console.log(`clear ${f}`)
+              fs.unlink(path.join(config.tmpDir, f), done)
+            })),
+            error => {
+              console.log('clear done')
+            }
+          )
         })
 
       })
