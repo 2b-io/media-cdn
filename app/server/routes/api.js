@@ -1,8 +1,8 @@
 import express from 'express'
 import fs from 'fs'
-import mkdirp from 'mkdirp'
 import mime from 'mime'
 import multer from 'multer'
+import mv from 'mv'
 import path from 'path'
 import request from 'superagent'
 import uuid from 'uuid'
@@ -54,17 +54,8 @@ router.post('/:slug/media', [
   (req, res, next) => {
     const media = req._media
     const source = path.join(config.tmpDir, media.state.source)
-    const sourceDir = path.dirname(source)
 
-    mkdirp.sync(sourceDir)
-
-    fs.createReadStream(media.state.url)
-      .pipe(fs.createWriteStream(source, { flags: 'w' }))
-      .on('finish', () => {
-        fs.unlinkSync(media.state.url)
-
-        next()
-      })
+    mv(media.state.url, source, { mkdirp: true }, next)
   },
   (req, res, next) => {
     const { media } = req
@@ -79,8 +70,6 @@ router.get('/test', [
   (req, res, next) => {
     const file = path.join(config.tmpDir, 'test.jpg')
     const url = 'http://d-14:3002/a/the-cool-stuffs/media'
-
-    console.log(file, url)
 
     request
       .post(url)
