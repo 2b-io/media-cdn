@@ -25,7 +25,7 @@ const handle = (job, rpc) => ({ media }, done) => {
 
 const waitFor = (media, job) => {
   switch (job) {
-    case 'download':
+    case 'crawl':
       return media.source
 
     case 'optimize':
@@ -39,11 +39,11 @@ export default (data, rpc, done) => {
       (done) => done(null, { media: data.media }),
       ...data.flow.map(job => handle(job, rpc)),
     ],
-    (error, { media }) => {
+    (error, data) => {
       if (error) {
         done({ succeed: false, reason: serializeError(error) })
       } else {
-        done({ succeed: true, media })
+        done({ succeed: true, media: data.media })
       }
     }
   )

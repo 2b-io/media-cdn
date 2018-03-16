@@ -60,25 +60,29 @@ const download = async (media) => {
     console.log('cache miss')
 
     await crawl(media)
-    await putToCache(media.state.source)
+    // await putToCache(media.state.source)
   } else {
     console.log('cache hit')
 
     await getFromCache(media.state.source)
   }
+
+  media.addTemporaryFile(media.state.source)
+
+  return media
 }
 
 export default (data, rpc, done) => {
-  console.log('download...')
+  console.log('crawl...')
 
   const media = Media.from(data.media)
 
   download(media)
-    .then(() => done({ succeed: true, media }))
+    .then(media => done({ succeed: true, media }))
     .catch(error => done({
       succeed: false,
       reason: serializeError(error)
     }))
-    .finally(() => console.log('download done'))
+    .finally(() => console.log('crawl done'))
 }
 

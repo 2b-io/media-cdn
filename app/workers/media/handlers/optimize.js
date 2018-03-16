@@ -85,17 +85,17 @@ const optimize = async (media) => {
 
   const targetMeta = await image.toFile(output)
 
+  media.addTemporaryFile(media.state.target)
+
   if (!resize) {
     // compare file sizes
     const state = await getStat(media.state.source)
 
     if (state.size < targetMeta.size) {
       // source is better, cache source
-      return await putToCache(media.state.target, media.state.source)
+      media.state.useSourceAsTarget = true
     }
   }
-
-  // await putToCache(media.state.target)
 
   return media
 }

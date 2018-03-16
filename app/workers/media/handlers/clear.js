@@ -1,4 +1,5 @@
 import parallel from 'async/parallel'
+import reflect from 'async/reflect'
 import fs from 'fs'
 import path from 'path'
 import serializeError from 'serialize-error'
@@ -10,25 +11,16 @@ export default (data, rpc, done) => {
   console.log('clear...')
 
   const media = Media.from(data.media)
-  const { source, target } = media.state
 
   parallel(
-    [
-      done => source ?
-        fs.unlink(path.join(config.tmpDir, source), done) :
-        done(),
-      done => target ?
-        fs.unlink(path.join(config.tmpDir, target), done) :
-        done()
-    ],
+    media.state.tmp.map(f => reflect(done => {
+      console.log(`clear ${f}`)
+      fs.unlink(path.join(config.tmpDir, f), done)
+    })),
     error => {
       console.log('clear done')
 
-      if (error) {
-        done({ succeed: false, reason: serializeError(error) })
-      } else {
-        done({ succeed: true, media })
-      }
+      done({ succeed: true, media })
     }
   )
 }

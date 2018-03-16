@@ -4,7 +4,7 @@ import shortHash from 'short-hash'
 class Asset {
   constructor(props, state) {
     this.props = { ... props }
-    this.state = { ...state }
+    this.state = { tmp: [], ...state }
   }
 
   generate() {
@@ -29,6 +29,16 @@ class Asset {
 
   hash(value) {
     return shortHash(value)
+  }
+
+  addTemporaryFile(file) {
+    if (!Array.isArray(this.state.tmp)) {
+      this.state.tmp = []
+    }
+
+    if (!this.state.tmp.includes(file)) {
+      this.state.tmp.push(file)
+    }
   }
 }
 
