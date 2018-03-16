@@ -2,6 +2,7 @@ import dl from 'download'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
+import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -74,7 +75,10 @@ export default (data, rpc, done) => {
 
   download(media)
     .then(() => done({ succeed: true, media }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
     .finally(() => console.log('download done'))
 }
 

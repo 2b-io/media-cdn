@@ -1,6 +1,7 @@
 import parallel from 'async/parallel'
 import fs from 'fs'
 import path from 'path'
+import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import Media from 'entities/Media'
@@ -24,7 +25,7 @@ export default (data, rpc, done) => {
       console.log('clear done')
 
       if (error) {
-        done({ succeed: false, reason: error.toString() })
+        done({ succeed: false, reason: serializeError(error) })
       } else {
         done({ succeed: true })
       }

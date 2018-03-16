@@ -1,6 +1,7 @@
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
+import serializeError from 'serialize-error'
 import sharp from 'sharp'
 
 import config from 'infrastructure/config'
@@ -104,6 +105,9 @@ export default (data, rpc, done) => {
 
   optimize(media)
     .then(() => done({ succeed: true, media }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
     .finally(() => console.log('optimize done'))
 }

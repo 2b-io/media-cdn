@@ -52,6 +52,18 @@ router.post('/:slug/media', [
     next()
   },
   (req, res, next) => {
+    const { _media: media } = req
+
+    req.app.get('rpc')
+      .request('flow', { media, flow: [ 'mv' ] })
+      .onResponse(message => {
+        console.log(message)
+
+        res.json(message)
+      })
+      .send()
+  },
+  (req, res, next) => {
     const media = req._media
     const source = path.join(config.tmpDir, media.state.source)
 
