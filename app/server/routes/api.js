@@ -63,20 +63,16 @@ router.post('/:slug/media', [
       .onResponse(message => {
         console.log(message)
 
-        // res.json(message)
-
         const { media } = message.data
 
         const source = path.join(config.tmpDir, media.source)
         const target = path.join(config.tmpDir, media.target)
+        const filename = `${media.url.split('/').pop()}${media.ext}`
 
         res.set('content-type', media.mime)
         res.set('cache-control', 'public, max-age=2592000')
-        // fs.createReadStream(file)
-        //   .pipe(res)
-        //   .on('finish', () => {
-        //     console.log('finish')
-        //   })
+        res.set('content-disposition', `inline; filename=${filename}`)
+
         res.sendFile(target)
 
         res.on('finish', () => {
@@ -89,6 +85,17 @@ router.post('/:slug/media', [
   }
 ])
 
+const forwardHeaders = [
+  'content-disposition',
+  'content-type',
+  'cache-control',
+  'accept-ranges',
+  'last-modified',
+  'etag',
+  'content-length',
+  'date'
+]
+
 router.get('/test', [
   (req, res, next) => {
     const file = path.join(config.tmpDir, 'test.jpg')
@@ -99,9 +106,9 @@ router.get('/test', [
       .field('store', false)
       .attach('media', fs.createReadStream(file))
       .on('response', response => {
-        console.log(response.headers)
-
-        res.set('content-type', response.headers['content-type'])
+        forwardHeaders.forEach(h => {
+          res.set(h, response.headers[h])
+        })
       })
       .pipe(res)
       .on('finish', () => {
