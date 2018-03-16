@@ -6,6 +6,7 @@ import mv from 'mv'
 import path from 'path'
 import request from 'superagent'
 import uuid from 'uuid'
+
 import config from 'infrastructure/config'
 import Media from 'entities/Media'
 
@@ -55,26 +56,36 @@ router.post('/:slug/media', [
     const { _media: media } = req
 
     req.app.get('rpc')
-      .request('flow', { media, flow: [ 'mv' ] })
+      .request('flow', { media, flow: [
+        'mv',
+        'optimize'
+      ] })
       .onResponse(message => {
         console.log(message)
 
-        res.json(message)
+        // res.json(message)
+
+        const { media } = message.data
+
+        const source = path.join(config.tmpDir, media.source)
+        const target = path.join(config.tmpDir, media.target)
+
+        res.set('content-type', media.mime)
+        res.set('cache-control', 'public, max-age=2592000')
+        // fs.createReadStream(file)
+        //   .pipe(res)
+        //   .on('finish', () => {
+        //     console.log('finish')
+        //   })
+        res.sendFile(target)
+
+        res.on('finish', () => {
+          fs.unlink(source, () => {})
+          fs.unlink(target, () => {})
+        })
+
       })
       .send()
-  },
-  (req, res, next) => {
-    const media = req._media
-    const source = path.join(config.tmpDir, media.state.source)
-
-    mv(media.state.url, source, { mkdirp: true }, next)
-  },
-  (req, res, next) => {
-    const { media } = req
-
-    res.json({
-      media: req._media
-    })
   }
 ])
 
@@ -87,12 +98,15 @@ router.get('/test', [
       .post(url)
       .field('store', false)
       .attach('media', fs.createReadStream(file))
-      .then(data => {
-        res
-          .set('Content-Type', 'application/json')
-          .send(data.text)
+      .on('response', response => {
+        console.log(response.headers)
+
+        res.set('content-type', response.headers['content-type'])
       })
-      .catch(next)
+      .pipe(res)
+      .on('finish', () => {
+        console.log('yyy')
+      })
   }
 ])
 

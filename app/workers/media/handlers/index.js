@@ -3,6 +3,7 @@ import cssmin from './cssmin'
 import download from './download'
 import flow from './flow'
 import jsmin from './jsmin'
+import mv from './mv'
 import optimize from './optimize'
 
 export default {
@@ -11,5 +12,6 @@ export default {
   download,
   flow,
   jsmin,
+  mv,
   optimize
 }

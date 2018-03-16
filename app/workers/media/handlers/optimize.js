@@ -95,7 +95,9 @@ const optimize = async (media) => {
     }
   }
 
-  return await putToCache(media.state.target)
+  // await putToCache(media.state.target)
+
+  return media
 }
 
 export default (data, rpc, done) => {
@@ -104,7 +106,7 @@ export default (data, rpc, done) => {
   const media = Media.from(data.media)
 
   optimize(media)
-    .then(() => done({ succeed: true, media }))
+    .then(media => done({ succeed: true, media }))
     .catch(error => done({
       succeed: false,
       reason: serializeError(error)

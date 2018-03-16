@@ -39,11 +39,11 @@ export default (data, rpc, done) => {
       (done) => done(null, { media: data.media }),
       ...data.flow.map(job => handle(job, rpc)),
     ],
-    (error) => {
+    (error, { media }) => {
       if (error) {
         done({ succeed: false, reason: serializeError(error) })
       } else {
-        done({ succeed: true })
+        done({ succeed: true, media })
       }
     }
   )
