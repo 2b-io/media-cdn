@@ -1,10 +1,8 @@
 import express from 'express'
-import fs from 'fs'
 import mime from 'mime'
 import multer from 'multer'
 import mv from 'mv'
 import path from 'path'
-import request from 'superagent'
 
 import config from 'infrastructure/config'
 import Media from 'entities/Media'
@@ -82,35 +80,6 @@ router.post('/:slug/media', [
       })
       .onResponse(() => {})
       .send()
-  }
-])
-
-const forwardHeaders = [
-  'content-disposition',
-  'content-type',
-  'cache-control',
-  'accept-ranges',
-  'last-modified',
-  'etag',
-  'content-length',
-  'date'
-]
-
-router.get('/test', [
-  (req, res, next) => {
-    const file = path.join(config.tmpDir, 'test.jpg')
-    const url = 'http://d-14:3002/a/the-cool-stuffs/media'
-
-    request
-      .post(url)
-      .field('store', false)
-      .attach('media', fs.createReadStream(file))
-      .on('response', response => {
-        forwardHeaders.forEach(h => {
-          res.set(h, response.headers[h])
-        })
-      })
-      .pipe(res)
   }
 ])
 
