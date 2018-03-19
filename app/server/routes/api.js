@@ -10,6 +10,7 @@ import flow from '../middlewares/args/flow'
 import preset from '../middlewares/args/preset'
 import project from '../middlewares/args/project'
 import size from '../middlewares/args/size'
+import type from '../middlewares/args/type'
 import clear from '../middlewares/clear'
 
 import handleUpload from '../middlewares/handle-upload'
@@ -38,10 +39,12 @@ router.post('/:slug/media', [
 
     next()
   },
+  type,
   flow,
+  // (req, res, next) => {
+  //   res.json(req._args)
+  // },
   (req, res, next) => {
-    console.log(req._args)
-
     const media = Media.create({
       src: {
         pathname: req.file.path,
@@ -54,7 +57,10 @@ router.post('/:slug/media', [
 
     media.state.ext = `.${ext}`
     media.state.source = `${media.state.source}.${ext}`
-    media.state.target = `${media.state.target}.${ext}`
+
+    if (media.state.target) {
+      media.state.target = `${media.state.target}.${ext}`
+    }
 
     req._media = media
 
@@ -64,14 +70,11 @@ router.post('/:slug/media', [
     const { _media: media } = req
 
     req.app.get('rpc')
-      .request('flow', { media, flow: [
-        'mv',
-        'optimize'
-      ] })
+      .request('flow', { media, flow: req._args.flow })
       .onResponse(message => {
         const media = req._media = message.data.media
 
-        const target = path.join(config.tmpDir, media.target)
+        const target = path.join(config.tmpDir, media.target || media.source)
         const filename = `${media.url.split('/').pop()}${media.ext}`
 
         res.set('content-type', media.mime)
