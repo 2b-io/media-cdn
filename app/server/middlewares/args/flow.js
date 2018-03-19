@@ -3,19 +3,23 @@ import size from './size'
 import series from '../series'
 
 export default (req, res, next) => {
-    const { api, type } = req._args
+    const { api, store, type } = req._args
 
     switch (type) {
       case 'image':
         req._args.flow = api ?
-          [ 'mv', 'optimize' ] :
+          (store ?
+            [ 'mv', 'cacheSource', 'optimize', 'cacheTarget' ] :
+            [ 'mv', 'optimize' ]) :
           [ 'crawl', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ]
 
         return series(preset, size)(req, res, next)
 
       default:
         req._args.flow = api ?
-          [ 'mv' ] :
+          (store ?
+            [ 'mv', 'cacheSource' ] :
+            [ 'mv' ]) :
           [ 'crawl', 'cacheSource', 'clear' ]
 
         return next()

@@ -19,18 +19,20 @@ const forwardHeaders = [
 
 router.get('/test', [
   (req, res, next) => {
-    const file = path.join(config.tmpDir, 'test.css')
+    const file = path.join(config.tmpDir, 'test.jpg')
     const url = 'http://d-14:3002/a/the-cool-stuffs/media'
 
     request
       .post(url)
-      .field('store', false)
+      .field('store', true)
       .field('w', 640)
       .field('h', 640)
       .field('m', 'crop')
       .attach('media', fs.createReadStream(file))
       .on('response', response => {
         forwardHeaders.forEach(h => {
+          if (!response.headers[h]) return
+
           res.set(h, response.headers[h])
         })
       })

@@ -3,6 +3,7 @@ import morgan from 'morgan'
 
 import api from './routes/api'
 import pretty from './routes/pretty'
+import store from './routes/store'
 import tool from './routes/tool'
 import universal from './routes/universal'
 
@@ -15,6 +16,7 @@ app.disable('x-powered-by')
 app.use('/a', api)
 app.use('/p', pretty)
 app.use('/u', universal)
+app.use('/s', store)
 app.use('/t', tool)
 
 app.use((error, req, res, next) => {
