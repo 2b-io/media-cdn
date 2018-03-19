@@ -1,27 +1,20 @@
 import express from 'express'
 import mime from 'mime'
-import multer from 'multer'
-import mv from 'mv'
 import path from 'path'
 
-import config from 'infrastructure/config'
 import Media from 'entities/Media'
+import config from 'infrastructure/config'
 
 import flow from '../middlewares/args/flow'
 import project from '../middlewares/args/project'
+import clear from '../middlewares/clear'
+import handleUpload from '../middlewares/handle-upload'
 
 const router = express()
-const upload = multer({
-  dest: config.tmpDir,
-})
 
 router.post('/:slug/media', [
   project,
-  (req, res, next) => {
-    const { project } = req._args
-
-    upload.single('media')(req, res, next)
-  },
+  handleUpload,
   (req, res, next) => {
     req._args.mime = req.file.mimetype
 
@@ -58,7 +51,6 @@ router.post('/:slug/media', [
       .onResponse(message => {
         const media = req._media = message.data.media
 
-        const source = path.join(config.tmpDir, media.source)
         const target = path.join(config.tmpDir, media.target)
         const filename = `${media.url.split('/').pop()}${media.ext}`
 
@@ -72,15 +64,7 @@ router.post('/:slug/media', [
       })
       .send()
   },
-  (req, res, next) => {
-    req.app.get('rpc')
-      .request('flow', {
-        media: req._media,
-        flow: [ 'clear' ]
-      })
-      .onResponse(() => {})
-      .send()
-  }
+  clear
 ])
 
 export default router
