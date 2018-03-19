@@ -56,18 +56,18 @@ const returnLocalMedia = (req, res, next) => {
   const filename = `${media.state.url.split('/').pop()}${media.state.ext}`
 
   if (req._args.store) {
-    res.json({
-      source: new URL(
-        `s/${media.state.source.replace('/source', '')}`,
-        config.server.url
-      ).toString(),
-      target: new URL(
-        `s/${media.state.target}`,
-        config.server.url
-      ).toString()
+    return res.json({
+      source: media.state.source &&
+        new URL(
+          `s/${media.state.source.replace('/source', '')}`,
+          config.server.url
+        ).toString(),
+      target: media.state.target &&
+        new URL(
+          `s/${media.state.target}`,
+          config.server.url
+        ).toString()
     })
-
-    return next()
   }
 
   res.set('content-type', media.state.mime)
@@ -75,7 +75,7 @@ const returnLocalMedia = (req, res, next) => {
   res.set('content-disposition', `inline; filename=${filename}`)
   res.sendFile(target)
 
-  res.on('finish', () => next())
+  res.on('finish', () => clear(req, res, next))
 }
 
 /*
@@ -96,14 +96,8 @@ router.post('/:slug/media', [
   type,
   flow,
   createUploadMediaEntity,
-  // (req, res, next) => {
-  //   const { store } = req._args
-
-  //   res.json({ ...req._media.toJSON(), store })
-  // },
   processFlow,
-  returnLocalMedia,
-  clear
+  returnLocalMedia
 ])
 
 export default router

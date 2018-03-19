@@ -9,7 +9,7 @@ export default (req, res, next) => {
       case 'image':
         req._args.flow = api ?
           (store ?
-            [ 'mv', 'cacheSource', 'optimize', 'cacheTarget' ] :
+            [ 'mv', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ] :
             [ 'mv', 'optimize' ]) :
           [ 'crawl', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ]
 
@@ -18,7 +18,7 @@ export default (req, res, next) => {
       default:
         req._args.flow = api ?
           (store ?
-            [ 'mv', 'cacheSource' ] :
+            [ 'mv', 'cacheSource', 'clear' ] :
             [ 'mv' ]) :
           [ 'crawl', 'cacheSource', 'clear' ]
 
