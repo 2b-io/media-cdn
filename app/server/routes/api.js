@@ -2,6 +2,7 @@ import boolean from 'boolean'
 import express from 'express'
 import mime from 'mime'
 import path from 'path'
+import { URL } from 'url'
 
 import Media from 'entities/Media'
 import config from 'infrastructure/config'
@@ -54,13 +55,24 @@ const returnLocalMedia = (req, res, next) => {
   const target = path.join(config.tmpDir, media.state.target || media.state.source)
   const filename = `${media.state.url.split('/').pop()}${media.state.ext}`
 
-  res.set('content-type', media.state.mime)
-  res.set('cache-control', 'public, max-age=2592000')
+  if (req._args.store) {
+    res.json({
+      source: new URL(
+        `s/${media.state.source.replace('/source', '')}`,
+        config.server.url
+      ).toString(),
+      target: new URL(
+        `s/${media.state.target}`,
+        config.server.url
+      ).toString()
+    })
 
-  if (!req._args.store) {
-    res.set('content-disposition', `inline; filename=${filename}`)
+    return next()
   }
 
+  res.set('content-type', media.state.mime)
+  res.set('cache-control', 'public, max-age=2592000')
+  res.set('content-disposition', `inline; filename=${filename}`)
   res.sendFile(target)
 
   res.on('finish', () => next())
@@ -84,6 +96,11 @@ router.post('/:slug/media', [
   type,
   flow,
   createUploadMediaEntity,
+  // (req, res, next) => {
+  //   const { store } = req._args
+
+  //   res.json({ ...req._media.toJSON(), store })
+  // },
   processFlow,
   returnLocalMedia,
   clear

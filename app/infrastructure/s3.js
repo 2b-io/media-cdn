@@ -32,6 +32,7 @@ export default {
       Bucket: s3.config.bucket,
       Key: remote,
       ContentType: mime.getType(local),
+      // TODO ContentDisposition: `inline; filename=???`,
       Body: fs.createReadStream(local)
     }).promise()
   }
