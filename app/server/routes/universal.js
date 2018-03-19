@@ -3,6 +3,7 @@ import express from 'express'
 import flow from '../middlewares/args/flow'
 import mime from '../middlewares/args/mime'
 import project from '../middlewares/args/project'
+import type from '../middlewares/args/type'
 import universalSrc from '../middlewares/args/universal-src'
 
 import createMediaEntity from '../middlewares/create-media-entity'
@@ -17,9 +18,9 @@ router.get([ '/:slug', '/:slug/media' ], [
   project,
   universalSrc,
   mime,
+  type,
   flow,
   // collect general args - END
-
   // serve media
   createMediaEntity,
   fetchMediaMeta,
