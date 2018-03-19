@@ -43,8 +43,6 @@ const jsmin = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('jsmin...')
-
   const media = Media.from(data.media)
 
   jsmin(media)
@@ -53,5 +51,4 @@ export default (data, rpc, done) => {
       succeed: false,
       reason: serializeError(error)
     }))
-    .finally(() => console.log('jsmin done'))
 }

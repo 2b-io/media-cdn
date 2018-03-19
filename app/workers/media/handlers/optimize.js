@@ -101,8 +101,6 @@ const optimize = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('optimize...')
-
   const media = Media.from(data.media)
 
   optimize(media)
@@ -111,5 +109,4 @@ export default (data, rpc, done) => {
       succeed: false,
       reason: serializeError(error)
     }))
-    .finally(() => console.log('optimize done'))
 }

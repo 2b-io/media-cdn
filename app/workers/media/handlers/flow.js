@@ -8,11 +8,15 @@ import config from 'infrastructure/config'
 import Media from 'entities/Media'
 
 const handle = (job, rpc) => ({ media }, done) => {
+  console.log(`[JOB] ${job}...`)
+
   rpc
     .request(job, { media })
     .waitFor(waitFor(media, job))
     .onResponse(message => {
       const succeed = message && message.data && message.data.succeed
+
+      console.log(`[JOB] ${job} done: ${succeed}`)
 
       if (succeed) {
         done(null, message.data)

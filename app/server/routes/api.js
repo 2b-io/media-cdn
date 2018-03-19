@@ -1,5 +1,3 @@
-import parallel from 'async/parallel'
-import reflect from 'async/reflect'
 import express from 'express'
 import fs from 'fs'
 import mime from 'mime'
@@ -7,7 +5,6 @@ import multer from 'multer'
 import mv from 'mv'
 import path from 'path'
 import request from 'superagent'
-import uuid from 'uuid'
 
 import config from 'infrastructure/config'
 import Media from 'entities/Media'
@@ -37,9 +34,7 @@ router.post('/:slug/media', [
     const media = Media.create({
       src: {
         pathname: req.file.path,
-        toString() {
-          return req.file.path
-        }
+        toString: () => req.file.path
       },
       ...req._args
     })
@@ -63,7 +58,7 @@ router.post('/:slug/media', [
         'optimize'
       ] })
       .onResponse(message => {
-        const { media } = message.data
+        const media = req._media = message.data.media
 
         const source = path.join(config.tmpDir, media.source)
         const target = path.join(config.tmpDir, media.target)
@@ -75,19 +70,17 @@ router.post('/:slug/media', [
 
         res.sendFile(target)
 
-        res.on('finish', () => {
-          parallel(
-            media.tmp.map(f => reflect(done => {
-              console.log(`clear ${f}`)
-              fs.unlink(path.join(config.tmpDir, f), done)
-            })),
-            error => {
-              console.log('clear done')
-            }
-          )
-        })
-
+        res.on('finish', () => next())
       })
+      .send()
+  },
+  (req, res, next) => {
+    req.app.get('rpc')
+      .request('flow', {
+        media: req._media,
+        flow: [ 'clear' ]
+      })
+      .onResponse(() => {})
       .send()
   }
 ])
@@ -118,9 +111,6 @@ router.get('/test', [
         })
       })
       .pipe(res)
-      .on('finish', () => {
-        console.log('yyy')
-      })
   }
 ])
 

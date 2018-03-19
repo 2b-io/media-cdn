@@ -74,8 +74,6 @@ const download = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('crawl...')
-
   const media = Media.from(data.media)
 
   download(media)
@@ -84,6 +82,5 @@ export default (data, rpc, done) => {
       succeed: false,
       reason: serializeError(error)
     }))
-    .finally(() => console.log('crawl done'))
 }
 

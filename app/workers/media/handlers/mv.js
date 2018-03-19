@@ -20,8 +20,6 @@ export default (data, rpc, done) => {
 
     media.addTemporaryFile(media.state.source)
 
-    media.state.width = 600
-
     done({ succeed: true, media })
   })
 }

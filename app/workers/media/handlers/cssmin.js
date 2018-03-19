@@ -53,8 +53,6 @@ const cssmin = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('cssmin...')
-
   const media = Media.from(data.media)
 
   cssmin(media)
@@ -63,5 +61,4 @@ export default (data, rpc, done) => {
       succeed: false,
       reason: serializeError(error)
     }))
-    .finally(() => console.log('cssmin done'))
 }

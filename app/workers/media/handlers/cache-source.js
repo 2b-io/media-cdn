@@ -13,8 +13,6 @@ const putToCache = async (remote, local) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('cache-source...')
-
   const media = Media.from(data.media)
 
   const { cacheSource, source } = media.state
@@ -29,5 +27,4 @@ export default (data, rpc, done) => {
       succeed: false,
       error: serializeError(error)
     }))
-    .finally(() => console.log('cache-source done'))
 }
