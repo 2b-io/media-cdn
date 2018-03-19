@@ -25,6 +25,9 @@ router.get('/test', [
     request
       .post(url)
       .field('store', false)
+      .field('w', 640)
+      .field('h', 640)
+      .field('m', 'crop')
       .attach('media', fs.createReadStream(file))
       .on('response', response => {
         forwardHeaders.forEach(h => {

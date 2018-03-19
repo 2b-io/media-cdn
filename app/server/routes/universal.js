@@ -18,7 +18,7 @@ router.get([ '/:slug', '/:slug/media' ], [
   universalSrc,
   mime,
   flow,
-   // collect general args - END
+  // collect general args - END
 
   // serve media
   createMediaEntity,
