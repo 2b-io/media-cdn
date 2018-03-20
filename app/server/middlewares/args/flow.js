@@ -1,32 +1,27 @@
-import match from 'mime-match'
-
 import preset from './preset'
 import size from './size'
-import series from '../series'
+import seq from '../utils/seq'
 
 export default (req, res, next) => {
-  try {
-    const { mime } = req._args
+    const { api, store, type } = req._args
 
-    if (match(mime, 'text/css')) {
-      // req._args.flow = [ 'download', 'cssmin' ]
-      req._args.flow = [ 'download' ]
-      req._args.type = 'css'
-    } else if (match(mime, 'application/javascript')) {
-      // req._args.flow = [ 'download', 'jsmin' ]
-      req._args.flow = [ 'download' ]
-      req._args.type = 'javascript'
-    } else if (match(mime, 'image/jpeg') || match(mime, 'image/png')) {
-      req._args.flow = [ 'download', 'optimize' ]
-      req._args.type = 'image'
+    switch (type) {
+      case 'image':
+        req._args.flow = api ?
+          (store ?
+            [ 'mv', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ] :
+            [ 'mv', 'optimize' ]) :
+          [ 'crawl', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ]
 
-      return series(preset, size)(req, res, next)
-    } else {
-      req._args.flow = [ 'download' ]
+        return seq(preset, size)(req, res, next)
+
+      default:
+        req._args.flow = api ?
+          (store ?
+            [ 'mv', 'cacheSource', 'clear' ] :
+            [ 'mv' ]) :
+          [ 'crawl', 'cacheSource', 'clear' ]
+
+        return next()
     }
-  } catch (error) {
-    req._args.flow = [ 'download' ]
-  }
-
-  next()
 }

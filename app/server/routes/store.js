@@ -9,28 +9,25 @@ import flow from '../middlewares/args/flow'
 import mime from '../middlewares/args/mime'
 import project from '../middlewares/args/project'
 import type from '../middlewares/args/type'
-import universalSrc from '../middlewares/args/universal-src'
-
+import storedUrl from '../middlewares/args/stored-url'
 import join from '../middlewares/utils/join'
 
 const router = express()
 
-router.get([ '/:slug', '/:slug/media' ], join(
-  // collect general args
+router.get([
+  '/:slug/:sh/:p/:pv/:m\\_:w\\x:h\.:ext',
+  '/:slug/:sh\.:ext'
+], join(
   project,
-  universalSrc,
+  storedUrl,
   mime,
   type,
-  flow, // TODO separate flow & additional args
-  // collect general args - END
-  // serve media
+  flow,
   createMediaEntity,
   fetchMediaMeta,
   processFlow,
   fetchMediaMeta,
   returnCachedMedia
-  // serve media - END
 ))
 
 export default router
-

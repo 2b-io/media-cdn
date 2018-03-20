@@ -2,6 +2,7 @@ import CleanCSS from 'clean-css'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
+import serializeError from 'serialize-error'
 import { Transform } from 'stream'
 
 import config from 'infrastructure/config'
@@ -52,12 +53,12 @@ const cssmin = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('cssmin...')
-
   const media = Media.from(data.media)
 
   cssmin(media)
     .then(() => done({ succeed: true }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
-    .finally(() => console.log('cssmin done'))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
 }

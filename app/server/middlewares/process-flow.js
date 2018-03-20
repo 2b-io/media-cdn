@@ -1,3 +1,5 @@
+import Media from 'entities/Media'
+
 export default (req, res, next) => {
   const { _media:media, _meta:meta } = req
 
@@ -16,6 +18,10 @@ export default (req, res, next) => {
       if (!succeed) {
         next(message.data)
       }
+
+      const media = Media.from(message.data.media)
+
+      req._media = media
 
       next()
     })

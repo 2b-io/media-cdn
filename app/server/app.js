@@ -1,7 +1,10 @@
 import express from 'express'
 import morgan from 'morgan'
 
+import api from './routes/api'
 import pretty from './routes/pretty'
+import store from './routes/store'
+import tool from './routes/tool'
 import universal from './routes/universal'
 
 const app = express()
@@ -10,8 +13,11 @@ app.use(morgan('dev'))
 app.enable('trust proxy')
 app.disable('x-powered-by')
 
-app.use('/u', universal)
+app.use('/a', api)
 app.use('/p', pretty)
+app.use('/u', universal)
+app.use('/s', store)
+app.use('/t', tool)
 
 app.use((error, req, res, next) => {
   console.log(error)
@@ -20,7 +26,7 @@ app.use((error, req, res, next) => {
   res.set('Pragma', 'no-cache')
   res.set('Expires', '0')
   res.set('Surrogate-Control', 'no-store')
-  res.status(400).send(error)
+  res.sendStatus(400)
 })
 
 export default app

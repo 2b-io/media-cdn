@@ -2,6 +2,7 @@ import series from 'async/series'
 import dl from 'download'
 import fs from 'fs'
 import rpc from 'one-doing-the-rest-waiting'
+import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 
@@ -32,7 +33,7 @@ Promise.all([
     } catch (error) {
       done({
         succeed: false,
-        reason: error
+        reason: serializeError(error)
       })
     }
   })

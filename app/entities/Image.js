@@ -5,7 +5,7 @@ class Image extends Asset {
     super.generate()
 
     const { uid, ext } = this.state
-    const { width, height, mode, preset } = this.props
+    const { width, height, mode, preset, requestOrigin } = this.props
     const presetValues = this.hash(
       JSON.stringify(preset.values),
       Object.keys(preset.values).sort()
@@ -14,7 +14,9 @@ class Image extends Asset {
     this.state = {
       ...this.state,
       width, height, mode,
-      target: `${uid}/${preset.hash}/${presetValues}/${mode}_${width}x${height}${ext}`,
+      target: requestOrigin ?
+        this.state.source :
+        `${uid}/${preset.hash}/${presetValues}/${mode}_${width}x${height}${ext}`,
       quality: preset.values.quality
     }
 

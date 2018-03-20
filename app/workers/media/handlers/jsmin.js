@@ -2,6 +2,7 @@ import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import minifyTransform from 'minify-stream'
+import serializeError from 'serialize-error'
 import UglifyJS from 'uglify-js'
 
 import config from 'infrastructure/config'
@@ -42,16 +43,12 @@ const jsmin = async (media) => {
 }
 
 export default (data, rpc, done) => {
-  console.log('jsmin...')
-
   const media = Media.from(data.media)
 
   jsmin(media)
     .then(() => done({ succeed: true }))
-    .catch(error => {
-      console.log(error)
-
-      done({ succeed: false, reason: error.toString() })
-    })
-    .finally(() => console.log('jsmin done'))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
 }

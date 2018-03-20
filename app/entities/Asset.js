@@ -4,14 +4,14 @@ import shortHash from 'short-hash'
 class Asset {
   constructor(props, state) {
     this.props = { ... props }
-    this.state = { ...state }
+    this.state = { tmp: [], ...state }
   }
 
   generate() {
-    const { mime, project, src, type } = this.props
+    const { mime, project, src, type, uid:presetUID } = this.props
     const url = src.toString()
 
-    const uid = `${project.slug}/${shortHash(url)}`
+    const uid = presetUID || `${project.slug}/${shortHash(url)}`
     const ext = path.extname(src.pathname)
 
     this.state = {
@@ -29,6 +29,16 @@ class Asset {
 
   hash(value) {
     return shortHash(value)
+  }
+
+  addTemporaryFile(file) {
+    if (!Array.isArray(this.state.tmp)) {
+      this.state.tmp = []
+    }
+
+    if (!this.state.tmp.includes(file)) {
+      this.state.tmp.push(file)
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
+import serializeError from 'serialize-error'
 import sharp from 'sharp'
 
 import config from 'infrastructure/config'
@@ -84,26 +85,28 @@ const optimize = async (media) => {
 
   const targetMeta = await image.toFile(output)
 
+  media.addTemporaryFile(media.state.target)
+
   if (!resize) {
     // compare file sizes
     const state = await getStat(media.state.source)
 
     if (state.size < targetMeta.size) {
       // source is better, cache source
-      return await putToCache(media.state.target, media.state.source)
+      media.state.useSourceAsTarget = true
     }
   }
 
-  return await putToCache(media.state.target)
+  return media
 }
 
 export default (data, rpc, done) => {
-  console.log('optimize...')
-
   const media = Media.from(data.media)
 
   optimize(media)
-    .then(() => done({ succeed: true }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
-    .finally(() => console.log('optimize done'))
+    .then(media => done({ succeed: true, media }))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
 }

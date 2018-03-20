@@ -2,6 +2,7 @@ import dl from 'download'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
+import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -59,22 +60,25 @@ const download = async (media) => {
     console.log('cache miss')
 
     await crawl(media)
-    await putToCache(media.state.source)
   } else {
     console.log('cache hit')
 
     await getFromCache(media.state.source)
   }
+
+  media.addTemporaryFile(media.state.source)
+
+  return media
 }
 
 export default (data, rpc, done) => {
-  console.log('download...')
-
   const media = Media.from(data.media)
 
   download(media)
-    .then(() => done({ succeed: true }))
-    .catch(error => done({ succeed: false, reason: error.toString() }))
-    .finally(() => console.log('download done'))
+    .then(media => done({ succeed: true, media }))
+    .catch(error => done({
+      succeed: false,
+      reason: serializeError(error)
+    }))
 }
 

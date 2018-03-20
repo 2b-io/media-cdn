@@ -21,18 +21,19 @@ export default {
       Key: key
     }).promise()
   },
-  receive: remote => {
-    return s3.getObject({
-      Bucket: s3.config.bucket,
-      Key: remote
-    }).createReadStream()
-  },
   store: async (local, remote) => {
     return await s3.putObject({
       Bucket: s3.config.bucket,
       Key: remote,
       ContentType: mime.getType(local),
+      // TODO ContentDisposition: `inline; filename=???`,
       Body: fs.createReadStream(local)
     }).promise()
+  },
+  receive: remote => {
+    return s3.getObject({
+      Bucket: s3.config.bucket,
+      Key: remote
+    }).createReadStream()
   }
 }
