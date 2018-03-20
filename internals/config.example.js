@@ -1,7 +1,10 @@
 const path = require('path')
 
 module.exports = {
-  serverPort: 3002,
+  server: {
+    url: 'http://localhost:3002',
+    port: 3002
+  }
   queuePrefix: 'mod',
   redis: {
     host: '127.0.0.1',
