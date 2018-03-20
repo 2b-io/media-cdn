@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Easy-integrated online service to create media real time from original media",
   "main": "index.js",
-  "repository": "git@github.com:media-network/media-on-demand-cdn.git",
+  "repository": "git@github.com:media-network/media-cdn.git",
   "author": "LongLH <d@dapps.me>",
   "license": "MIT",
   "dependencies": {

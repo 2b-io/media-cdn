@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+  developement: true,
   server: {
     url: 'http://localhost:3002',
     port: 3002
