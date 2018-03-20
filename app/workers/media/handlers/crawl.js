@@ -60,8 +60,6 @@ const download = async (media) => {
     console.log('cache miss')
 
     await crawl(media)
-
-    media.state.cacheSource = true
   } else {
     console.log('cache hit')
 

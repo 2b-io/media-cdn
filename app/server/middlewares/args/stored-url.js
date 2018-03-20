@@ -30,6 +30,11 @@ export default [
     const { uid } = req._args
 
     if (!p) {
+      req._args = {
+        ...req._args,
+        requestOrigin: true
+      }
+
       return next()
     }
 

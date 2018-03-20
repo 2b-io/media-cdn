@@ -15,11 +15,6 @@ const putToCache = async (remote, local) => {
 export default (data, rpc, done) => {
   const media = Media.from(data.media)
   const { source } = media.state
-  // const { cacheSource, source } = media.state
-
-  // if (!cacheSource) {
-  //   return done({ succeed: true, media})
-  // }
 
   putToCache(source, source)
     .then(() => done({ succeed: true, media}))

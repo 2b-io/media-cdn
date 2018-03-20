@@ -10,12 +10,15 @@ export default (req, res, next) => {
 
   const target = path.join(config.tmpDir, media.state.target || media.state.source)
   const filename = `${media.state.url.split('/').pop()}${media.state.ext}`
+  const { ext, source } = media.state
+
+  const regex = new RegExp(`/source${ext}$`)
 
   if (req._args.store) {
     return res.json({
-      source: media.state.source &&
+      source: source &&
         new URL(
-          `s/${media.state.source.replace('/source', '')}`,
+          `s/${source.replace(regex, ext)}`,
           config.server.url
         ).toString(),
       target: media.state.target &&

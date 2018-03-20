@@ -19,7 +19,7 @@ const forwardHeaders = [
 
 router.get('/test', [
   (req, res, next) => {
-    const file = path.join(config.tmpDir, 'test.css')
+    const file = path.join(config.tmpDir, 'test.jpg')
     const url = 'http://d-14:3002/a/the-cool-stuffs/media'
 
     request
