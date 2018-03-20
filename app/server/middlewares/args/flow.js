@@ -1,6 +1,6 @@
 import preset from './preset'
 import size from './size'
-import series from '../series'
+import seq from '../utils/seq'
 
 export default (req, res, next) => {
     const { api, store, type } = req._args
@@ -13,7 +13,7 @@ export default (req, res, next) => {
             [ 'mv', 'optimize' ]) :
           [ 'crawl', 'cacheSource', 'optimize', 'cacheTarget', 'clear' ]
 
-        return series(preset, size)(req, res, next)
+        return seq(preset, size)(req, res, next)
 
       default:
         req._args.flow = api ?

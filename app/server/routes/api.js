@@ -1,82 +1,16 @@
-import boolean from 'boolean'
 import express from 'express'
-import mime from 'mime'
-import path from 'path'
-import { URL } from 'url'
 
-import Media from 'entities/Media'
-import config from 'infrastructure/config'
-
+import createMediaEntity from '../middlewares/create-media-entity'
+import handleUpload from '../middlewares/handle-upload'
+import processFlow from '../middlewares/process-flow'
+import returnLocalMedia from '../middlewares/return-local-media'
+import api from '../middlewares/args/api'
 import flow from '../middlewares/args/flow'
 import project from '../middlewares/args/project'
 import type from '../middlewares/args/type'
-import clear from '../middlewares/clear'
-import processFlow from '../middlewares/process-flow'
-
-import handleUpload from '../middlewares/handle-upload'
-import series from '../middlewares/series'
+import join from '../middlewares/utils/join'
 
 const router = express()
-
-const collectUploadArgs = (req, res, next) => {
-  req._args.api = true
-  req._args.store = boolean(req.body.store || false)
-  req._args.mime = req.file.mimetype
-
-  next()
-}
-
-const createUploadMediaEntity = (req, res, next) => {
-  const media = Media.create({
-    src: {
-      pathname: req.file.path,
-      toString: () => req.file.path
-    },
-    ...req._args
-  })
-
-  const ext = mime.getExtension(media.state.mime)
-
-  media.state.ext = `.${ext}`
-  media.state.source = `${media.state.source}.${ext}`
-
-  if (media.state.target) {
-    media.state.target = `${media.state.target}.${ext}`
-  }
-
-  req._media = media
-
-  next()
-}
-
-const returnLocalMedia = (req, res, next) => {
-  const { _media: media } = req
-
-  const target = path.join(config.tmpDir, media.state.target || media.state.source)
-  const filename = `${media.state.url.split('/').pop()}${media.state.ext}`
-
-  if (req._args.store) {
-    return res.json({
-      source: media.state.source &&
-        new URL(
-          `s/${media.state.source.replace('/source', '')}`,
-          config.server.url
-        ).toString(),
-      target: media.state.target &&
-        new URL(
-          `s/${media.state.target}`,
-          config.server.url
-        ).toString()
-    })
-  }
-
-  res.set('content-type', media.state.mime)
-  res.set('cache-control', 'public, max-age=2592000')
-  res.set('content-disposition', `inline; filename=${filename}`)
-  res.sendFile(target)
-
-  res.on('finish', () => clear(req, res, next))
-}
 
 /*
   Form Data:
@@ -89,15 +23,15 @@ const returnLocalMedia = (req, res, next) => {
   + m/mode: done
   + p/preset: done
 */
-router.post('/:slug/media', [
+router.post('/:slug/media', join(
   project,
   handleUpload,
-  collectUploadArgs,
+  api,
   type,
   flow,
-  createUploadMediaEntity,
+  createMediaEntity,
   processFlow,
   returnLocalMedia
-])
+))
 
 export default router

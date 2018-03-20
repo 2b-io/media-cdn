@@ -26,7 +26,7 @@ app.use((error, req, res, next) => {
   res.set('Pragma', 'no-cache')
   res.set('Expires', '0')
   res.set('Surrogate-Control', 'no-store')
-  res.status(400).send(error)
+  res.sendStatus(400)
 })
 
 export default app

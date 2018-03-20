@@ -8,10 +8,10 @@ class Asset {
   }
 
   generate() {
-    const { mime, project, src, type } = this.props
+    const { mime, project, src, type, uid:presetUID } = this.props
     const url = src.toString()
 
-    const uid = `${project.slug}/${shortHash(url)}`
+    const uid = presetUID || `${project.slug}/${shortHash(url)}`
     const ext = path.extname(src.pathname)
 
     this.state = {
