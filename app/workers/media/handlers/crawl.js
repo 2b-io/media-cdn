@@ -59,7 +59,11 @@ const download = async (media) => {
   if (!meta) {
     console.log('cache miss')
 
-    await crawl(media)
+    if (media.state.crawlable) {
+      await crawl(media)
+    } else {
+      throw new Error('Media is not crawlable')
+    }
   } else {
     console.log('cache hit')
 

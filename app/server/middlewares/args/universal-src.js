@@ -17,11 +17,14 @@ export default (req, res, next) => {
   const allowOrigin = project.origins.length === 0 || project.origins.some(o => isMatch(o, src.hostname))
 
   if (!allowOrigin) {
-    // return next(new Error('invalid origin'))
-    return next(new Error('invalid origin'))
+    return next(new Error('Invalid origin'))
   }
 
-  req._args.src = src
+  req._args = {
+    ...req._args,
+    src,
+    crawlable: true
+  }
 
   next()
 }

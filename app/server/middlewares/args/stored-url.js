@@ -4,7 +4,8 @@ export default [
 
     req._args = {
       ...req._args,
-      uid: `${slug}/${sh}`
+      uid: `${slug}/${sh}`,
+      crawlable: false
     }
 
     next()

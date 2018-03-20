@@ -16,7 +16,7 @@ export default (req, res, next) => {
       const succeed = message && message.data && message.data.succeed
 
       if (!succeed) {
-        next(message.data)
+        return next(message.data)
       }
 
       const media = Media.from(message.data.media)

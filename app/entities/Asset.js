@@ -8,7 +8,7 @@ class Asset {
   }
 
   generate() {
-    const { mime, project, src, type, uid:presetUID } = this.props
+    const { crawlable, mime, project, src, type, uid:presetUID } = this.props
     const url = src.toString()
 
     const uid = presetUID || `${project.slug}/${shortHash(url)}`
@@ -16,7 +16,7 @@ class Asset {
 
     this.state = {
       ...this.state,
-      uid, ext, mime, type, url,
+      crawlable, uid, ext, mime, type, url,
       source: `${uid}/source${ext}`
     }
 
