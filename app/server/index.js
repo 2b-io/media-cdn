@@ -1,5 +1,6 @@
-import 'newrelic'
-import rpc from 'one-doing-the-rest-waiting'
+// import 'newrelic'
+// import rpc from 'one-doing-the-rest-waiting'
+import rpc from 'libs/message-bus'
 
 import config from 'infrastructure/config'
 import app from './app'

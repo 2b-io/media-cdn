@@ -1,9 +1,10 @@
 import series from 'async/series'
 import dl from 'download'
 import fs from 'fs'
-import rpc from 'one-doing-the-rest-waiting'
+// import rpc from 'one-doing-the-rest-waiting'
 import serializeError from 'serialize-error'
 
+import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
 
 import handlers from './handlers'

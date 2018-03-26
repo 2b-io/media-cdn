@@ -1,0 +1,23 @@
+{
+  "name": "message-bus",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "kue": "0.11.6",
+    "uuid": "3.2.1"
+  },
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "concurrently": "3.5.1",
+    "express": "4.16.3",
+    "nodemon": "1.17.2"
+  },
+  "scripts": {
+    "start": "concurrently \"yarn p1\" \"yarn p2\" \"yarn c1\" \"yarn c2\"",
+    "p1": "nodemon test/p1.js --exec babel-node --watch src --watch test/p1.js",
+    "p2": "nodemon test/p2.js --exec babel-node --watch src --watch test/p2.js",
+    "c1": "nodemon test/c1.js --exec babel-node --watch src --watch test/c1.js",
+    "c2": "nodemon test/c2.js --exec babel-node --watch src --watch test/c2.js"
+  }
+}
