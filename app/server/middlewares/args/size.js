@@ -1,6 +1,6 @@
 const SUPPORTED_MODES = [ 'cover', 'contain', 'crop' ]
 
-export default (req, res, next) => {
+export default function getSizeArg(req, res, next) {
   const height = (
     (req.query && (req.query.h || req.query.height)) ||
     (req.body && (req.body.h || req.body.height)) ||

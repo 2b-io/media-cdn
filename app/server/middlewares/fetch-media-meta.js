@@ -1,6 +1,6 @@
 import s3 from 'infrastructure/s3'
 
-export default (req, res, next) => {
+export default function fetchMediaMeta(req, res, next) {
   const { _media:media, _meta:meta } = req
 
   if (meta) {

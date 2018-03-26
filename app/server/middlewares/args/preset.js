@@ -1,6 +1,6 @@
 import Preset from 'models/Preset'
 
-export default (req, res, next) => {
+export default function getPresetArg(req, res, next) {
   const hash = (
     req.query.p || req.query.preset ||
     (req.body && (req.body.p || req.body.preset)) ||

@@ -1,6 +1,6 @@
 import Media from 'entities/Media'
 
-export default (req, res, next) => {
+export default function processFlow(req, res, next) {
   const { _media:media, _meta:meta } = req
 
   if (meta) {

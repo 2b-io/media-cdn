@@ -5,7 +5,7 @@ import config from 'infrastructure/config'
 
 import clear from './clear'
 
-export default (req, res, next) => {
+export default function returnLocalMedia(req, res, next) {
   const { _media: media } = req
 
   const target = path.join(config.tmpDir, media.state.target || media.state.source)

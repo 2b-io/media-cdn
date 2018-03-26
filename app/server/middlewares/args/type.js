@@ -2,7 +2,7 @@ import match from 'mime-match'
 
 const mimeMatch = mime => type => match(mime, type)
 
-export default (req, res, next) => {
+export default function getTypeArg(req, res, next) {
   try {
     const { mime } = req._args
     const match = mimeMatch(mime)

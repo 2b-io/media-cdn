@@ -2,7 +2,7 @@ import preset from './preset'
 import size from './size'
 import seq from '../utils/seq'
 
-export default (req, res, next) => {
+export default function initFlow(req, res, next) {
     const { api, store, type } = req._args
 
     switch (type) {

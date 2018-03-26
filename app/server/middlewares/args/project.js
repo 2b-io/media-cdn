@@ -1,6 +1,6 @@
 import Project from 'models/Project'
 
-export default (req, res, next) => {
+export default function getProjectArg(req, res, next) {
   const { slug } = req.params
 
   Project.findOne({

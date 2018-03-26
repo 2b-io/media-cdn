@@ -10,7 +10,7 @@ const isMatch = (origin, domain) => {
   return regex.test(domain)
 }
 
-export default (req, res, next) => {
+export default function getUniversalSrcArg(req, res, next) {
   const src = new URL(req.query.url || req.query.src)
   const { project } = req._args
 

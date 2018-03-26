@@ -1,6 +1,6 @@
 import boolean from 'boolean'
 
-export default (req, res, next) => {
+export default function initAPIHandle(req, res, next) {
   req._args = {
     ...req._args,
     api: true,

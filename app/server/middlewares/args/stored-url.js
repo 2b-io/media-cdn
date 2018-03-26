@@ -1,5 +1,5 @@
 export default [
-  (req, res, next) => {
+  function getUIDArg(req, res, next) {
     const { slug, sh } = req.params
 
     req._args = {
@@ -10,7 +10,7 @@ export default [
 
     next()
   },
-  (req, res, next) => {
+  function getSourceArg(req, res, next) {
     const { ext } = req.params
     const { uid } = req._args
     const source = `${uid}/source.${ext}`
@@ -26,7 +26,7 @@ export default [
 
     next()
   },
-  (req, res, next) => {
+  function getTargetArg(req, res, next) {
     const { p, pv, m, w, h, ext } = req.params
     const { uid } = req._args
 
