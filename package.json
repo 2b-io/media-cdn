@@ -50,6 +50,9 @@
     "dev:worker": "cd app && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.dev.js",
     "staging:start": "concurrently \"yarn staging:server\" \"yarn staging:worker\"",
     "staging:server": "cd build && node server/ --CONFIG=../internals/config.dev.js",
-    "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js"
+    "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js",
+    "docker:up": "cd internals && docker-compose up -d && cd ..",
+    "docker:stop": "cd internals && docker-compose stop && cd ..",
+    "docker:rm": "cd internals && docker-compose rm && cd .."
   }
 }

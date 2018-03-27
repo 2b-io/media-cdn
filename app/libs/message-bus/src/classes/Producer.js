@@ -1,16 +1,14 @@
-import kue from 'kue'
+import Connection from './Connection'
 
-class Producer {
-  static create(props) {
-    return new Producer(props)
-  }
-
+class Producer extends Connection {
   constructor(props) {
-    this._kue = kue.createQueue(props)
+    super(props)
   }
 
-  discover(done, interval = 1000) {
-    done()
+  async discover() {
+    await this._connect()
+
+    return this
   }
 }
 

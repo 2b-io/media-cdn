@@ -2,6 +2,6 @@ import Consumer from './classes/Consumer'
 import Producer from './classes/Producer'
 
 export default {
-  createConsumer: Consumer.create,
-  createProducer: Producer.create
+  createConsumer: props => new Consumer(props),
+  createProducer: props => new Producer(props)
 }
