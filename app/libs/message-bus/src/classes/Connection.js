@@ -18,6 +18,8 @@ class Connection {
     this._retryCount = 0
     this._ready = 0
     this._channel = null
+    this._exchange = 'mb.bus',
+    this._queue = `mb.${this.props.name}-${Date.now()}`
   }
 
   _setChannel(channel) {
@@ -50,6 +52,8 @@ class Connection {
       this._setChannel(channel)
       log('Connected!')
 
+      await this._init()
+
       return channel
     } catch (e) {
       return await this._retry()
@@ -62,6 +66,46 @@ class Connection {
     await delay(this.props.retryInterval)
 
     return await this._connect()
+  }
+
+  async _init() {
+    const channel = this._channel
+    const { name } = this.props
+
+    await channel.assertExchange(
+      this._exchange,
+      'direct',
+      {
+        durable: true,
+        autoDelete: true
+      }
+    )
+
+    await channel.assertQueue(
+      this._queue,
+      {
+        exclusive: true,
+        durable: true,
+        autoDelete: true
+      }
+    )
+
+    await channel.bindQueue(this._queue, this._exchange, this.props.type)
+
+    await channel.consume(this._queue, async (msg) => {
+      log(`Message received: [${msg.properties.appId}] -> [${this.props.name}]`)
+      const content = JSON.parse(msg.content.toString())
+
+      if (content.from !== this._id) {
+        if (typeof this.handleMessage === 'function') {
+          await this.handleMessage(msg)
+        }
+      }
+
+      await channel.ack(msg)
+
+      log(`Message acknowledged`)
+    })
   }
 }
 

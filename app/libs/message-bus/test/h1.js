@@ -4,9 +4,11 @@ Promise.all([
   rpc.createConsumer().register(),
   rpc.createProducer().discover()
 ]).then(([ consumer, producer ]) => {
-  console.log('done')
-  console.log(`Consumer: ${consumer._id}`)
-  console.log(`Producer: ${producer._id}`)
+  producer.publish({
+    type: 'join'
+  }, (error, reply) => {
+    console.log('reply', error, reply)
+  })
 })
 
 

@@ -4,55 +4,50 @@ class Consumer extends Connection {
   constructor(props) {
     super({
       name: 'consumer',
-      ...props
+      ...props,
+      type: 'consumer'
     })
   }
 
   async register() {
     await this._connect()
 
-    await this._initQueue()
-
     return this
   }
 
-  async _initQueue() {
-    try {
-      const channel = this._channel
-      const { name } = this.props
+  async handleMessage(msg) {
+    const content = JSON.parse(msg.content.toString())
 
-      const { exchange } = await channel.assertExchange(
-        'mb.room',
-        'direct',
-        {
-          durable: false,
-          autoDelete: true
-        }
-      )
+    console.log(content)
 
-      const { queue } = await channel.assertQueue(
-        `mb.${name}`,
-        {
-          durable: false,
-          autoDelete: true
-        }
-      )
+    await this.reply(
+      { data: 'xxx', },
+      msg.properties.correlationId,
+      msg.properties.replyTo
+    )
+  }
 
-      const binding = await channel.bindQueue(
-        queue,
-        exchange,
-        '*'
-      )
+  async reply(msg, correlationId, replyTo) {
+    const channel = this._channel
 
-      const consume = await channel.consume(queue, msg => {
-
-      }, {
-        noAck: false
-      })
-
-    } catch (e) {
-      console.log(e)
-    }
+    return await channel.publish(
+      this._exchange,
+      'producer',
+      new Buffer(
+        JSON.stringify({
+          ...msg,
+          from: this._id
+        })
+      ),
+      {
+        correlationId,
+        contentType: 'application/json',
+        contentEncoding: 'utf8',
+        timestamp: Date.now(),
+        persistent: true,
+        appId: this.props.name
+      }
+    )
   }
 }
 
