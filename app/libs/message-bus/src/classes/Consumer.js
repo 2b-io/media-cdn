@@ -9,25 +9,32 @@ class Consumer extends Connection {
     })
   }
 
-  async register() {
-    await this._connect()
+  async onMessage(cb) {
+    this._onMessage = cb
 
     return this
   }
 
   async handleMessage(msg) {
     const content = JSON.parse(msg.content.toString())
+    const { correlationId } = msg.properties
 
-    console.log(content)
+    if (!correlationId) {
+      return
+    }
+
+    const response = typeof this._onMessage === 'function' ?
+      await this._onMessage(content) : null
+
+    this.log(response)
 
     await this.reply(
-      { data: 'xxx', },
-      msg.properties.correlationId,
-      msg.properties.replyTo
+      response,
+      msg.properties.correlationId
     )
   }
 
-  async reply(msg, correlationId, replyTo) {
+  async reply(response, correlationId) {
     const channel = this._channel
 
     return await channel.publish(
@@ -35,7 +42,7 @@ class Consumer extends Connection {
       'producer',
       new Buffer(
         JSON.stringify({
-          ...msg,
+          ...response,
           from: this._id
         })
       ),

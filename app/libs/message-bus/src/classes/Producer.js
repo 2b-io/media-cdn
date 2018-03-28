@@ -1,6 +1,7 @@
 import uuid from 'uuid'
 
 import Connection from './Connection'
+import Message from './Message'
 
 class Producer extends Connection {
   constructor(props) {
@@ -11,12 +12,6 @@ class Producer extends Connection {
     })
 
     this._callbacks = {}
-  }
-
-  async discover() {
-    await this._connect()
-
-    return this
   }
 
   async handleMessage(msg) {
@@ -31,10 +26,20 @@ class Producer extends Connection {
     }
   }
 
+  request(content) {
+    return new Message({
+      content,
+      connection: this
+    })
+  }
+
   async publish(msg, callback) {
     const channel = this._channel
-    const correlationId = uuid.v4()
-    this._callbacks[correlationId] = callback
+    const correlationId = callback && uuid.v4()
+
+    if (callback) {
+      this._callbacks[correlationId] = callback
+    }
 
     return await channel.publish(
       this._exchange,
