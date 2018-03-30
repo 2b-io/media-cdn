@@ -11,17 +11,21 @@ const handle = (job, rpc) => ({ media }, done) => {
   console.log(`[JOB] ${job}...`)
 
   rpc
-    .request(job, { media })
+    .request()
+    .content({
+      type: job,
+      data: media
+    })
     .waitFor(waitFor(media, job))
-    .onResponse(message => {
-      const succeed = message && message.data && message.data.succeed
+    .onResponse(async (error, content) => {
+      const succeed = !error && content && content.data && content.data.succeed
 
       console.log(`[JOB] ${job} done: ${succeed}`)
 
       if (succeed) {
-        done(null, message.data)
+        done(null, content.data)
       } else {
-        done(message.data)
+        done(content.data)
       }
     })
     .send()

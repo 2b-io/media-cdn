@@ -8,9 +8,10 @@ import app from './app'
 const { queuePrefix:prefix, redis, server, development } = config
 
 rpc
-  .createProducer({ prefix, redis })
-  .discover(channel => {
-    app.set('rpc', channel)
+  .createProducer()
+  .connect()
+  .then(producer => {
+    app.set('rpc', producer)
 
     app.listen(server.port, () => console.log(`Server start at :${server.port}`))
   })

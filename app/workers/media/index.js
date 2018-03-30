@@ -12,25 +12,27 @@ import handlers from './handlers'
 const { queuePrefix:prefix, redis } = config
 
 Promise.all([
-  new Promise(resolve => {
-    rpc.createConsumer({ prefix, redis }).register(resolve)
-  }),
-  new Promise(resolve => {
-    rpc.createProducer({ prefix, redis }).discover(resolve)
-  })
+  rpc.createConsumer().connect(),
+  rpc.createProducer().connect()
+  // new Promise(resolve => {
+  //   rpc.createConsumer({ prefix, redis }).register(resolve)
+  // }),
+  // new Promise(resolve => {
+  //   rpc.createProducer({ prefix, redis }).discover(resolve)
+  // })
 ]).then(([ input, output ]) => {
   console.log('worker bootstrapped')
 
-  input.onRequest((message, done) => {
+  input.onMessage(async (content) => {
     try {
 
-      const handler = handlers[message.type]
+      const handler = handlers[content.type]
 
       if (!handler) {
-        throw new Error(`Unsupported job: ${message.type}`)
+        throw new Error(`Unsupported job: ${content.type}`)
       }
 
-      handler(message.data, output, done)
+      handler(content.data, output, done)
     } catch (error) {
       done({
         succeed: false,
