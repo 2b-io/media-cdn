@@ -58,7 +58,7 @@ class Connection {
       })
 
       const channel = await conn.createChannel()
-      await channel.prefetch(1)
+      // await channel.prefetch(1)
 
       this._setChannel(channel)
       this.log('Connected!')
@@ -88,7 +88,7 @@ class Connection {
       'direct',
       {
         durable: true,
-        autoDelete: true
+        // autoDelete: true
       }
     )
 
@@ -97,7 +97,7 @@ class Connection {
       {
         // exclusive: true,
         durable: true,
-        autoDelete: true
+        // autoDelete: true
       }
     )
 

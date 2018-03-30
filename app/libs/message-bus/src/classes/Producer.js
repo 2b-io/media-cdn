@@ -105,6 +105,16 @@ class Producer extends Connection {
 
         console.log(waitList)
       }
+
+      return
+    }
+
+    try {
+      const result = await this.mockSend(msg)
+
+      msg._onReply(null, result)
+    } catch (error) {
+      msg._onReply(error)
     }
 
     // this.log(msg)
@@ -114,6 +124,9 @@ class Producer extends Connection {
     // await delay(2e3)
 
     // return 'haha'
+    if (!msg._ttl) {
+      return await this.publish(msg._content)
+    }
 
     return await Promise.race([
       this.publish(msg._content),

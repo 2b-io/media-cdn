@@ -13,7 +13,7 @@ rpc.createProducer().connect()
 
           producer.log('onReply', response.content.toString())
         })
-        .ttl(500)
+        .ttl(0)
         .send()
     }
   })
