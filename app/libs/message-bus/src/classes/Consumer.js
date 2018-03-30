@@ -16,7 +16,7 @@ class Consumer extends Connection {
   }
 
   async handleMessage(msg) {
-    const content = JSON.parse(msg.content.toString())
+    const content = this.parseContent(msg)
     const { correlationId } = msg.properties
 
     if (!correlationId) {
@@ -24,9 +24,7 @@ class Consumer extends Connection {
     }
 
     const response = typeof this._onMessage === 'function' ?
-      await this._onMessage(content) : null
-
-    this.log(response)
+      await this._onMessage(content, msg) : null
 
     await this.reply(
       response,

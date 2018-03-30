@@ -72,70 +72,71 @@ class Producer extends Connection {
   async send(msg) {
     const waitFor = msg._waitFor
 
-    if (waitFor) {
-      // look in pool
-      this._pool[waitFor] = this._pool[waitFor] || []
+    if (!waitFor) {
+      try {
+        const reply = await this.mockSend(msg)
+        const content = this.parseContent(reply)
 
-      const waitList = this._pool[waitFor]
-      const isFirst = waitList.length === 0
-
-      if (isFirst) {
-        this.log('doing job')
-      } else {
-        this.log('waiting results')
-      }
-
-      waitList.push(msg)
-
-      if (isFirst) {
-        let waitJob
-
-        try {
-          const result = await this.mockSend(msg)
-
-          while (waitJob = waitList.shift()) {
-            waitJob._onReply(null, result)
-          }
-
-        } catch (error) {
-          while (waitJob = waitList.shift()) {
-            waitJob._onReply(error)
-          }
-        }
-
-        console.log(waitList)
+        msg._onReply(null, content, reply)
+      } catch (error) {
+        msg._onReply(error)
       }
 
       return
     }
 
-    try {
-      const result = await this.mockSend(msg)
+    // look in pool
+    this._pool[waitFor] = this._pool[waitFor] || []
 
-      msg._onReply(null, result)
-    } catch (error) {
-      msg._onReply(error)
+    const waitList = this._pool[waitFor]
+    const isFirst = waitList.length === 0
+
+    if (isFirst) {
+      this.log('doing job')
+    } else {
+      this.log('waiting results')
     }
 
-    // this.log(msg)
+    waitList.push(msg)
+
+    if (isFirst) {
+      let waitJob
+
+      try {
+        const reply = await this.mockSend(msg)
+        const content = this.parseContent(reply)
+
+        while (waitJob = waitList.shift()) {
+          waitJob._onReply(null, content, reply)
+        }
+
+      } catch (error) {
+        while (waitJob = waitList.shift()) {
+          waitJob._onReply(error)
+        }
+      }
+    }
   }
 
   async mockSend(msg) {
-    // await delay(2e3)
-
-    // return 'haha'
     if (!msg._ttl) {
-      return await this.publish(msg._content)
+      return await this.publish(msg._content, !!msg._onReply)
     }
 
-    return await Promise.race([
-      this.publish(msg._content),
-      this.ttl(msg._ttl)
+    const timer = delay(msg._ttl)
+
+    const reply = await Promise.race([
+      this.publish(msg._content, !!msg._onReply),
+      this.ttl(timer)
     ])
+
+    timer.cancel()
+
+    return reply
   }
 
-  async ttl(duration) {
-    await delay(duration)
+  async ttl(timer) {
+    await timer
 
     this.log('timeout')
 

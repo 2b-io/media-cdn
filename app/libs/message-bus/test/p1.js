@@ -5,15 +5,15 @@ rpc.createProducer().connect()
     for (var i = 0; i < 20; i++) {
       producer.request()
         .content({ value: i })
-        .waitFor('abc')
-        .onReply((error, response) => {
+        .ttl(10e3)
+        // .waitFor('abc')
+        .onReply((error, content) => {
           if (error) {
             return producer.log(error.toString())
           }
 
-          producer.log('onReply', response.content.toString())
+          producer.log('onReply', content)
         })
-        .ttl(0)
         .send()
     }
   })
