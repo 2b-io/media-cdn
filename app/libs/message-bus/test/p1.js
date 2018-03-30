@@ -6,10 +6,14 @@ rpc.createProducer().connect()
       producer.request()
         .content({ value: i })
         .waitFor('abc')
-        .onReply(response => {
+        .onReply((error, response) => {
+          if (error) {
+            return producer.log(error.toString())
+          }
+
           producer.log('onReply', response.content.toString())
         })
-        .ttl(10e3)
+        .ttl(500)
         .send()
     }
   })

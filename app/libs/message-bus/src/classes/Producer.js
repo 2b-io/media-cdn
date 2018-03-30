@@ -88,12 +88,19 @@ class Producer extends Connection {
       waitList.push(msg)
 
       if (isFirst) {
-        const result = await this.mockSend(msg)
-
         let waitJob
 
-        while (waitJob = waitList.shift()) {
-          waitJob._onReply(result)
+        try {
+          const result = await this.mockSend(msg)
+
+          while (waitJob = waitList.shift()) {
+            waitJob._onReply(null, result)
+          }
+
+        } catch (error) {
+          while (waitJob = waitList.shift()) {
+            waitJob._onReply(error)
+          }
         }
 
         console.log(waitList)
@@ -108,7 +115,18 @@ class Producer extends Connection {
 
     // return 'haha'
 
-    return await this.publish(msg._content)
+    return await Promise.race([
+      this.publish(msg._content),
+      this.ttl(msg._ttl)
+    ])
+  }
+
+  async ttl(duration) {
+    await delay(duration)
+
+    this.log('timeout')
+
+    throw new Error('timeout')
   }
 }
 
