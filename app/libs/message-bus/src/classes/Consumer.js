@@ -19,12 +19,12 @@ class Consumer extends Connection {
     const content = this.parseContent(msg)
     const { correlationId } = msg.properties
 
+    const response = this._onMessage ?
+      await this._onMessage(content, msg) : null
+
     if (!correlationId) {
       return
     }
-
-    const response = typeof this._onMessage === 'function' ?
-      await this._onMessage(content, msg) : null
 
     await this.reply(
       response,
@@ -33,26 +33,7 @@ class Consumer extends Connection {
   }
 
   async reply(response, correlationId) {
-    const channel = this._channel
-
-    return await channel.publish(
-      this._exchange,
-      'producer',
-      new Buffer(
-        JSON.stringify({
-          ...response,
-          from: this._id
-        })
-      ),
-      {
-        correlationId,
-        contentType: 'application/json',
-        contentEncoding: 'utf8',
-        timestamp: Date.now(),
-        persistent: true,
-        appId: this.props.name
-      }
-    )
+    return await super.publish('producer', response, correlationId)
   }
 }
 

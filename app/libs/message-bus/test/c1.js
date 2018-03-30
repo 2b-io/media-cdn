@@ -3,10 +3,10 @@ import rpc from '../src'
 
 rpc.createConsumer().connect()
 .then(consumer => {
-  consumer.onMessage(async (msg) => {
+  consumer.onMessage(async (content) => {
     await delay(1e3)
-    consumer.log('hahaha', msg.value)
+    console.log('hahaha', content.value)
 
-    return { value: msg.value }
+    return { value: content.value }
   })
 })

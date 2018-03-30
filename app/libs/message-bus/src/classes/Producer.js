@@ -13,60 +13,37 @@ class Producer extends Connection {
       type: 'producer'
     })
 
-    this._callbacks = {}
+    this._defs = {}
     this._pool = {}
   }
 
   async handleMessage(msg) {
     const correlationId = msg.properties.correlationId
 
-    const callback = this._callbacks[correlationId]
+    const deferred = this._defs[correlationId]
 
-    if (callback) {
-      callback.resolve(msg)
+    if (deferred) {
+      deferred.resolve(msg)
     }
   }
 
-  request(content) {
+  request() {
     return new Message({
-      content,
-      connection: this
+      producer: this
     })
   }
 
-  async publish(msg, expectReply = true) {
+  async publish(content, expectReply = true) {
     const channel = this._channel
     const correlationId = expectReply ? uuid.v4() : undefined
 
     if (expectReply) {
-      this._callbacks[correlationId] = deferred()
+      this._defs[correlationId] = deferred()
     }
 
-    await channel.publish(
-      this._exchange,
-      'consumer',
-      new Buffer(
-        JSON.stringify({
-          ...msg,
-          from: this._id
-        })
-      ),
-      {
-        correlationId,
-        replyTo: this._queue,
-        contentType: 'application/json',
-        contentEncoding: 'utf8',
-        timestamp: Date.now(),
-        persistent: true,
-        appId: this.props.name
-      }
-    )
+    await super.publish('consumer', content, correlationId)
 
-    if (!expectReply) {
-      return
-    }
-
-    return this._callbacks[correlationId].promise
+    return expectReply ? this._defs[correlationId].promise : null
   }
 
   async send(msg) {
@@ -74,12 +51,15 @@ class Producer extends Connection {
 
     if (!waitFor) {
       try {
-        const reply = await this.mockSend(msg)
-        const content = this.parseContent(reply)
+        const reply = await this.sendWithTimeout(msg)
 
-        msg._onReply(null, content, reply)
+        if (msg._onReply) {
+          const content = this.parseContent(reply)
+
+          msg._onReply(null, content, reply)
+        }
       } catch (error) {
-        msg._onReply(error)
+        msg._onReply && msg._onReply(error)
       }
 
       return
@@ -91,34 +71,28 @@ class Producer extends Connection {
     const waitList = this._pool[waitFor]
     const isFirst = waitList.length === 0
 
-    if (isFirst) {
-      this.log('doing job')
-    } else {
-      this.log('waiting results')
-    }
-
     waitList.push(msg)
 
     if (isFirst) {
       let waitJob
 
       try {
-        const reply = await this.mockSend(msg)
+        const reply = await this.sendWithTimeout(msg)
         const content = this.parseContent(reply)
 
         while (waitJob = waitList.shift()) {
-          waitJob._onReply(null, content, reply)
+          waitJob._onReply && waitJob._onReply(null, content, reply)
         }
 
       } catch (error) {
         while (waitJob = waitList.shift()) {
-          waitJob._onReply(error)
+          waitJob._onReply && waitJob._onReply(error)
         }
       }
     }
   }
 
-  async mockSend(msg) {
+  async sendWithTimeout(msg) {
     if (!msg._ttl) {
       return await this.publish(msg._content, !!msg._onReply)
     }
@@ -137,8 +111,6 @@ class Producer extends Connection {
 
   async ttl(timer) {
     await timer
-
-    this.log('timeout')
 
     throw new Error('timeout')
   }

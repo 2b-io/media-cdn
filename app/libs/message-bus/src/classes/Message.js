@@ -1,6 +1,6 @@
 class Message {
-  constructor({ connection }) {
-    this._connection = connection
+  constructor({ producer }) {
+    this._producer = producer
   }
 
   content(content) {
@@ -28,7 +28,7 @@ class Message {
   }
 
   async send() {
-    return await this._connection.send(this)
+    return await this._producer.send(this)
   }
 }
 

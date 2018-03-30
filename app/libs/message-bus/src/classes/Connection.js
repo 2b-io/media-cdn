@@ -7,7 +7,7 @@ class Connection {
   constructor(props) {
     this.props = {
       host: 'amqp://localhost',
-      retryInterval: 1e3,
+      retryInterval: 5e3,
       ...props
     }
 
@@ -25,7 +25,7 @@ class Connection {
   }
 
   parseContent(msg) {
-    return JSON.parse(msg.content.toString())
+    return JSON.parse(msg && msg.content && msg.content.toString() || null)
   }
 
   _setChannel(channel) {
@@ -38,10 +38,6 @@ class Connection {
     this._retryCount = this._retryCount + 1
     this._ready = false
     this._channel = null
-  }
-
-  async send(msg) {
-    console.log(msg)
   }
 
   async connect() {
@@ -119,6 +115,29 @@ class Connection {
     }, {
       noAck: false
     })
+  }
+
+  async publish(routing, content, correlationId) {
+    this.log(`Message sent: [${this.props.name}] -> [${routing}]`)
+
+    return await this._channel.publish(
+      this._exchange,
+      routing,
+      new Buffer(
+        JSON.stringify(content)
+      ),
+      {
+        correlationId,
+        contentType: 'application/json',
+        contentEncoding: 'utf-8',
+        timestamp: Date.now(),
+        persistent: true,
+        appId: this.props.name,
+        headers: {
+          from: this._id
+        }
+      }
+    )
   }
 }
 
