@@ -1,7 +1,12 @@
 class Message {
-  constructor(props) {
-    this._connection = props.connection
-    this._content = props.content
+  constructor({ connection }) {
+    this._connection = connection
+  }
+
+  content(content) {
+    this._content = content
+
+    return this
   }
 
   waitFor(key) {
@@ -16,8 +21,14 @@ class Message {
     return this
   }
 
-  send() {
-    this._connection.send(this)
+  ttl(duration) {
+    this._ttl = duration
+
+    return this
+  }
+
+  async send() {
+    return await this._connection.send(this)
   }
 }
 

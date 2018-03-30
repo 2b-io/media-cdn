@@ -40,6 +40,10 @@ class Connection {
     this._channel = null
   }
 
+  async send(msg) {
+    console.log(msg)
+  }
+
   async connect() {
     this.log(`Connecting... retries: ${this._retryCount}`)
 

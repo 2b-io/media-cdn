@@ -1,3 +1,5 @@
+import deferred from 'deferred'
+import delay from 'delay'
 import uuid from 'uuid'
 
 import Connection from './Connection'
@@ -12,6 +14,7 @@ class Producer extends Connection {
     })
 
     this._callbacks = {}
+    this._pool = {}
   }
 
   async handleMessage(msg) {
@@ -19,10 +22,8 @@ class Producer extends Connection {
 
     const callback = this._callbacks[correlationId]
 
-    if (typeof callback === 'function') {
-      this._callbacks[correlationId] = null
-
-      await callback(null, msg)
+    if (callback) {
+      callback.resolve(msg)
     }
   }
 
@@ -33,15 +34,15 @@ class Producer extends Connection {
     })
   }
 
-  async publish(msg, callback) {
+  async publish(msg, expectReply = true) {
     const channel = this._channel
-    const correlationId = callback && uuid.v4()
+    const correlationId = expectReply ? uuid.v4() : undefined
 
-    if (callback) {
-      this._callbacks[correlationId] = callback
+    if (expectReply) {
+      this._callbacks[correlationId] = deferred()
     }
 
-    return await channel.publish(
+    await channel.publish(
       this._exchange,
       'consumer',
       new Buffer(
@@ -60,6 +61,54 @@ class Producer extends Connection {
         appId: this.props.name
       }
     )
+
+    if (!expectReply) {
+      return
+    }
+
+    return this._callbacks[correlationId].promise
+  }
+
+  async send(msg) {
+    const waitFor = msg._waitFor
+
+    if (waitFor) {
+      // look in pool
+      this._pool[waitFor] = this._pool[waitFor] || []
+
+      const waitList = this._pool[waitFor]
+      const isFirst = waitList.length === 0
+
+      if (isFirst) {
+        this.log('doing job')
+      } else {
+        this.log('waiting results')
+      }
+
+      waitList.push(msg)
+
+      if (isFirst) {
+        const result = await this.mockSend(msg)
+
+        let waitJob
+
+        while (waitJob = waitList.shift()) {
+          waitJob._onReply(result)
+        }
+
+        console.log(waitList)
+      }
+    }
+
+    // this.log(msg)
+  }
+
+  async mockSend(msg) {
+    // await delay(2e3)
+
+    // return 'haha'
+
+    return await this.publish(msg._content)
   }
 }
 
