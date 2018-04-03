@@ -100,13 +100,13 @@ const optimize = async (media) => {
   return media
 }
 
-export default (data, rpc, done) => {
-  const media = Media.from(data.media)
+export default async (data, rpc, done) => {
+  let media = Media.from(data.media)
 
-  optimize(media)
-    .then(media => done({ succeed: true, media }))
-    .catch(error => done({
-      succeed: false,
-      reason: serializeError(error)
-    }))
+  media = await optimize(media)
+
+  return {
+    succeed: true,
+    media
+  }
 }

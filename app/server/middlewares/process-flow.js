@@ -10,16 +10,22 @@ export default function processFlow(req, res, next) {
   const { flow } = req._args
 
   req.app.get('rpc')
-    .request('flow', { media, flow })
+    .request()
+    .content({
+      type: 'flow',
+      data: { media, flow }
+    })
+    .sendTo('worker')
     .waitFor(media.state.uid)
-    .onResponse(message => {
-      const succeed = message && message.data && message.data.succeed
+    .ttl(10e3)
+    .onReply(async (error, content) => {
+      const succeed = !error && content && content.succeed
 
       if (!succeed) {
-        return next(message.data)
+        return next(content)
       }
 
-      const media = Media.from(message.data.media)
+      const media = Media.from(content.media)
 
       req._media = media
 

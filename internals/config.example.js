@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  developement: true,
+  development: true,
   server: {
     url: 'http://localhost:3002',
     port: 3002
@@ -10,6 +10,10 @@ module.exports = {
   redis: {
     host: '127.0.0.1',
     port: 6379
+  },
+  amq: {
+    host: 'amqp://localhost',
+    prefix: 'cdn.'
   },
   aws: {
     s3: {

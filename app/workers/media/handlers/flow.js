@@ -11,18 +11,20 @@ const handle = (job, rpc) => ({ media }, done) => {
   console.log(`[JOB] ${job}...`)
 
   rpc
-    .request(job, { media })
+    .request()
+    .content({
+      type: job,
+      data: { media }
+    })
+    .sendTo('worker')
+    .ttl(5e3)
     .waitFor(waitFor(media, job))
-    .onResponse(message => {
-      const succeed = message && message.data && message.data.succeed
+    .onReply(async (error, content) => {
+      const succeed = !error && content && content.succeed
 
       console.log(`[JOB] ${job} done: ${succeed}`)
 
-      if (succeed) {
-        done(null, message.data)
-      } else {
-        done(message.data)
-      }
+      done(null, content)
     })
     .send()
 }
@@ -37,18 +39,20 @@ const waitFor = (media, job) => {
   }
 }
 
-export default (data, rpc, done) => {
-  waterfall(
-    [
-      (done) => done(null, { media: data.media }),
-      ...data.flow.map(job => handle(job, rpc)),
-    ],
-    (error, data) => {
-      if (error) {
-        done({ succeed: false, reason: serializeError(error) })
-      } else {
-        done({ succeed: true, media: data.media })
+export default async (data, rpc) => {
+  return new Promise((resolve, reject) => {
+    waterfall(
+      [
+        (done) => done(null, { media: data.media }),
+        ...data.flow.map(job => handle(job, rpc)),
+      ],
+      (error, data) => {
+        if (error) {
+          return reject(error)
+        }
+
+        resolve({ succeed: true, media: data.media })
       }
-    }
-  )
+    )
+  })
 }

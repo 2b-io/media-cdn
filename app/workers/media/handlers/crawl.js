@@ -2,7 +2,6 @@ import dl from 'download'
 import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
-import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -75,14 +74,14 @@ const download = async (media) => {
   return media
 }
 
-export default (data, rpc, done) => {
-  const media = Media.from(data.media)
+export default async (data, rpc) => {
+  let media = Media.from(data.media)
 
-  download(media)
-    .then(media => done({ succeed: true, media }))
-    .catch(error => done({
-      succeed: false,
-      reason: serializeError(error)
-    }))
+  media = await download(media)
+
+  return {
+    succeed: true,
+    media
+  }
 }
 
