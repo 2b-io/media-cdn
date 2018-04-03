@@ -4,8 +4,7 @@ class Consumer extends Connection {
   constructor(props) {
     super({
       name: 'consumer',
-      ...props,
-      type: 'consumer'
+      ...props
     })
   }
 

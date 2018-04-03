@@ -21,6 +21,12 @@ class Message {
     return this
   }
 
+  sendTo(name) {
+    this._sendTo = name
+
+    return this
+  }
+
   ttl(duration) {
     this._ttl = duration
 

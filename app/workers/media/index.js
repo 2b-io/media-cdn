@@ -12,8 +12,8 @@ import handlers from './handlers'
 const { queuePrefix:prefix, redis } = config
 
 Promise.all([
-  rpc.createConsumer().connect(),
-  rpc.createProducer({ name: `worker-${Date.now()}` }).connect()
+  rpc.createConsumer({ name: 'worker' }).connect(),
+  rpc.createProducer({ name: `worker-distributor-${Date.now()}` }).connect()
   // new Promise(resolve => {
   //   rpc.createConsumer({ prefix, redis }).register(resolve)
   // }),

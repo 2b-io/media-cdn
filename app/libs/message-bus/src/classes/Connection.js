@@ -8,6 +8,7 @@ class Connection {
     this.props = {
       host: 'amqp://localhost',
       retryInterval: 5e3,
+      prefix: 'mb.',
       ...props
     }
 
@@ -15,8 +16,8 @@ class Connection {
     this._retryCount = 0
     this._ready = 0
     this._channel = null
-    this._exchange = `mb.global`
-    this._queue = `mb.${this.props.name}`
+    this._exchange = `${this.props.prefix}global`
+    this._queue = `${this.props.prefix}${this.props.name}`
     this._log = debug('message-bus')
   }
 
@@ -100,7 +101,7 @@ class Connection {
     await channel.bindQueue(this._queue, this._exchange, this.props.name)
 
     await channel.consume(this._queue, async (msg) => {
-      this.log(`Message received: [${msg.properties.appId}] -> [${this.props.name}]`)
+      this.log(`Message received: [${msg.properties.replyTo}] -> [${this.props.name}]`)
       const content = JSON.parse(msg.content.toString())
 
       if (typeof this.handleMessage === 'function') {

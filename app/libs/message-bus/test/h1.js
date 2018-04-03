@@ -2,8 +2,8 @@ import delay from 'delay'
 import rpc from '../src'
 
 Promise.all([
-  rpc.createConsumer().connect(),
-  rpc.createConsumer().connect(),
+  rpc.createConsumer({ name: 'worker1' }).connect(),
+  rpc.createConsumer({ name: 'worker2' }).connect(),
   // null,
   rpc.createProducer({ name: 'xxx' }).connect(),
   rpc.createProducer({ name: 'yyy' }).connect()
@@ -28,6 +28,7 @@ Promise.all([
     producer1.request()
       .content({ value: i })
       .ttl(2e3)
+      .sendTo('worker2')
       // .waitFor('abc')
       .onReply(async (error, content) => {
         if (error) {
@@ -41,6 +42,7 @@ Promise.all([
     producer2.request()
       .content({ value: i + 10 })
       .ttl(2e3)
+      .sendTo('worker1')
       // .waitFor('abc')
       .onReply(async (error, content) => {
         if (error) {

@@ -9,8 +9,7 @@ class Producer extends Connection {
   constructor(props) {
     super({
       name: 'producer',
-      ...props,
-      type: 'producer'
+      ...props
     })
 
     this._defs = {}
@@ -33,7 +32,7 @@ class Producer extends Connection {
     })
   }
 
-  async publish(content, expectReply = true) {
+  async publish(sentTo, content, expectReply = true) {
     const channel = this._channel
     const correlationId = expectReply ? uuid.v4() : undefined
 
@@ -41,7 +40,7 @@ class Producer extends Connection {
       this._defs[correlationId] = deferred()
     }
 
-    await super.publish('consumer', content, {
+    await super.publish(sentTo, content, {
       correlationId
     })
 
@@ -96,13 +95,13 @@ class Producer extends Connection {
 
   async sendWithTimeout(msg) {
     if (!msg._ttl) {
-      return await this.publish(msg._content, !!msg._onReply)
+      return await this.publish(msg._sendTo, msg._content, !!msg._onReply)
     }
 
     const timer = delay(msg._ttl)
 
     const reply = await Promise.race([
-      this.publish(msg._content, !!msg._onReply),
+      this.publish(msg._sendTo, msg._content, !!msg._onReply),
       this.ttl(timer)
     ])
 

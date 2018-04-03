@@ -15,6 +15,7 @@ export default function processFlow(req, res, next) {
       type: 'flow',
       data: { media, flow }
     })
+    .sendTo('worker')
     .waitFor(media.state.uid)
     .onReply(async (error, content) => {
       const succeed = !error && content && content.succeed
