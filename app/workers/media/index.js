@@ -13,7 +13,7 @@ const { queuePrefix:prefix, redis } = config
 
 Promise.all([
   rpc.createConsumer().connect(),
-  rpc.createProducer({ name: 'worker' }).connect()
+  rpc.createProducer({ name: `worker-${Date.now()}` }).connect()
   // new Promise(resolve => {
   //   rpc.createConsumer({ prefix, redis }).register(resolve)
   // }),
