@@ -84,17 +84,15 @@ class Connection {
       this._exchange,
       'direct',
       {
-        durable: true,
-        // autoDelete: true
+        durable: true
       }
     )
 
     await channel.assertQueue(
       this._queue,
       {
-        // exclusive: true,
         durable: true,
-        // autoDelete: true
+        autoDelete: !!this.props.autoDelete
       }
     )
 

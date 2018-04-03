@@ -4,12 +4,13 @@ import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
 import app from './app'
 
-const { amqp, server } = config
+const { amq, server } = config
 
 rpc
   .createProducer({
     name: `web-server-${Date.now()}`,
-    host: amqp.host
+    host: amq.host,
+    prefix: amq.prefix
   })
   .connect()
   .then(producer => {

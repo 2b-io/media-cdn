@@ -3,16 +3,18 @@ import config from 'infrastructure/config'
 
 import handlers from './handlers'
 
-const { amqp } = config
+const { amq } = config
 
 Promise.all([
   rpc.createConsumer({
     name: 'worker',
-    host: amqp.host
+    host: amq.host,
+    prefix: amq.prefix
   }).connect(),
   rpc.createProducer({
     name: `worker-distributor-${Date.now()}`,
-    host: amqp.host
+    host: amq.host,
+    prefix: amq.prefix
   }).connect()
 ]).then(([ consumer, producer ]) => {
   console.log('worker bootstrapped')

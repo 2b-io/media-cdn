@@ -9,7 +9,8 @@ class Producer extends Connection {
   constructor(props) {
     super({
       name: 'producer',
-      ...props
+      ...props,
+      autoDelete: true
     })
 
     this._defs = {}
