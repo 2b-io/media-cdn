@@ -43,7 +43,7 @@
     "nodemon": "1.12.1"
   },
   "scripts": {
-    "start": "concurrently \"yarn dev:server\" \"yarn dev:worker\"",
+    "start": "concurrently --raw \"yarn dev:server\" \"yarn dev:worker\"",
     "build": "cd app && babel . -d ../build",
     "build:clean": "rm -rf build",
     "dev:server": "cd app && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",

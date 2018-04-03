@@ -17,6 +17,7 @@ const handle = (job, rpc) => ({ media }, done) => {
       data: { media }
     })
     .sendTo('worker')
+    .ttl(5e3)
     .waitFor(waitFor(media, job))
     .onReply(async (error, content) => {
       const succeed = !error && content && content.succeed

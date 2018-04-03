@@ -1,14 +1,16 @@
-// import 'newrelic'
-// import rpc from 'one-doing-the-rest-waiting'
+import 'newrelic'
 import rpc from 'libs/message-bus'
 
 import config from 'infrastructure/config'
 import app from './app'
 
-const { queuePrefix:prefix, redis, server, development } = config
+const { amqp, server } = config
 
 rpc
-  .createProducer({ name: `web-server-${Date.now()}` })
+  .createProducer({
+    name: `web-server-${Date.now()}`,
+    host: amqp.host
+  })
   .connect()
   .then(producer => {
     app.set('rpc', producer)

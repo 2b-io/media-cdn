@@ -1,25 +1,19 @@
-import series from 'async/series'
-import dl from 'download'
-import fs from 'fs'
-// import rpc from 'one-doing-the-rest-waiting'
-import serializeError from 'serialize-error'
-
 import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
 
 import handlers from './handlers'
 
-const { queuePrefix:prefix, redis } = config
+const { amqp } = config
 
 Promise.all([
-  rpc.createConsumer({ name: 'worker' }).connect(),
-  rpc.createProducer({ name: `worker-distributor-${Date.now()}` }).connect()
-  // new Promise(resolve => {
-  //   rpc.createConsumer({ prefix, redis }).register(resolve)
-  // }),
-  // new Promise(resolve => {
-  //   rpc.createProducer({ prefix, redis }).discover(resolve)
-  // })
+  rpc.createConsumer({
+    name: 'worker',
+    host: amqp.host
+  }).connect(),
+  rpc.createProducer({
+    name: `worker-distributor-${Date.now()}`,
+    host: amqp.host
+  }).connect()
 ]).then(([ consumer, producer ]) => {
   console.log('worker bootstrapped')
 
