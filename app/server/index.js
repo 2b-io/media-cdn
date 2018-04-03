@@ -8,7 +8,7 @@ import app from './app'
 const { queuePrefix:prefix, redis, server, development } = config
 
 rpc
-  .createProducer()
+  .createProducer({ name: 'web-server' })
   .connect()
   .then(producer => {
     app.set('rpc', producer)

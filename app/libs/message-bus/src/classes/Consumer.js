@@ -28,12 +28,15 @@ class Consumer extends Connection {
 
     await this.reply(
       response,
-      msg.properties.correlationId
+      msg.properties.correlationId,
+      msg.properties.replyTo
     )
   }
 
-  async reply(response, correlationId) {
-    return await super.publish('producer', response, correlationId)
+  async reply(response, correlationId, replyTo) {
+    return await super.publish(replyTo, response, {
+      correlationId
+    })
   }
 }
 

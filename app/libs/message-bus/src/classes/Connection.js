@@ -15,7 +15,7 @@ class Connection {
     this._retryCount = 0
     this._ready = 0
     this._channel = null
-    this._exchange = 'mb.bus',
+    this._exchange = `mb.global`
     this._queue = `mb.${this.props.name}`
     this._log = debug('message-bus')
   }
@@ -97,16 +97,14 @@ class Connection {
       }
     )
 
-    await channel.bindQueue(this._queue, this._exchange, this.props.type)
+    await channel.bindQueue(this._queue, this._exchange, this.props.name)
 
     await channel.consume(this._queue, async (msg) => {
       this.log(`Message received: [${msg.properties.appId}] -> [${this.props.name}]`)
       const content = JSON.parse(msg.content.toString())
 
-      if (content.from !== this._id) {
-        if (typeof this.handleMessage === 'function') {
-          await this.handleMessage(msg)
-        }
+      if (typeof this.handleMessage === 'function') {
+        await this.handleMessage(msg)
       }
 
       await channel.ack(msg)
@@ -117,25 +115,28 @@ class Connection {
     })
   }
 
-  async publish(routing, content, correlationId) {
+  async publish(routing, content, options) {
     this.log(`Message sent: [${this.props.name}] -> [${routing}]`)
 
     return await this._channel.publish(
       this._exchange,
       routing,
       new Buffer(
-        JSON.stringify(content)
+        JSON.stringify({
+          ...content
+        })
       ),
       {
-        correlationId,
+        expiration: 5e3.toString(),
         contentType: 'application/json',
         contentEncoding: 'utf-8',
         timestamp: Date.now(),
         persistent: true,
-        appId: this.props.name,
+        replyTo: this.props.name,
         headers: {
           from: this._id
-        }
+        },
+        ...options
       }
     )
   }

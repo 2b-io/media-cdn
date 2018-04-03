@@ -14,19 +14,15 @@ const handle = (job, rpc) => ({ media }, done) => {
     .request()
     .content({
       type: job,
-      data: media
+      data: { media }
     })
     .waitFor(waitFor(media, job))
-    .onResponse(async (error, content) => {
-      const succeed = !error && content && content.data && content.data.succeed
+    .onReply(async (error, content) => {
+      const succeed = !error && content && content.succeed
 
       console.log(`[JOB] ${job} done: ${succeed}`)
 
-      if (succeed) {
-        done(null, content.data)
-      } else {
-        done(content.data)
-      }
+      done(null, content)
     })
     .send()
 }
@@ -41,18 +37,20 @@ const waitFor = (media, job) => {
   }
 }
 
-export default (data, rpc, done) => {
-  waterfall(
-    [
-      (done) => done(null, { media: data.media }),
-      ...data.flow.map(job => handle(job, rpc)),
-    ],
-    (error, data) => {
-      if (error) {
-        done({ succeed: false, reason: serializeError(error) })
-      } else {
-        done({ succeed: true, media: data.media })
+export default async (data, rpc) => {
+  return new Promise((resolve, reject) => {
+    waterfall(
+      [
+        (done) => done(null, { media: data.media }),
+        ...data.flow.map(job => handle(job, rpc)),
+      ],
+      (error, data) => {
+        if (error) {
+          return reject(error)
+        }
+
+        resolve({ succeed: true, media: data.media })
       }
-    }
-  )
+    )
+  })
 }

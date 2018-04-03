@@ -6,6 +6,8 @@ import shortHash from 'short-hash'
 
 import config from 'infrastructure/config'
 
+// aws.config.logger = console
+
 const s3 = new aws.S3({
   ...config.aws.s3
 })

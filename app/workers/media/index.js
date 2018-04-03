@@ -13,32 +13,24 @@ const { queuePrefix:prefix, redis } = config
 
 Promise.all([
   rpc.createConsumer().connect(),
-  rpc.createProducer().connect()
+  rpc.createProducer({ name: 'worker' }).connect()
   // new Promise(resolve => {
   //   rpc.createConsumer({ prefix, redis }).register(resolve)
   // }),
   // new Promise(resolve => {
   //   rpc.createProducer({ prefix, redis }).discover(resolve)
   // })
-]).then(([ input, output ]) => {
+]).then(([ consumer, producer ]) => {
   console.log('worker bootstrapped')
 
-  input.onMessage(async (content) => {
-    try {
+  consumer.onMessage(async (content) => {
+    const handler = handlers[content.type]
 
-      const handler = handlers[content.type]
-
-      if (!handler) {
-        throw new Error(`Unsupported job: ${content.type}`)
-      }
-
-      handler(content.data, output, done)
-    } catch (error) {
-      done({
-        succeed: false,
-        reason: serializeError(error)
-      })
+    if (!handler) {
+      throw new Error(`Unsupported job: ${content.type}`)
     }
+
+    return await handler(content.data, producer)
   })
 })
 

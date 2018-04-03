@@ -41,7 +41,9 @@ class Producer extends Connection {
       this._defs[correlationId] = deferred()
     }
 
-    await super.publish('consumer', content, correlationId)
+    await super.publish('consumer', content, {
+      correlationId
+    })
 
     return expectReply ? this._defs[correlationId].promise : null
   }

@@ -1,5 +1,4 @@
 import path from 'path'
-import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -12,14 +11,14 @@ const putToCache = async (remote, local) => {
   )
 }
 
-export default (data, rpc, done) => {
+export default async (data, rpc) => {
   const media = Media.from(data.media)
   const { source } = media.state
 
-  putToCache(source, source)
-    .then(() => done({ succeed: true, media}))
-    .catch(error => done({
-      succeed: false,
-      error: serializeError(error)
-    }))
+  await putToCache(source, source)
+
+  return {
+    succeed: true,
+    media
+  }
 }
