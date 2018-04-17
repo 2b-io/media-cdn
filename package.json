@@ -50,10 +50,10 @@
     "up": "docker-compose up -d && yarn remote",
     "remote": "docker exec -it media.cdn bash",
     "start": "NEW_RELIC_ENABLED=false concurrently --raw \"yarn dev:server\" \"yarn dev:worker\"",
-    "build": "cd app && babel . -d ../build",
+    "build": "cd src && babel . -d ../build",
     "build:clean": "rm -rf build",
-    "dev:server": "cd app && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
-    "dev:worker": "cd app && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.dev.js",
+    "dev:server": "cd src && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
+    "dev:worker": "cd src && nodemon workers/media/ --exec babel-node --CONFIG=../internals/config.dev.js",
     "staging:start": "concurrently \"yarn staging:server\" \"yarn staging:worker\"",
     "staging:server": "cd build && node server/ --CONFIG=../internals/config.dev.js",
     "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js"

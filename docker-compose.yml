@@ -22,5 +22,7 @@ services:
       - "15672:15672"
   mongo:
     image: mongo
+    volumes:
+      - ../data:/data/db
     ports:
       - "27017:27017"
