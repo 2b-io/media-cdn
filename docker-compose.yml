@@ -1,0 +1,26 @@
+version: '3'
+services:
+  media-cdn:
+    build: .
+    container_name: media.cdn
+    command: bash -c "yarn && tail -f /dev/null"
+    volumes:
+      - .:/usr/src
+      - /usr/src/node_modules
+    ports:
+      - "3002:3002"
+    depends_on:
+      - rabbitmq
+      - mongo
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5671:5671"
+      - "5672:5672"
+      - "15671:15671"
+      - "15672:15672"
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
