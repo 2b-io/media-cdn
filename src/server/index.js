@@ -1,20 +1,22 @@
-import 'newrelic'
 import rpc from 'libs/message-bus'
-
 import config from 'infrastructure/config'
+
 import app from './app'
 
-const { amq, server } = config
+const { amq: { host, prefix }, server: { port, bind } } = config
 
-rpc
-  .createProducer({
+const main = async () => {
+  const producer = await rpc.createProducer({
     name: `web-server-${Date.now()}`,
-    host: amq.host,
-    prefix: amq.prefix
-  })
-  .connect()
-  .then(producer => {
-    app.set('rpc', producer)
+    host,
+    prefix
+  }).connect()
 
-    app.listen(server.port, () => console.log(`Server start at :${server.port}`))
+  app.set('rpc', producer)
+
+  app.listen(port, bind, () => {
+    console.log(`Server start at ${bind}:${port}`)
   })
+}
+
+main()
