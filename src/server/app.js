@@ -22,7 +22,7 @@ app.get('/', [
 
     req._params = {
       project: {
-        slug: 'ntq'
+        slug: 'dev'
       },
       preset: {
         hash: 'default',

@@ -1,6 +1,6 @@
+import fs from 'fs-extra'
 import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
-
 import cache from 'services/cache'
 import crawler from 'services/crawler'
 import optimizer from 'services/optimizer'
@@ -80,9 +80,11 @@ const main = async () => {
         const meta = await cache.head(payload.origin)
 
         if (!meta) {
-          const localPath = await crawler.crawl(payload.url)
+          const file = await crawler.crawl(payload.url)
 
-          await cache.put(payload.origin, localPath)
+          await cache.put(payload.origin, file)
+
+          await fs.remove(file.path)
         }
 
         return { succeed: true }
@@ -94,7 +96,7 @@ const main = async () => {
 
         const target = await optimizer.optimize(origin, {})
 
-        await cache.put(payload.target, target)
+        // await cache.put(payload.target, target)
 
         return { succeed: true }
     }
