@@ -1,12 +1,22 @@
 import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
 
+import cache from 'services/cache'
+import crawler from 'services/crawler'
+import optimizer from 'services/optimizer'
+
 const { amq: { host, prefix } } = config
 
-const crawl = async (producer) => {
+const crawl = async (producer, payload) => {
   return new Promise((resolve, reject) => {
     producer.request()
-      .content({ job: 'crawl' })
+      .content({
+        job: 'crawl',
+        payload: {
+          url: payload.url,
+          origin: payload.origin
+        }
+      })
       .sendTo('worker')
       .ttl(10e3)
       .onReply(async (error, content) => {
@@ -18,10 +28,16 @@ const crawl = async (producer) => {
   })
 }
 
-const optimize = async (producer) => {
+const optimize = async (producer, payload) => {
   return new Promise((resolve, reject) => {
     producer.request()
-      .content({ job: 'optimize' })
+      .content({
+        job: 'optimize',
+        payload: {
+          origin: payload.origin,
+          target: payload.target
+        }
+      })
       .sendTo('worker')
       .ttl(10e3)
       .onReply(async (error, content) => {
@@ -48,23 +64,37 @@ const main = async () => {
   ])
 
   consumer.onMessage(async (content) => {
-    const { job } = content
+    const { job, payload } = content
 
     switch (job) {
       case 'process':
-        await crawl(producer)
+        await crawl(producer, payload)
 
-        await optimize(producer)
+        await optimize(producer, payload)
 
         return { succeed: true }
 
       case 'crawl':
-        console.log('crawl...')
+        console.log('crawl...', payload)
+
+        const meta = await cache.head(payload.origin)
+
+        if (!meta) {
+          const localPath = await crawler.crawl(payload.url)
+
+          await cache.put(payload.origin, localPath)
+        }
 
         return { succeed: true }
 
       case 'optimize':
-        console.log('optimize...')
+        console.log('optimize...', payload)
+
+        const origin = await cache.get(payload.origin)
+
+        const target = await optimizer.optimize(origin, {})
+
+        await cache.put(payload.target, target)
 
         return { succeed: true }
     }
