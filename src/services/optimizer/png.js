@@ -1,11 +1,13 @@
 import fs from 'fs-extra'
 import imagemin from 'imagemin'
 import imageminPngquant  from 'imagemin-pngquant'
+import path from 'path'
 import sharp from 'sharp'
 import localpath from 'services/localpath'
 
 const optimizePNG = async (input, output, args) => {
-  const dir = await localpath()
+  const dir = path.join(path.dirname(output), 'png')
+  await fs.ensureDir(dir)
 
   const files =  await imagemin([ input ], dir, {
     use: [ imageminPngquant(args) ]
