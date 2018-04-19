@@ -84,8 +84,6 @@ const main = async () => {
         return { succeed: true }
 
       case 'crawl':
-        // console.log('crawl...', payload)
-
         const meta = await cache.head(payload.origin)
 
         if (!meta) {
@@ -95,15 +93,11 @@ const main = async () => {
           await cache.put(payload.origin, file)
 
           await fs.remove(file.path)
-        } else {
-          console.log('CACHE HIT')
         }
 
         return { succeed: true }
 
       case 'optimize':
-        console.log('optimize...', payload)
-
         const origin = await cache.get(payload.origin)
 
         const target = await optimizer.optimize(origin, payload.args)

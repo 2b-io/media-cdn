@@ -1,31 +1,25 @@
 import jpeg from './jpeg'
 import png from './png'
+import webp from './webp'
+
+const scenarios = {
+  'image/jpeg': jpeg,
+  'image/png': png,
+  'image/webp': webp
+}
 
 export default {
-  optimize: async (file, opts) => {
+  optimize: async (file, args) => {
     console.log('optimizer.js: ', file)
 
     const { contentType } = file
 
-    switch (contentType) {
-      case 'image/jpeg':
-        // optimize jpeg
-        return await jpeg(file, opts)
+    const scenario = scenarios[contentType]
 
-      case 'image/png':
-        // optimize png
-        return await png(file, opts)
-
-      case 'image/gif':
-        // optimize gif
-
-      case 'image/webp':
-        // optimize webp
-
-      case 'image/bmp':
-        // optimze bmp
+    if (!scenario) {
+      return file
     }
 
-    return file
+    return await scenario(file, args)
   }
 }

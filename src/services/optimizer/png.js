@@ -4,14 +4,11 @@ import imageminPngquant  from 'imagemin-pngquant'
 import sharp from 'sharp'
 import localpath from 'services/localpath'
 
-const optimizePNG = async (input, output) => {
+const optimizePNG = async (input, output, args) => {
   const dir = await localpath()
 
   const files =  await imagemin([ input ], dir, {
-    use: [ imageminPngquant({
-      quality: 75,
-      speed: 10
-    }) ]
+    use: [ imageminPngquant(args) ]
   })
 
   await fs.remove(output)
@@ -24,13 +21,18 @@ export default async (file, args) => {
   const {
     mode = 'cover',
     width = 'auto',
-    height = 'auto'
+    height = 'auto',
+    quality = 80,
+    speed = 10
   } = args
 
   const resize = !(width === 'auto' && height === 'auto')
 
   if (!resize) {
-    await optimizePNG(file.path, output)
+    await optimizePNG(file.path, output, {
+      quality,
+      speed
+    })
 
     return {
       contentType: file.contentType,
@@ -55,14 +57,16 @@ export default async (file, args) => {
   }
 
   image.png({
-    compressionLevel: 8,
-    // progressive: true
+    compressionLevel: 9
   })
 
 
   await image.toFile(output)
 
-  await optimizePNG(output, output)
+  await optimizePNG(output, output, {
+    quality,
+    speed
+  })
 
   return {
     contentType: file.contentType,

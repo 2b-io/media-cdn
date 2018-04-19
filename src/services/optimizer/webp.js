@@ -6,8 +6,7 @@ export default async (file, args) => {
     mode = 'cover',
     width = 'auto',
     height = 'auto',
-    quality = 80,
-    progressive = true
+    quality = 80
   } = args
 
   const image = sharp(file.path)
@@ -29,9 +28,9 @@ export default async (file, args) => {
     }
   }
 
-  image.jpeg({
+  image.webp({
     quality: quality,
-    progressive: progressive
+    alphaQuality: quality
   })
 
   const output = await localpath(file.ext)

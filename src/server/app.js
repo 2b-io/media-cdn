@@ -26,7 +26,9 @@ app.get('/', [
       },
       preset: {
         hash: 'default',
-        valueHash: sh.unique('default')
+        values: {
+          quality: 75
+        }
       },
       args: {
         mode: req.query.m || 'cover',
@@ -41,15 +43,22 @@ app.get('/', [
   },
   (req, res, next) => {
     const {
-      project: { slug },
-      preset: { hash, valueHash },
       args: {
         mode = 'cover',
         width = 'auto',
         height = 'auto'
       },
+      project: { slug },
+      preset: { hash, values },
       urlHash
     } = req._params
+
+    const valueHash = sh.unique(
+      JSON.stringify(
+        values,
+        Object.keys(values).sort()
+      )
+    )
 
     req._params.origin = `${slug}/${hash}/${valueHash}/${urlHash}`
 
@@ -86,7 +95,10 @@ app.get('/', [
           url: req._params.url,
           origin: req._params.origin,
           target: req._params.target,
-          args: req._params.args
+          args: {
+            ...req._params.preset.values,
+            ...req._params.args
+          }
         }
       })
       .sendTo('worker')
