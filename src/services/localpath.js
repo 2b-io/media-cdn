@@ -4,7 +4,7 @@ import uuid from 'uuid'
 
 import config from 'infrastructure/config'
 
-export default async () => {
+export default async (ext) => {
   const today = new Date()
   const localpath = path.join(
     config.tmpDir,
@@ -15,5 +15,5 @@ export default async () => {
 
   await fs.ensureDir(path.dirname(localpath))
 
-  return localpath
+  return ext ? `${localpath}.${ext}` : localpath
 }

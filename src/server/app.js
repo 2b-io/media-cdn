@@ -17,7 +17,7 @@ app.get('/', [
     console.log('assert parameters')
 
     const url = req.query.url ?
-      decodeURIComponent(req.query.url) :
+      req.query.url :
       'https://assets.stuffs.cool/2018/04/the.cool.stuffs_c37da7f1-afe6-4833-ae98-39bb66b5f2b8.jpg'
 
     req._params = {
@@ -29,9 +29,9 @@ app.get('/', [
         valueHash: sh.unique('default')
       },
       args: {
-        mode: 'crop',
-        // width: 100,
-        // height: 100
+        mode: req.query.m || 'cover',
+        width: parseInt(req.query.w, 10) || undefined,
+        height: parseInt(req.query.h, 10) || undefined
       },
       url: url,
       urlHash: sh.unique(url)
@@ -60,7 +60,9 @@ app.get('/', [
   async (req, res, next) => {
     console.log('app.js: HEAD /the-resource')
 
-    return next()
+    if (req.query.f) {
+      return next()
+    }
 
     req._meta = await cache.head(req._params.target)
 

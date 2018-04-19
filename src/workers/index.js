@@ -110,6 +110,7 @@ const main = async () => {
 
         await cache.put(payload.target, target)
 
+        await fs.remove(origin.path)
         await fs.remove(target.path)
 
         return { succeed: true }

@@ -32,12 +32,12 @@ export default async (file, args) => {
     progressive: true
   })
 
-  const output = await localpath()
-  await image.toFile(file.ext ? `${output}.${file.ext}` : output)
+  const output = await localpath(file.ext)
+  await image.toFile(output)
 
   return {
     contentType: file.contentType,
     ext: file.ext,
-    path: file.ext ? `${output}.${file.ext}` : output
+    path: output
   }
 }

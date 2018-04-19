@@ -10,14 +10,13 @@ export default {
   head: async (key) => {
     console.log(`cache.js: HEAD /${key}`)
 
-    // console.log('cache.js: CACHE MISS')
-    // return null
     try {
       return await s3.headObject({
         Bucket: s3.config.bucket,
         Key: key
       }).promise()
     } catch (e) {
+      // TODO check not found
       return null
     }
   },
@@ -33,7 +32,7 @@ export default {
     }).promise()
   },
   get: async (key) => {
-    const downloadPath = localpath()
+    const downloadPath = await localpath()
     const res = {}
 
     const data = await s3.getObject({

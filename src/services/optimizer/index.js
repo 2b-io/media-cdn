@@ -1,4 +1,5 @@
 import jpeg from './jpeg'
+import png from './png'
 
 export default {
   optimize: async (file, opts) => {
@@ -13,6 +14,7 @@ export default {
 
       case 'image/png':
         // optimize png
+        return await png(file, opts)
 
       case 'image/gif':
         // optimize gif
