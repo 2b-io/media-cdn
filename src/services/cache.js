@@ -8,8 +8,6 @@ import localpath from 'services/localpath'
 
 export default {
   head: async (key) => {
-    console.log(`cache.js: HEAD /${key}`)
-
     try {
       return await s3.headObject({
         Bucket: s3.config.bucket,
@@ -21,8 +19,6 @@ export default {
     }
   },
   put: async (key, file) => {
-    console.log('cache.js: PUT', file)
-
     return await s3.putObject({
       Bucket: s3.config.bucket,
       Key: key,

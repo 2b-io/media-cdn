@@ -10,8 +10,6 @@ const scenarios = {
 
 export default {
   optimize: async (file, args) => {
-    console.log('optimizer.js: ', file)
-
     const { contentType } = file
 
     const scenario = scenarios[contentType]

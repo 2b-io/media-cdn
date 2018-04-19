@@ -101,8 +101,9 @@ app.get('/', [
           }
         }
       })
+      .waitFor(`process:${req._params.target}`)
       .sendTo('worker')
-      .ttl(10e3)
+      .ttl(60e3)
       .onReply(async (error, content) => {
         console.log(error, content)
 

@@ -17,11 +17,10 @@ const crawl = async (producer, payload) => {
           origin: payload.origin
         }
       })
+      .waitFor(`crawl:${payload.origin}`)
       .sendTo('worker')
-      .ttl(10e3)
+      .ttl(30e3)
       .onReply(async (error, content) => {
-        console.log('crawl... done')
-
         if (error) {
           reject()
         } else {
@@ -43,11 +42,10 @@ const optimize = async (producer, payload) => {
           args: payload.args
         }
       })
+      .waitFor(`optimize:${payload.origin}`)
       .sendTo('worker')
-      .ttl(10e3)
+      .ttl(30e3)
       .onReply(async (error, content) => {
-        console.log('optimize... done')
-
         if (error) {
           reject()
         } else {
@@ -77,17 +75,22 @@ const main = async () => {
 
     switch (job) {
       case 'process':
+        console.log('process...')
+
         await crawl(producer, payload)
 
         await optimize(producer, payload)
 
+        console.log('process... done')
+
         return { succeed: true }
 
       case 'crawl':
+        console.log('crawl...')
+
         const meta = await cache.head(payload.origin)
 
         if (!meta) {
-          console.log('CACHE MISS')
           const file = await crawler.crawl(payload.url)
 
           await cache.put(payload.origin, file)
@@ -95,9 +98,13 @@ const main = async () => {
           await fs.remove(file.path)
         }
 
+        console.log('crawl... done')
+
         return { succeed: true }
 
       case 'optimize':
+        console.log('optimize...')
+
         const origin = await cache.get(payload.origin)
 
         const target = await optimizer.optimize(origin, payload.args)
@@ -106,6 +113,8 @@ const main = async () => {
 
         await fs.remove(origin.path)
         await fs.remove(target.path)
+
+        console.log('optimize... done')
 
         return { succeed: true }
     }
