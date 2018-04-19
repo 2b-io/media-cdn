@@ -1,23 +1,25 @@
 import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
-import path from 'path'
-import uuid from 'uuid'
+
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
-
+import localpath from 'services/localpath'
 
 export default {
   head: async (key) => {
     console.log(`cache.js: HEAD /${key}`)
 
-    console.log('cache.js: CACHE MISS')
-    return null
-
-    return await s3.headObject({
-      Bucket: s3.config.bucket,
-      Key: key
-    }).promise()
+    // console.log('cache.js: CACHE MISS')
+    // return null
+    try {
+      return await s3.headObject({
+        Bucket: s3.config.bucket,
+        Key: key
+      }).promise()
+    } catch (e) {
+      return null
+    }
   },
   put: async (key, file) => {
     console.log('cache.js: PUT', file)
@@ -31,13 +33,7 @@ export default {
     }).promise()
   },
   get: async (key) => {
-    const today = new Date()
-    const downloadPath = path.join(
-      config.tmpDir,
-      `${today.getFullYear()}`,
-      `${today.getMonth()}`,
-      uuid.v4()
-    )
+    const downloadPath = localpath()
     const res = {}
 
     const data = await s3.getObject({
@@ -52,5 +48,11 @@ export default {
     await fs.outputFile(res.path, data.Body)
 
     return res
+  },
+  stream: (key) => {
+    return s3.getObject({
+      Bucket: s3.config.bucket,
+      Key: key
+    }).createReadStream()
   }
 }

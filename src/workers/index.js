@@ -22,7 +22,11 @@ const crawl = async (producer, payload) => {
       .onReply(async (error, content) => {
         console.log('crawl... done')
 
-        resolve()
+        if (error) {
+          reject()
+        } else {
+          resolve()
+        }
       })
       .send()
   })
@@ -35,7 +39,8 @@ const optimize = async (producer, payload) => {
         job: 'optimize',
         payload: {
           origin: payload.origin,
-          target: payload.target
+          target: payload.target,
+          args: payload.args
         }
       })
       .sendTo('worker')
@@ -43,7 +48,11 @@ const optimize = async (producer, payload) => {
       .onReply(async (error, content) => {
         console.log('optimize... done')
 
-        resolve()
+        if (error) {
+          reject()
+        } else {
+          resolve()
+        }
       })
       .send()
   })
@@ -75,16 +84,19 @@ const main = async () => {
         return { succeed: true }
 
       case 'crawl':
-        console.log('crawl...', payload)
+        // console.log('crawl...', payload)
 
         const meta = await cache.head(payload.origin)
 
         if (!meta) {
+          console.log('CACHE MISS')
           const file = await crawler.crawl(payload.url)
 
           await cache.put(payload.origin, file)
 
           await fs.remove(file.path)
+        } else {
+          console.log('CACHE HIT')
         }
 
         return { succeed: true }
@@ -94,9 +106,11 @@ const main = async () => {
 
         const origin = await cache.get(payload.origin)
 
-        const target = await optimizer.optimize(origin, {})
+        const target = await optimizer.optimize(origin, payload.args)
 
-        // await cache.put(payload.target, target)
+        await cache.put(payload.target, target)
+
+        await fs.remove(target.path)
 
         return { succeed: true }
     }

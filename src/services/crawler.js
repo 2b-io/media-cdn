@@ -1,16 +1,12 @@
 import fs from 'fs-extra'
 import got from 'got'
-import mkdirp from 'mkdirp'
 import mime from 'mime'
-import path from 'path'
 import { URL } from 'url'
-import uuid from 'uuid'
 
 import config from 'infrastructure/config'
+import localpath from 'services/localpath'
 
 const download = async (url, crawlPath) => {
-  await fs.ensureDir(path.dirname(crawlPath))
-
   const response = await new Promise((resolve, reject) => {
     // skip querystring
     const filename = new URL(url).pathname
@@ -44,13 +40,7 @@ const download = async (url, crawlPath) => {
 
 export default {
   crawl: async (url) => {
-    const today = new Date()
-    const crawlPath = path.join(
-      config.tmpDir,
-      `${today.getFullYear()}`,
-      `${today.getMonth()}`,
-      uuid.v4()
-    )
+    const crawlPath = await localpath()
 
     return await download(url, crawlPath)
   }

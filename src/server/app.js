@@ -30,8 +30,8 @@ app.get('/', [
       },
       args: {
         mode: 'crop',
-        width: 100,
-        height: 100
+        // width: 100,
+        // height: 100
       },
       url: url,
       urlHash: sh.unique(url)
@@ -43,7 +43,11 @@ app.get('/', [
     const {
       project: { slug },
       preset: { hash, valueHash },
-      args: { mode, width, height },
+      args: {
+        mode = 'cover',
+        width = 'auto',
+        height = 'auto'
+      },
       urlHash
     } = req._params
 
@@ -56,7 +60,11 @@ app.get('/', [
   async (req, res, next) => {
     console.log('app.js: HEAD /the-resource')
 
+    return next()
+
     req._meta = await cache.head(req._params.target)
+
+    console.log(req._meta)
 
     next()
   },
@@ -75,7 +83,8 @@ app.get('/', [
         payload: {
           url: req._params.url,
           origin: req._params.origin,
-          target: req._params.target
+          target: req._params.target,
+          args: req._params.args
         }
       })
       .sendTo('worker')
@@ -87,10 +96,36 @@ app.get('/', [
       })
       .send()
   },
-  (req, res, next) => {
-    console.log('GET /the-resource')
+  async (req, res, next) => {
+    if (req._meta) {
+      return next()
+    }
 
-    // res.send('ok')
-    res.json(req._params)
+    console.log('app.js: HEAD /the-resource')
+
+    req._meta = await cache.head(req._params.target)
+
+    console.log(req._meta)
+
+    next()
+  },
+  (req, res, next) => {
+    if (!req._meta) {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+      res.set('Pragma', 'no-cache')
+      res.set('Expires', '0')
+      res.set('Surrogate-Control', 'no-store')
+      return res.status(500).json(req._params)
+    }
+
+    console.log('PIPE /the-resource')
+
+    res.set('accept-ranges', req._meta.AcceptRanges)
+    res.set('content-type', req._meta.ContentType)
+    res.set('content-length', req._meta.ContentLength)
+    res.set('last-Modified', req._meta.LastModified)
+    res.set('etag', req._meta.ETag)
+    res.set('cache-control', req._meta.CacheControl)
+    cache.stream(req._params.target).pipe(res)
   }
 ])
