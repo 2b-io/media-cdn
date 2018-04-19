@@ -75,8 +75,6 @@ app.get('/', [
 
     req._meta = await cache.head(req._params.target)
 
-    console.log(req._meta)
-
     next()
   },
   (req, res, next) => {
