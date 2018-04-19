@@ -4,6 +4,7 @@ import crawler from 'services/crawler'
 
 export default async (payload) => {
   console.log('crawl...')
+  console.time('crawl...')
 
   const meta = await cache.head(payload.origin)
 
@@ -21,5 +22,5 @@ export default async (payload) => {
     }
   }
 
-  console.log('crawl... done')
+  console.timeEnd('crawl...')
 }

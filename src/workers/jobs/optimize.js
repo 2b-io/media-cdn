@@ -4,6 +4,7 @@ import optimizer from 'services/optimizer'
 
 export default async (payload) => {
   console.log('optimize...')
+  console.time('optimize...')
 
   let origin, target
 
@@ -24,5 +25,5 @@ export default async (payload) => {
     }
   }
 
-  console.log('optimize... done')
+  console.timeEnd('optimize...')
 }

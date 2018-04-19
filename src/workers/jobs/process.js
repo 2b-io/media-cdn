@@ -51,10 +51,11 @@ const optimize = async (payload, producer) => {
 
 export default async (payload, producer) => {
   console.log('process...')
+  console.time('process...')
 
   await crawl(payload, producer)
 
   await optimize(payload, producer)
 
-  console.log('process... done')
+  console.timeEnd('process...')
 }
