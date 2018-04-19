@@ -1,61 +1,11 @@
-import deserializeError from 'deserialize-error'
-import fs from 'fs-extra'
 import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
-import cache from 'services/cache'
-import crawler from 'services/crawler'
-import optimizer from 'services/optimizer'
+
+import crawl from './jobs/crawl'
+import process from './jobs/process'
+import optimize from './jobs/optimize'
 
 const { amq: { host, prefix } } = config
-
-const crawl = async (producer, payload) => {
-  return await new Promise((resolve, reject) => {
-    producer.request()
-      .content({
-        job: 'crawl',
-        payload: {
-          url: payload.url,
-          origin: payload.origin
-        }
-      })
-      .waitFor(`crawl:${payload.origin}`)
-      .sendTo('worker')
-      .ttl(30e3)
-      .onReply(async (error) => {
-        if (error) {
-          reject(deserializeError(error))
-        } else {
-          resolve()
-        }
-      })
-      .send()
-  })
-}
-
-const optimize = async (producer, payload) => {
-  return new Promise((resolve, reject) => {
-    producer.request()
-      .content({
-        job: 'optimize',
-        payload: {
-          origin: payload.origin,
-          target: payload.target,
-          args: payload.args
-        }
-      })
-      .waitFor(`optimize:${payload.origin}`)
-      .sendTo('worker')
-      .ttl(30e3)
-      .onReply(async (error) => {
-        if (error) {
-          reject(deserializeError(error))
-        } else {
-          resolve()
-        }
-      })
-      .send()
-  })
-}
 
 const main = async () => {
   const [ consumer, producer ] = await Promise.all([
@@ -76,64 +26,13 @@ const main = async () => {
 
     switch (job) {
       case 'process':
-        console.log('process...')
-
-        await crawl(producer, payload)
-
-        await optimize(producer, payload)
-
-        console.log('process... done')
-
-        return
+        return await process(payload, producer)
 
       case 'crawl':
-        console.log('crawl...')
-
-        const meta = await cache.head(payload.origin)
-
-        if (!meta) {
-          let file
-
-          try {
-            file = await crawler.crawl(payload.url)
-
-            await cache.put(payload.origin, file)
-          } finally {
-            if (file) {
-              await fs.remove(file.path)
-            }
-          }
-        }
-
-        console.log('crawl... done')
-
-        return
+        return await crawl(payload)
 
       case 'optimize':
-        console.log('optimize...')
-
-        let origin, target
-
-        try {
-          const origin = await cache.get(payload.origin)
-
-          const target = await optimizer.optimize(origin, payload.args)
-
-          await cache.put(payload.target, target)
-
-        } finally {
-          if (origin) {
-            await fs.remove(origin.path)
-          }
-
-          if (target) {
-            await fs.remove(target.path)
-          }
-        }
-
-        console.log('optimize... done')
-
-        return
+        return await optimize(payload)
     }
 
     return { succeed: false }
