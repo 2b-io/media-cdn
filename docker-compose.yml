@@ -10,17 +10,17 @@ services:
     ports:
       - "3002:3002"
     depends_on:
-      - rabbitmq
-      - mongo
+      - rabbitmq-cdn
+      - mongo-cdn
 
-  rabbitmq:
+  rabbitmq-cdn:
     image: rabbitmq:3-management
     ports:
       - "5671:5671"
       - "5672:5672"
       - "15671:15671"
       - "15672:15672"
-  mongo:
+  mongo-cdn:
     image: mongo
     volumes:
       - ../data:/data/db
