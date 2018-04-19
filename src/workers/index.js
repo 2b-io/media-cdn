@@ -1,3 +1,4 @@
+import deserializeError from 'deserialize-error'
 import fs from 'fs-extra'
 import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
@@ -8,7 +9,7 @@ import optimizer from 'services/optimizer'
 const { amq: { host, prefix } } = config
 
 const crawl = async (producer, payload) => {
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     producer.request()
       .content({
         job: 'crawl',
@@ -20,9 +21,9 @@ const crawl = async (producer, payload) => {
       .waitFor(`crawl:${payload.origin}`)
       .sendTo('worker')
       .ttl(30e3)
-      .onReply(async (error, content) => {
+      .onReply(async (error) => {
         if (error) {
-          reject()
+          reject(deserializeError(error))
         } else {
           resolve()
         }
@@ -45,9 +46,9 @@ const optimize = async (producer, payload) => {
       .waitFor(`optimize:${payload.origin}`)
       .sendTo('worker')
       .ttl(30e3)
-      .onReply(async (error, content) => {
+      .onReply(async (error) => {
         if (error) {
-          reject()
+          reject(deserializeError(error))
         } else {
           resolve()
         }
@@ -83,7 +84,7 @@ const main = async () => {
 
         console.log('process... done')
 
-        return { succeed: true }
+        return
 
       case 'crawl':
         console.log('crawl...')
@@ -91,32 +92,48 @@ const main = async () => {
         const meta = await cache.head(payload.origin)
 
         if (!meta) {
-          const file = await crawler.crawl(payload.url)
+          let file
 
-          await cache.put(payload.origin, file)
+          try {
+            file = await crawler.crawl(payload.url)
 
-          await fs.remove(file.path)
+            await cache.put(payload.origin, file)
+          } finally {
+            if (file) {
+              await fs.remove(file.path)
+            }
+          }
         }
 
         console.log('crawl... done')
 
-        return { succeed: true }
+        return
 
       case 'optimize':
         console.log('optimize...')
 
-        const origin = await cache.get(payload.origin)
+        let origin, target
 
-        const target = await optimizer.optimize(origin, payload.args)
+        try {
+          const origin = await cache.get(payload.origin)
 
-        await cache.put(payload.target, target)
+          const target = await optimizer.optimize(origin, payload.args)
 
-        await fs.remove(origin.path)
-        await fs.remove(target.path)
+          await cache.put(payload.target, target)
+
+        } finally {
+          if (origin) {
+            await fs.remove(origin.path)
+          }
+
+          if (target) {
+            await fs.remove(target.path)
+          }
+        }
 
         console.log('optimize... done')
 
-        return { succeed: true }
+        return
     }
 
     return { succeed: false }

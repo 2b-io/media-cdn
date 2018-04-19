@@ -58,7 +58,7 @@ class Producer extends Connection {
         if (msg._onReply) {
           const content = this.parseContent(reply)
 
-          msg._onReply(null, content, reply)
+          msg._onReply(content.error, content.content, reply)
         }
       } catch (error) {
         msg._onReply && msg._onReply(error)
@@ -83,7 +83,7 @@ class Producer extends Connection {
         const content = this.parseContent(reply)
 
         while (waitJob = waitList.shift()) {
-          waitJob._onReply && waitJob._onReply(null, content, reply)
+          waitJob._onReply && waitJob._onReply(content.error, content.content, reply)
         }
 
       } catch (error) {

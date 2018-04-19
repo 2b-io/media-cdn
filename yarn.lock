@@ -1657,6 +1657,10 @@ depd@~1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
 
+deserialize-error@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/deserialize-error/-/deserialize-error-0.0.3.tgz#f568633572d7c2cc46a55a5fc254b6dfce7b3fca"
+
 destroy@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/destroy/-/destroy-1.0.4.tgz#978857442c44749e4206613e37946205826abd80"

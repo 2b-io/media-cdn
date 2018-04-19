@@ -104,8 +104,10 @@ app.get('/', [
       .waitFor(`process:${req._params.target}`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error, content) => {
-        console.log(error, content)
+      .onReply(async (error) => {
+        if (error) {
+          return res.status(500).send(error)
+        }
 
         next()
       })
@@ -119,8 +121,6 @@ app.get('/', [
     console.log('app.js: HEAD /the-resource')
 
     req._meta = await cache.head(req._params.target)
-
-    console.log(req._meta)
 
     next()
   },

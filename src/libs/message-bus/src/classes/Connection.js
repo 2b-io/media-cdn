@@ -126,7 +126,7 @@ class Connection {
         })
       ),
       {
-        expiration: 5e3.toString(),
+        expiration: 120e3.toString(),
         contentType: 'application/json',
         contentEncoding: 'utf-8',
         timestamp: Date.now(),

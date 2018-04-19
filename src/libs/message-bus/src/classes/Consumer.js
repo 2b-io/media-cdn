@@ -1,3 +1,4 @@
+import serializeError from 'serialize-error'
 import Connection from './Connection'
 
 class Consumer extends Connection {
@@ -18,8 +19,15 @@ class Consumer extends Connection {
     const content = this.parseContent(msg)
     const { correlationId } = msg.properties
 
-    const response = this._onMessage ?
-      await this._onMessage(content, msg) : null
+    const response = {}
+
+    try {
+      response.content = this._onMessage ?
+        await this._onMessage(content, msg)
+        : null
+    } catch (error) {
+      response.error = serializeError(error)
+    }
 
     if (!correlationId) {
       return
