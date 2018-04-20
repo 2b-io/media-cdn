@@ -1,4 +1,5 @@
 import fs from 'fs-extra'
+import mime from 'mime'
 import cache from 'services/cache'
 import crawler from 'services/crawler'
 
@@ -19,10 +20,17 @@ export default async (payload) => {
       file = await crawler.crawl(payload.url)
 
       await cache.put(payload.origin, file)
+
+      return file
     } finally {
       if (file) {
         await fs.remove(file.path)
       }
+    }
+  } else {
+    return {
+      contentType: meta.ContentType,
+      ext: mime.getExtension(meta.ContentType)
     }
   }
 

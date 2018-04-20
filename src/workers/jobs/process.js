@@ -13,11 +13,11 @@ const crawl = async (payload, producer) => {
       .waitFor(`crawl:${payload.origin}`)
       .sendTo('worker')
       .ttl(30e3)
-      .onReply(async (error) => {
+      .onReply(async (error, content) => {
         if (error) {
           reject(deserializeError(error))
         } else {
-          resolve()
+          resolve(content)
         }
       })
       .send()
@@ -38,11 +38,11 @@ const optimize = async (payload, producer) => {
       .waitFor(`optimize:${payload.origin}`)
       .sendTo('worker')
       .ttl(30e3)
-      .onReply(async (error) => {
+      .onReply(async (error, content) => {
         if (error) {
           reject(deserializeError(error))
         } else {
-          resolve()
+          resolve(content)
         }
       })
       .send()
@@ -50,12 +50,16 @@ const optimize = async (payload, producer) => {
 }
 
 export default async (payload, producer) => {
-  console.log('process...')
-  console.time('process...')
+  try {
+    console.log('process...')
+    console.time('process...')
 
-  await crawl(payload, producer)
+    const origin = await crawl(payload, producer)
 
-  await optimize(payload, producer)
+    const target = await optimize(payload, producer)
 
-  console.timeEnd('process...')
+    return { origin, target }
+  } finally {
+    console.timeEnd('process...')
+  }
 }

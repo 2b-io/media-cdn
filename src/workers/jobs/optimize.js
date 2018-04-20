@@ -15,6 +15,7 @@ export default async (payload) => {
 
     await cache.put(payload.target, target)
 
+    return target
   } finally {
     if (origin) {
       await fs.remove(origin.path)
@@ -23,7 +24,7 @@ export default async (payload) => {
     if (target) {
       await fs.remove(target.path)
     }
-  }
 
-  console.timeEnd('optimize...')
+    console.timeEnd('optimize...')
+  }
 }

@@ -1,3 +1,4 @@
+import mime from 'mime'
 import sh from 'shorthash'
 import cache from 'services/cache'
 
@@ -67,7 +68,7 @@ export default [
       .waitFor(`process:${req._params.target}`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error) => {
+      .onReply(async (error, content) => {
         if (error) {
           return res.status(500).send(error)
         }
@@ -88,7 +89,9 @@ export default [
     next()
   },
   (req, res, next) => {
-    if (!req._meta) {
+    const meta = req._meta
+
+    if (!meta) {
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
       res.set('Pragma', 'no-cache')
       res.set('Expires', '0')
@@ -98,12 +101,19 @@ export default [
 
     console.log(`PIPE ${req._params.target}`)
 
-    res.set('accept-ranges', req._meta.AcceptRanges)
-    res.set('content-type', req._meta.ContentType)
-    res.set('content-length', req._meta.ContentLength)
-    res.set('last-Modified', req._meta.LastModified)
-    res.set('etag', req._meta.ETag)
-    res.set('cache-control', req._meta.CacheControl)
-    cache.stream(req._params.target).pipe(res)
+    const { origin, target } = req._params
+    const ext = mime.getExtension(meta.ContentType)
+
+    res.set('accept-ranges', meta.AcceptRanges)
+    res.set('content-type', meta.ContentType)
+    res.set('content-length', meta.ContentLength)
+    res.set('last-Modified', meta.LastModified)
+    res.set('etag', meta.ETag)
+    res.set('cache-control', meta.CacheControl)
+
+    res.set('x-origin-path', `${origin}.${ext}`)
+    res.set('x-target-path', `${target}.${ext}`)
+
+    cache.stream(target).pipe(res)
   }
 ]

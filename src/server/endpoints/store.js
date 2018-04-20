@@ -1,5 +1,6 @@
 import express from 'express'
 import mime from 'mime'
+import sh from 'shorthash'
 
 import Preset from 'models/Preset'
 import Project from 'models/Project'
@@ -9,19 +10,58 @@ import handleRequest from 'server/middlewares/handle-request'
 
 const router = express()
 
-router.get('/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext', join(
+router.get([
+  '/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext',
+  '/:slug/:uh/:m\\_:w\\x:h\.:ext'
+], join(
+  async (req, res, next) => {
+    req._params = {}
+
+    next()
+  },
   async (req, res, next) => {
     const {
-      slug, ext,
+      slug, ext, vh,
       uh:urlHash,
-      p:hash,
-      vh:valueHash,
+      p:hash = 'default',
       m:mode,
       w:width,
       h:height
     } = req.params
 
+    let valueHash = vh
+
+    if (!vh) {
+      const project = req._params.project = await Project.findOne({
+        slug,
+        removed: false,
+        disabled: false
+      }).lean()
+
+      if (!project) {
+        return res.sendStatus(400)
+      }
+
+      const preset = req._params.preset = await Preset.findOne({
+        hash: hash,
+        project: project._id,
+        removed: false
+      }).lean()
+
+      if (!preset) {
+        return res.sendStatus(400)
+      }
+
+      valueHash = sh.unique(
+        JSON.stringify(
+          preset.values,
+          Object.keys(preset.values).sort()
+        )
+      )
+    }
+
     req._params = {
+      ...req._params,
       origin: `${slug}/${urlHash}`,
       target: `${slug}/${urlHash}/${hash}/${valueHash}/${mode}_${width}x${height}`,
       ext
@@ -52,7 +92,7 @@ router.get('/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext', join(
     res.set('cache-control', meta.CacheControl)
     res.set('x-origin-path', `${origin}.${ext}`)
     res.set('x-target-path', `${target}.${ext}`)
-    cache.stream(req._params.target).pipe(res)
+    cache.stream(target).pipe(res)
   },
   async (req, res, next) => {
     req._params = {
@@ -67,6 +107,10 @@ router.get('/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext', join(
     next()
   },
   async (req, res, next) => {
+    if (req._params.project) {
+      return next()
+    }
+
     const { slug } = req.params
 
     const project = req._params.project = await Project.findOne({
@@ -82,6 +126,10 @@ router.get('/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext', join(
     next()
   },
   async (req, res, next) => {
+    if (req._params.preset) {
+      return next()
+    }
+
     const presetHash = req.params.p
 
     const preset = req._params.preset = await Preset.findOne({
@@ -143,7 +191,7 @@ router.get('/:slug/:uh\.:ext', join(
     res.set('etag', meta.ETag)
     res.set('cache-control', meta.CacheControl)
     res.set('x-origin-path', `${origin}.${ext}`)
-    cache.stream(req._params.origin).pipe(res)
+    cache.stream(origin).pipe(res)
   }
 ))
 
