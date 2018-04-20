@@ -84,6 +84,8 @@ router.get([
       return res.redirect(`${req.app.mountpath}/${target}.${ext}`)
     }
 
+    console.log(`PIPE ${target}`)
+
     res.set('accept-ranges', meta.AcceptRanges)
     res.set('content-type', meta.ContentType)
     res.set('content-length', meta.ContentLength)
@@ -179,10 +181,10 @@ router.get('/:slug/:uh\.:ext', join(
     next()
   },
   async (req, res, next) => {
-    console.log(`PIPE ${req._params.origin}`)
-
     const meta = req._meta
     const { origin, ext } = req._params
+
+    console.log(`PIPE ${origin}`)
 
     res.set('accept-ranges', meta.AcceptRanges)
     res.set('content-type', meta.ContentType)
