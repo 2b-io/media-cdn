@@ -26,13 +26,17 @@ export default async (payload) => {
       if (file) {
         await fs.remove(file.path)
       }
+
+      console.timeEnd('crawl...')
     }
   } else {
+    console.timeEnd('crawl...')
+
     return {
       contentType: meta.ContentType,
       ext: mime.getExtension(meta.ContentType)
     }
   }
 
-  console.timeEnd('crawl...')
+
 }
