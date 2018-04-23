@@ -4,9 +4,6 @@ import cache from 'services/cache'
 import crawler from 'services/crawler'
 
 export default async (payload) => {
-  console.log('crawl...')
-  console.time('crawl...')
-
   const meta = await cache.head(payload.origin)
 
   if (!meta) {
@@ -26,12 +23,8 @@ export default async (payload) => {
       if (file) {
         await fs.remove(file.path)
       }
-
-      console.timeEnd('crawl...')
     }
   } else {
-    console.timeEnd('crawl...')
-
     return {
       contentType: meta.ContentType,
       ext: mime.getExtension(meta.ContentType)

@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import got from 'got'
 import mime from 'mime'
+import normalizeUrl from 'normalize-url'
 import { URL } from 'url'
 
 import config from 'infrastructure/config'
@@ -9,10 +10,13 @@ import localpath from 'services/localpath'
 const download = async (url, crawlPath) => {
   const response = await new Promise((resolve, reject) => {
     // skip querystring
-    const filename = new URL(url).pathname
+    const u = new URL(normalizeUrl(url, {
+      stripWWW: false
+    }))
+
     const res = {}
 
-    got.stream(url)
+    got.stream(u.toString())
       .on('error', reject)
       .on('response', response => {
         const contentType = response.headers['content-type']

@@ -2,6 +2,9 @@ import deserializeError from 'deserialize-error'
 
 const crawl = async (payload, producer) => {
   return await new Promise((resolve, reject) => {
+    const s = Date.now()
+    console.log(`CRAWL ${payload.url} -> ${payload.origin}...`)
+
     producer.request()
       .content({
         job: 'crawl',
@@ -14,6 +17,8 @@ const crawl = async (payload, producer) => {
       .sendTo('worker')
       .ttl(30e3)
       .onReply(async (error, content) => {
+        console.log(`CRAWL ${payload.url} -> ${payload.origin}... ${Date.now() - s}`)
+
         if (error) {
           reject(deserializeError(error))
         } else {
@@ -25,7 +30,10 @@ const crawl = async (payload, producer) => {
 }
 
 const optimize = async (payload, producer) => {
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
+    const s = Date.now()
+    console.log(`OPTIMIZE ${payload.origin} -> ${payload.target}...`)
+
     producer.request()
       .content({
         job: 'optimize',
@@ -39,6 +47,8 @@ const optimize = async (payload, producer) => {
       .sendTo('worker')
       .ttl(30e3)
       .onReply(async (error, content) => {
+        console.log(`OPTIMIZE ${payload.origin} -> ${payload.target}... ${Date.now() - s}`)
+
         if (error) {
           reject(deserializeError(error))
         } else {
@@ -50,16 +60,9 @@ const optimize = async (payload, producer) => {
 }
 
 export default async (payload, producer) => {
-  try {
-    console.log('process...')
-    console.time('process...')
+  const origin = await crawl(payload, producer)
 
-    const origin = await crawl(payload, producer)
+  const target = await optimize(payload, producer)
 
-    const target = await optimize(payload, producer)
-
-    return { origin, target }
-  } finally {
-    console.timeEnd('process...')
-  }
+  return { origin, target }
 }

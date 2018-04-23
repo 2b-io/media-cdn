@@ -3,9 +3,6 @@ import cache from 'services/cache'
 import optimizer from 'services/optimizer'
 
 export default async (payload) => {
-  console.log('optimize...')
-  console.time('optimize...')
-
   let origin, target
 
   try {
@@ -24,7 +21,5 @@ export default async (payload) => {
     if (target) {
       await fs.remove(target.path)
     }
-
-    console.timeEnd('optimize...')
   }
 }

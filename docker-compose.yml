@@ -10,7 +10,9 @@ services:
     ports:
       - "3002:3002"
     networks:
-      - infra_cdn
+      infra_cdn:
+        aliases:
+          - media-cdn
 
 networks:
   infra_cdn:

@@ -7,7 +7,7 @@ import universal from 'server/endpoints/universal'
 
 const app = express()
 
-app.use(morgan('dev'))
+// app.use(morgan('dev'))
 app.enable('trust proxy')
 app.disable('x-powered-by')
 
@@ -22,5 +22,11 @@ app.use('/u', universal)
 app.use((req, res, next) => {
   res.sendStatus(404)
 })
+
+// app.use((error, req, res, next) => {
+//   console.log(error)
+
+//   res.sendStatus(500)
+// })
 
 export default app
