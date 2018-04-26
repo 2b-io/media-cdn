@@ -18,8 +18,8 @@ router.get([ '/:slug', '/:slug/media' ], join(
 
     next()
   },
-  parseUrlFromQuery,
   getProject,
+  parseUrlFromQuery,
   getPreset,
   parseArgsFromQuery,
   handleRequest
