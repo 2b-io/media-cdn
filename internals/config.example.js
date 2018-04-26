@@ -2,6 +2,7 @@ const path = require('path')
 
 module.exports = {
   development: true,
+  version: '0.1',
   server: {
     url: 'http://localhost:3002',
     port: 3002

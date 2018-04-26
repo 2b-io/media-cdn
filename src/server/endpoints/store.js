@@ -12,21 +12,6 @@ import handleRequest from 'server/middlewares/handle-request'
 const router = express()
 
 router.get([
-  '/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext'
-], (req, res, next) => {
-  const {
-    slug, ext,
-    uh:urlHash,
-    p:hash = 'default',
-    m:mode,
-    w:width,
-    h:height
-  } = req.params
-
-  res.redirect(`${req.app.mountpath}/${slug}/${urlHash}/${hash}/${mode}_${width}x${height}.${ext}`)
-})
-
-router.get([
   '/:slug/:uh/:p/:m\\_:w\\x:h\.:ext',
   '/:slug/:uh/:m\\_:w\\x:h\.:ext'
 ], join(
@@ -34,6 +19,15 @@ router.get([
     req._params = {
       slug: req.params.slug,
       hash: req.params.p || 'default'
+    }
+
+    next()
+  },
+  async (req, res, next) => {
+    const { m } = req.params
+
+    if (m !== 'cover' && m !== 'contain' && m !== 'crop') {
+      return res.sendStatus(400)
     }
 
     next()

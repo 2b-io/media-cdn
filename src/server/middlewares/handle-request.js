@@ -91,7 +91,6 @@ export default [
   },
   (req, res, next) => {
     const meta = req._meta
-    const params = req._params
 
     if (!meta) {
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
@@ -105,6 +104,7 @@ export default [
 
     const { origin, target } = req._params
     const ext = mime.getExtension(meta.ContentType)
+    const params = { ...req._params, ext }
 
     res.set('accept-ranges', meta.AcceptRanges)
     res.set('content-type', meta.ContentType)

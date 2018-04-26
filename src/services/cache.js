@@ -6,12 +6,16 @@ import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'
 
+const { version = '0.0.1' } = config
+
+const cloudPath = (key) => `${version}/${key}`
+
 export default {
   head: async (key) => {
     try {
       return await s3.headObject({
         Bucket: s3.config.bucket,
-        Key: key
+        Key: cloudPath(key)
       }).promise()
     } catch (e) {
       // TODO check not found
@@ -21,7 +25,7 @@ export default {
   put: async (key, file) => {
     return await s3.putObject({
       Bucket: s3.config.bucket,
-      Key: key,
+      Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
       CacheControl: `max-age=${ms('1d') / 1000}`,
       Body: fs.createReadStream(file.path)
@@ -33,7 +37,7 @@ export default {
 
     const data = await s3.getObject({
       Bucket: s3.config.bucket,
-      Key: key
+      Key: cloudPath(key)
     }).promise()
 
     res.contentType = data.ContentType
@@ -47,7 +51,7 @@ export default {
   stream: (key) => {
     return s3.getObject({
       Bucket: s3.config.bucket,
-      Key: key
+      Key: cloudPath(key)
     }).createReadStream()
   }
 }

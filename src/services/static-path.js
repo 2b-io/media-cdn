@@ -7,12 +7,18 @@ export default {
   target: (params) => {
     const {
       origin, ext,
-      args: { mode, width, height },
-      preset: { hash }
+      args: {
+        mode,
+        width = 'auto',
+        height = 'auto'
+      },
+      preset: {
+        hash
+      }
     } = params
 
     return ext ?
-      `${origin}/${hash}/${mode}_${width}x${height}.${ext}` :
-      `${origin}/${hash}/${mode}_${width}x${height}`
+      `/s/${origin}/${hash}/${mode}_${width}x${height}.${ext}` :
+      `/s/${origin}/${hash}/${mode}_${width}x${height}`
   }
 }
