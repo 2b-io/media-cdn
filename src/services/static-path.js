@@ -1,8 +1,14 @@
+import config from 'infrastructure/config'
+
+const { server: { base } } = config
+
 export default {
   origin: (params) => {
     const { origin, ext } = params
 
-    return ext ? `${origin}.${ext}` : origin
+    return ext ?
+      `${base}/s/${origin}.${ext}` :
+      `${base}/s/${origin}`
   },
   target: (params) => {
     const {
@@ -18,7 +24,7 @@ export default {
     } = params
 
     return ext ?
-      `/s/${origin}/${hash}/${mode}_${width}x${height}.${ext}` :
-      `/s/${origin}/${hash}/${mode}_${width}x${height}`
+      `${base}/s/${origin}/${hash}/${mode}_${width}x${height}.${ext}` :
+      `${base}/s/${origin}/${hash}/${mode}_${width}x${height}`
   }
 }

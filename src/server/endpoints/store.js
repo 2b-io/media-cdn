@@ -12,8 +12,8 @@ import handleRequest from 'server/middlewares/handle-request'
 const router = express()
 
 router.get([
-  '/:slug/:uh/:p/:m\\_:w\\x:h\.:ext',
-  '/:slug/:uh/:m\\_:w\\x:h\.:ext'
+  '/:slug/:uh/:p/:m\\_:w\\x:h\.:ext?',
+  '/:slug/:uh/:m\\_:w\\x:h\.:ext?'
 ], join(
   async (req, res, next) => {
     req._params = {
@@ -84,9 +84,10 @@ router.get([
     const { origin, target } = req._params
 
     const ext = mime.getExtension(meta.ContentType)
+    const params = { ...req._params, ext }
 
     if (ext !== req._params.ext) {
-      return res.redirect(`${req.app.mountpath}/${target}.${ext}`)
+      return res.redirect(staticPath.target(params))
     }
 
     console.log(`PIPE ${target}`)
@@ -97,14 +98,14 @@ router.get([
     res.set('last-modified', meta.LastModified)
     res.set('etag', meta.ETag)
     res.set('cache-control', meta.CacheControl)
-    res.set('x-origin-path', staticPath.origin(req._params))
-    res.set('x-target-path', staticPath.target(req._params))
+    res.set('x-origin-path', staticPath.origin(params))
+    res.set('x-target-path', staticPath.target(params))
     cache.stream(target).pipe(res)
   },
   handleRequest
 ))
 
-router.get('/:slug/:uh\.:ext', join(
+router.get('/:slug/:uh\.:ext?', join(
   async (req, res, next) => {
     const { slug, uh:urlHash, ext } = req.params
 
@@ -128,9 +129,10 @@ router.get('/:slug/:uh\.:ext', join(
     const meta = req._meta
 
     const ext = mime.getExtension(meta.ContentType)
+    const params = { ...req._params, ext }
 
     if (ext !== req._params.ext) {
-      return res.redirect(`${req.app.mountpath}/${req._params.origin}.${ext}`)
+      return res.redirect(staticPath.origin(params))
     }
 
     next()
@@ -147,7 +149,7 @@ router.get('/:slug/:uh\.:ext', join(
     res.set('last-modified', meta.LastModified)
     res.set('etag', meta.ETag)
     res.set('cache-control', meta.CacheControl)
-    res.set('x-origin-path', `${origin}.${ext}`)
+    res.set('x-origin-path', staticPath.origin(req._params))
     cache.stream(origin).pipe(res)
   }
 ))
