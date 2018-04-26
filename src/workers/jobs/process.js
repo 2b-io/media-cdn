@@ -60,7 +60,9 @@ const optimize = async (payload, producer) => {
 }
 
 export default async (payload, producer) => {
-  const origin = await crawl(payload, producer)
+  const origin = payload.url ?
+    await crawl(payload, producer) :
+    payload.origin
 
   const target = await optimize(payload, producer)
 

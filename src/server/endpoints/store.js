@@ -2,23 +2,44 @@ import express from 'express'
 import mime from 'mime'
 import sh from 'shorthash'
 
-import Preset from 'models/Preset'
-import Project from 'models/Project'
 import cache from 'services/cache'
+import staticPath from 'services/static-path'
 import join from 'server/middlewares/utils/join'
+import getPreset from 'server/middlewares/preset'
+import getProject from 'server/middlewares/project'
 import handleRequest from 'server/middlewares/handle-request'
 
 const router = express()
 
 router.get([
-  '/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext',
+  '/:slug/:uh/:p/:vh/:m\\_:w\\x:h\.:ext'
+], (req, res, next) => {
+  const {
+    slug, ext,
+    uh:urlHash,
+    p:hash = 'default',
+    m:mode,
+    w:width,
+    h:height
+  } = req.params
+
+  res.redirect(`${req.app.mountpath}/${slug}/${urlHash}/${hash}/${mode}_${width}x${height}.${ext}`)
+})
+
+router.get([
+  '/:slug/:uh/:p/:m\\_:w\\x:h\.:ext',
   '/:slug/:uh/:m\\_:w\\x:h\.:ext'
 ], join(
   async (req, res, next) => {
-    req._params = {}
+    req._params = {
+      slug: req.params.slug,
+      hash: req.params.p || 'default'
+    }
 
     next()
   },
+  getProject,
+  getPreset,
   async (req, res, next) => {
     const {
       slug, ext, vh,
@@ -29,42 +50,32 @@ router.get([
       h:height
     } = req.params
 
-    let valueHash = vh
+    const { preset } = req._params
 
-    if (!vh) {
-      const project = req._params.project = await Project.findOne({
-        slug,
-        removed: false,
-        disabled: false
-      }).lean()
-
-      if (!project) {
-        return res.sendStatus(400)
-      }
-
-      const preset = req._params.preset = await Preset.findOne({
-        hash: hash,
-        project: project._id,
-        removed: false
-      }).lean()
-
-      if (!preset) {
-        return res.sendStatus(400)
-      }
-
-      valueHash = sh.unique(
-        JSON.stringify(
-          preset.values,
-          Object.keys(preset.values).sort()
-        )
+    const valueHash = sh.unique(
+      JSON.stringify(
+        preset.values,
+        Object.keys(preset.values).sort()
       )
-    }
+    )
 
     req._params = {
       ...req._params,
       origin: `${slug}/${urlHash}`,
       target: `${slug}/${urlHash}/${hash}/${valueHash}/${mode}_${width}x${height}`,
       ext
+    }
+
+    next()
+  },
+  async (req, res, next) => {
+    req._params = {
+      ...req._params,
+      args: {
+        mode: req.params.m,
+        width: parseInt(req.params.w, 10) || 'auto',
+        height: parseInt(req.params.h, 10) || 'auto'
+      }
     }
 
     next()
@@ -92,59 +103,9 @@ router.get([
     res.set('last-modified', meta.LastModified)
     res.set('etag', meta.ETag)
     res.set('cache-control', meta.CacheControl)
-    res.set('x-origin-path', `${origin}.${ext}`)
-    res.set('x-target-path', `${target}.${ext}`)
+    res.set('x-origin-path', staticPath.origin(req._params))
+    res.set('x-target-path', staticPath.target(req._params))
     cache.stream(target).pipe(res)
-  },
-  async (req, res, next) => {
-    req._params = {
-      ...req._params,
-      args: {
-        mode: req.params.m,
-        width: parseInt(req.params.w, 10) || 'auto',
-        height: parseInt(req.params.h, 10) || 'auto'
-      }
-    }
-
-    next()
-  },
-  async (req, res, next) => {
-    if (req._params.project) {
-      return next()
-    }
-
-    const { slug } = req.params
-
-    const project = req._params.project = await Project.findOne({
-      slug,
-      removed: false,
-      disabled: false
-    }).lean()
-
-    if (!project) {
-      return res.sendStatus(400)
-    }
-
-    next()
-  },
-  async (req, res, next) => {
-    if (req._params.preset) {
-      return next()
-    }
-
-    const presetHash = req.params.p
-
-    const preset = req._params.preset = await Preset.findOne({
-      hash: presetHash,
-      project: req._params.project._id,
-      removed: false
-    }).lean()
-
-    if (!preset) {
-      return res.sendStatus(400)
-    }
-
-    next()
   },
   handleRequest
 ))

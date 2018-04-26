@@ -1,6 +1,7 @@
 import mime from 'mime'
 import sh from 'shorthash'
 import cache from 'services/cache'
+import staticPath from 'services/static-path'
 
 export default [
   (req, res, next) => {
@@ -90,13 +91,14 @@ export default [
   },
   (req, res, next) => {
     const meta = req._meta
+    const params = req._params
 
     if (!meta) {
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
       res.set('Pragma', 'no-cache')
       res.set('Expires', '0')
       res.set('Surrogate-Control', 'no-store')
-      return res.status(500).json(req._params)
+      return res.sendStatus(500)
     }
 
     console.log(`PIPE ${req._params.target}`)
@@ -111,8 +113,8 @@ export default [
     res.set('etag', meta.ETag)
     res.set('cache-control', meta.CacheControl)
 
-    res.set('x-origin-path', `${origin}.${ext}`)
-    res.set('x-target-path', `${target}.${ext}`)
+    res.set('x-origin-path', staticPath.origin(params))
+    res.set('x-target-path', staticPath.target(params))
 
     cache.stream(target).pipe(res)
   }
