@@ -1,0 +1,19 @@
+version: '3'
+services:
+  media-cdn:
+    build: .
+    container_name: media.cdn
+    command: bash -c "yarn && tail -f /dev/null"
+    volumes:
+      - .:/usr/src
+      - /usr/src/node_modules
+    ports:
+      - "3002:3002"
+    networks:
+      infra_cdn:
+        aliases:
+          - media-cdn
+
+networks:
+  infra_cdn:
+    external: true
