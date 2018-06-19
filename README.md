@@ -1,2 +1,2 @@
-# optimg-on-fly
-On-fly optimizer for images. Easy to integrate with existing systems.
+# media-network/media-cdn
+Real-time image generator that is easy to integrate with existing systems.

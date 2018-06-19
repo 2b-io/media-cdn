@@ -23,7 +23,7 @@ const download = async (url, crawlPath) => {
 
         res.contentType = contentType ?
           contentType.split(';').shift() :
-          mime.getType(filename)
+          mime.getType(u.pathname)
 
         if (res.contentType) {
           res.ext = mime.getExtension(contentType)
