@@ -54,14 +54,12 @@
     "nodemon": "1.12.1"
   },
   "scripts": {
-    "up": "docker-compose up -d && yarn remote",
-    "remote": "docker exec -it media.cdn bash",
-    "start": "NEW_RELIC_ENABLED=false concurrently --raw \"yarn dev:server\" \"yarn dev:worker\"",
+    "start": "NEW_RELIC_ENABLED=false concurrently --raw \"npm run dev:server\" \"npm run dev:worker\"",
     "build": "cd src && babel . -d ../build",
     "build:clean": "rm -rf build",
     "dev:server": "cd src && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
     "dev:worker": "cd src && nodemon workers/ --exec babel-node --CONFIG=../internals/config.dev.js",
-    "staging:start": "concurrently \"yarn staging:server\" \"yarn staging:worker\"",
+    "staging:start": "concurrently \"npm run staging:server\" \"npm run staging:worker\"",
     "staging:server": "cd build && node server/ --CONFIG=../internals/config.dev.js",
     "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js"
   }
