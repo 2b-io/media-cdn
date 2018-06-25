@@ -67,6 +67,9 @@ module.exports = {
       "error",
       "never"
     ],
-    "object-shorthand": "error"
+    "object-shorthand": "error",
+    "security/detect-buffer-noassert": "error",
+    "security/detect-no-csrf-before-method-override": "error",
+    "security/detect-pseudoRandomBytes": "error"
   }
 };
