@@ -2932,12 +2932,6 @@
         }
       }
     },
-    "eslint-plugin-array-func": {
-      "version": "3.0.0",
-      "resolved": "https://registry.npmjs.org/eslint-plugin-array-func/-/eslint-plugin-array-func-3.0.0.tgz",
-      "integrity": "sha512-aUZ9wQiPl31ewbHxTN38rgaVOfQwg7Pyauq+5LWcTO4QQwvHZnCh2TPZFsaXhnBg3XmLT/AZogRThV/flz7ulQ==",
-      "dev": true
-    },
     "eslint-plugin-promise": {
       "version": "3.8.0",
       "resolved": "https://registry.npmjs.org/eslint-plugin-promise/-/eslint-plugin-promise-3.8.0.tgz",

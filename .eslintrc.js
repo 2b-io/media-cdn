@@ -4,13 +4,11 @@ module.exports = {
     "node": true
   },
   "plugins": [
-    "array-func",
     "promise",
     "security"
   ],
   "extends": [
     "eslint:recommended",
-    "plugin:array-func/recommended",
     "plugin:promise/recommended",
     "plugin:security/recommended"
   ],
