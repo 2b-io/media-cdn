@@ -1,5 +1,5 @@
 {
-  "name": "@media-network/cdn",
+  "name": "@media-network/media-cdn",
   "version": "v0.0.2-prod",
   "description": "Easy-integrated online service to create media real time from original media",
   "main": "index.js",
@@ -51,16 +51,19 @@
     "babel-preset-env": "1.6.1",
     "babel-preset-stage-2": "6.24.1",
     "concurrently": "3.5.0",
+    "eslint": "4.19.1",
     "nodemon": "1.12.1"
   },
   "scripts": {
-    "start": "NEW_RELIC_ENABLED=false concurrently --raw \"npm run dev:server\" \"npm run dev:worker\"",
+    "start": "NEW_RELIC_ENABLED=false concurrently --raw \"npm run dev:server\" \"npm run dev:worker\" \"npm run lint:watch\"",
     "build": "cd src && babel . -d ../build",
     "build:clean": "rm -rf build",
     "dev:server": "cd src && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
     "dev:worker": "cd src && nodemon workers/ --exec babel-node --CONFIG=../internals/config.dev.js",
     "staging:start": "concurrently \"npm run staging:server\" \"npm run staging:worker\"",
     "staging:server": "cd build && node server/ --CONFIG=../internals/config.dev.js",
-    "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js"
+    "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js",
+    "lint": "eslint --ext js ./src",
+    "lint:watch": "nodemon --legacy-watch --watch ./src --ext js --exec \"npm run lint\""
   }
 }
