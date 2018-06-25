@@ -3,7 +3,17 @@ module.exports = {
     "es6": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "plugins": [
+    "array-func",
+    "promise",
+    "security"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:array-func/recommended",
+    "plugin:promise/recommended",
+    "plugin:security/recommended"
+  ],
   // "parser": "babel-eslint",
   "parserOptions": {
     "ecmaFeatures": {
@@ -11,8 +21,6 @@ module.exports = {
     "sourceType": "module",
     "ecmaVersion": 2018
   },
-  "plugins": [
-  ],
   "rules": {
     "indent": [
       "error",
