@@ -6,9 +6,8 @@ export default async (payload) => {
   let origin, target
 
   try {
-    const origin = await cache.get(payload.origin)
-
-    const target = await optimizer.optimize(origin, payload.args)
+    origin = await cache.get(payload.origin)
+    target = await optimizer.optimize(origin, payload.args)
 
     await cache.put(payload.target, target)
 

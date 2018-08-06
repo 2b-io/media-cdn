@@ -42,5 +42,5 @@ export default {
     }
   },
   mongodb: process.env.MONGO,
-  tmpDir: process.env.TMP_DIR || path.resolve(__dirname, '../tmp')
+  tmpDir: process.env.TMP_DIR || path.resolve(__dirname, '../../tmp')
 }
