@@ -53,11 +53,11 @@
     "start": "NEW_RELIC_ENABLED=false concurrently --raw \"npm run dev:server\" \"npm run dev:worker\" \"npm run lint:watch\"",
     "build": "cd src && babel . -d ../build",
     "build:clean": "rm -rf build",
-    "dev:server": "cd src && nodemon server/ --exec babel-node --CONFIG=../internals/config.dev.js",
-    "dev:worker": "cd src && nodemon workers/ --exec babel-node --CONFIG=../internals/config.dev.js",
+    "dev:server": "cd src && nodemon server/ --exec babel-node",
+    "dev:worker": "cd src && nodemon workers/ --exec babel-node",
     "staging:start": "concurrently \"npm run staging:server\" \"npm run staging:worker\"",
-    "staging:server": "cd build && node server/ --CONFIG=../internals/config.dev.js",
-    "staging:worker": "cd build && node workers/media/ --CONFIG=../internals/config.dev.js",
+    "staging:server": "cd build && node server/",
+    "staging:worker": "cd build && node workers/media/",
     "lint": "eslint --ext js ./src",
     "lint:watch": "nodemon --legacy-watch --watch ./src --ext js --exec \"npm run lint\""
   }
