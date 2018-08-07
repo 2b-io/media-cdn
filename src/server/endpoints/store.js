@@ -12,8 +12,8 @@ import handleRequest from 'server/middlewares/handle-request'
 const router = express()
 
 router.get([
-  '/:slug/:uh/:p/:m\\_:w\\x:h\.:ext?',
-  '/:slug/:uh/:m\\_:w\\x:h\.:ext?'
+  '/:slug/:uh/:p/:m\\_:w\\x:h.:ext?',
+  '/:slug/:uh/:m\\_:w\\x:h.:ext?'
 ], join(
   async (req, res, next) => {
     req._params = {
@@ -36,12 +36,12 @@ router.get([
   getPreset,
   async (req, res, next) => {
     const {
-      slug, ext, vh,
-      uh:urlHash,
-      p:hash = 'default',
-      m:mode,
-      w:width,
-      h:height
+      slug, ext,
+      uh: urlHash,
+      p: hash = 'default',
+      m: mode,
+      w: width,
+      h: height
     } = req.params
 
     const { preset } = req._params
@@ -55,8 +55,8 @@ router.get([
 
     req._params = {
       ...req._params,
-      origin: `${slug}/${urlHash}`,
-      target: `${slug}/${urlHash}/${hash}/${valueHash}/${mode}_${width}x${height}`,
+      origin: `${ slug }/${ urlHash }`,
+      target: `${ slug }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`,
       ext
     }
 
@@ -81,7 +81,7 @@ router.get([
       return next()
     }
 
-    const { origin, target } = req._params
+    const { target } = req._params
 
     const ext = mime.getExtension(meta.ContentType)
     const params = { ...req._params, ext }
@@ -90,7 +90,7 @@ router.get([
       return res.redirect(staticPath.target(params))
     }
 
-    console.log(`PIPE ${target}`)
+    console.log(`PIPE ${ target }`)
 
     res.set('accept-ranges', meta.AcceptRanges)
     res.set('content-type', meta.ContentType)
@@ -105,13 +105,13 @@ router.get([
   handleRequest
 ))
 
-router.get('/:slug/:uh\.:ext?', join(
+router.get('/:slug/:uh.:ext?', join(
   async (req, res, next) => {
-    const { slug, uh:urlHash, ext } = req.params
+    const { ext, slug, uh: urlHash } = req.params
 
     req._params = {
-      origin: `${slug}/${urlHash}`,
-      ext
+      ext,
+      origin: `${ slug }/${ urlHash }`
     }
 
     next()
@@ -137,11 +137,11 @@ router.get('/:slug/:uh\.:ext?', join(
 
     next()
   },
-  async (req, res, next) => {
+  async (req, res) => {
     const meta = req._meta
-    const { origin, ext } = req._params
+    const { origin } = req._params
 
-    console.log(`PIPE ${origin}`)
+    console.log(`PIPE ${ origin }`)
 
     res.set('accept-ranges', meta.AcceptRanges)
     res.set('content-type', meta.ContentType)

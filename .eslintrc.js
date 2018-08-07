@@ -20,6 +20,10 @@ module.exports = {
     "ecmaVersion": 2018
   },
   "rules": {
+    "arrow-parens": [
+      "error",
+      "always"
+    ],
     "indent": [
       "error",
       2, {
@@ -68,8 +72,6 @@ module.exports = {
       "never"
     ],
     "object-shorthand": "error",
-    "security/detect-buffer-noassert": "error",
-    "security/detect-no-csrf-before-method-override": "error",
-    "security/detect-pseudoRandomBytes": "error"
+    "security/detect-object-injection": "off"
   }
 };

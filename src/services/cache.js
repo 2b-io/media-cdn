@@ -8,7 +8,7 @@ import localpath from 'services/localpath'
 
 const { version = '0.0.1' } = config
 
-const cloudPath = (key) => `${version}/${key}`
+const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
   head: async (key) => {
@@ -27,7 +27,7 @@ export default {
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
-      CacheControl: `max-age=${ms('1d') / 1000}`,
+      CacheControl: `max-age=${ ms('7d') / 1000 }`,
       Body: fs.createReadStream(file.path)
     }).promise()
   },
@@ -42,7 +42,7 @@ export default {
 
     res.contentType = data.ContentType
     res.ext = mime.getExtension(res.contentType)
-    res.path = `${downloadPath}.${res.ext}`
+    res.path = `${ downloadPath }.${ res.ext }`
 
     await fs.outputFile(res.path, data.Body)
 

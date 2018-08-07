@@ -30,8 +30,8 @@ export default async (file, args) => {
   }
 
   image.jpeg({
-    quality: quality,
-    progressive: progressive
+    quality,
+    progressive
   })
 
   const output = await localpath(file.ext)

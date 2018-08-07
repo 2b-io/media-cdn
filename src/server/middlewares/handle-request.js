@@ -27,9 +27,9 @@ export default [
       )
     )
 
-    req._params.origin = `${slug}/${urlHash}`
+    req._params.origin = `${ slug }/${ urlHash }`
 
-    req._params.target = `${slug}/${urlHash}/${hash}/${valueHash}/${mode}_${width}x${height}`
+    req._params.target = `${ slug }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`
 
     next()
   },
@@ -38,7 +38,7 @@ export default [
       return next()
     }
 
-    console.log(`HEAD ${req._params.target}`)
+    console.log(`HEAD ${ req._params.target }`)
 
     req._meta = await cache.head(req._params.target)
 
@@ -49,7 +49,7 @@ export default [
       return next()
     }
 
-    console.log(`PROCESS ${req._params.target}`)
+    console.log(`PROCESS ${ req._params.target }`)
 
     const producer = req.app.get('rpc')
 
@@ -66,10 +66,10 @@ export default [
           }
         }
       })
-      .waitFor(`process:${req._params.target}`)
+      .waitFor(`process:${ req._params.target }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error, content) => {
+      .onReply(async (error) => {
         if (error) {
           return res.status(500).send(error)
         }
@@ -83,13 +83,13 @@ export default [
       return next()
     }
 
-    console.log(`PROCESS ${req._params.target}`)
+    console.log(`PROCESS ${ req._params.target }`)
 
     req._meta = await cache.head(req._params.target)
 
     next()
   },
-  (req, res, next) => {
+  (req, res) => {
     const meta = req._meta
 
     if (!meta) {
@@ -100,9 +100,9 @@ export default [
       return res.sendStatus(500)
     }
 
-    console.log(`PIPE ${req._params.target}`)
+    console.log(`PIPE ${ req._params.target }`)
 
-    const { origin, target } = req._params
+    const { target } = req._params
     const ext = mime.getExtension(meta.ContentType)
     const params = { ...req._params, ext }
 

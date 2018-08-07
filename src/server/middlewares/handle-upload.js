@@ -9,7 +9,7 @@ export default multer({
     destination: config.tmpDir,
     filename: (req, file, done) => done(
       null,
-      `${uuid.v4()}.${mime.getExtension(file.mimetype)}`
+      `${ uuid.v4() }.${ mime.getExtension(file.mimetype) }`
     )
   })
 }).single('media')
