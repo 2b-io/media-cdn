@@ -1,7 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 
-import { api } from 'server/api'
+import { api } from 'server/endpoints/api'
 import pretty from 'server/endpoints/pretty'
 import store from 'server/endpoints/store'
 import universal from 'server/endpoints/universal'

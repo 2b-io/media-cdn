@@ -22,25 +22,25 @@ env.config({
 
 export default {
   __rootDir: rootDir,
-  systemPort: process.env.PORT,
-  webpackDevServer: process.env.DEV_SERVER,
-  mongodb: process.env.MONGO,
+  development: process.env.NODE_ENV === 'development',
+  version: process.env.VERSION,
   server: {
-    base: process.env.DEV_SERVER,
-    bind: process.env.BIND,
-    port: process.env.PORT
-  },
-  aws: {
-    s3: {
-      bucket: process.env.AWS_S3_BUCKET,
-      region: process.env.AWS_S3_REGION,
-      accessKeyId: process.env.AWS_S3_ACCESSKEYID,
-      secretAccessKey: process.env.AWS_S3_SECRETACCESSKEY
-    }
+    base: process.env.BASE_URL,
+    bind: process.env.SERVER_BIND,
+    port: process.env.SERVER_PORT
   },
   amq: {
     host: process.env.AMQ_HOST,
     prefix: process.env.AMQ_PREFIX
   },
-  tmpDir: path.resolve(__dirname, '.../tmp')
+  aws: {
+    s3: {
+      bucket: process.env.AWS_S3_BUCKET,
+      region: process.env.AWS_S3_REGION,
+      accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY
+    }
+  },
+  mongodb: process.env.MONGO,
+  tmpDir: process.env.TMP_DIR || path.resolve(__dirname, '../../tmp')
 }
