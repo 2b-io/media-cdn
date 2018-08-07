@@ -7,7 +7,7 @@ const { amq: { host, prefix }, server: { port, bind } } = config
 
 const main = async () => {
   const producer = await rpc.createProducer({
-    name: `web-server-${Date.now()}`,
+    name: `web-server-${ Date.now() }`,
     host,
     prefix
   }).connect()
@@ -15,7 +15,7 @@ const main = async () => {
   app.set('rpc', producer)
 
   app.listen(port, bind, () => {
-    console.log(`Server start at ${bind}:${port}`)
+    console.log(`Server start at ${ bind }:${ port }`)
   })
 }
 

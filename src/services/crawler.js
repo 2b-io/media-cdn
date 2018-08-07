@@ -4,7 +4,6 @@ import mime from 'mime'
 import normalizeUrl from 'normalize-url'
 import { URL } from 'url'
 
-import config from 'infrastructure/config'
 import localpath from 'services/localpath'
 
 const download = async (url, crawlPath) => {
@@ -18,7 +17,7 @@ const download = async (url, crawlPath) => {
 
     got.stream(u.toString())
       .on('error', reject)
-      .on('response', response => {
+      .on('response', (response) => {
         const contentType = response.headers['content-type']
 
         res.contentType = contentType ?
@@ -27,7 +26,7 @@ const download = async (url, crawlPath) => {
 
         if (res.contentType) {
           res.ext = mime.getExtension(contentType)
-          res.path = `${crawlPath}.${res.ext}`
+          res.path = `${ crawlPath }.${ res.ext }`
         }
       })
       .pipe(fs.createWriteStream(crawlPath))

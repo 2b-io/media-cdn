@@ -34,7 +34,6 @@ class Producer extends Connection {
   }
 
   async publish(sentTo, content, expectReply = true) {
-    const channel = this._channel
     const correlationId = expectReply ? uuid.v4() : undefined
 
     if (expectReply) {

@@ -7,8 +7,8 @@ export default {
     const { origin, ext } = params
 
     return ext ?
-      `${base}/s/${origin}.${ext}` :
-      `${base}/s/${origin}`
+      `${ base }/s/${ origin }.${ ext }` :
+      `${ base }/s/${ origin }`
   },
   target: (params) => {
     const {
@@ -24,7 +24,7 @@ export default {
     } = params
 
     return ext ?
-      `${base}/s/${origin}/${hash}/${mode}_${width}x${height}.${ext}` :
-      `${base}/s/${origin}/${hash}/${mode}_${width}x${height}`
+      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }.${ ext }` :
+      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }`
   }
 }

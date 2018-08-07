@@ -22,9 +22,9 @@ class Consumer extends Connection {
     const response = {}
 
     try {
-      response.content = this._onMessage ?
-        await this._onMessage(content, msg)
-        : null
+      if (this._onMessage) {
+        response.content = await this._onMessage(content, msg)
+      }
     } catch (error) {
       response.error = serializeError(error)
     }

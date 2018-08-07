@@ -23,7 +23,10 @@ export default async (req, res, next) => {
   const { hostname } = new URL(url)
   const { project } = req._params
 
-  const allowOrigin = project.origins.length === 0 || project.origins.some(o => isMatch(o, hostname))
+  const allowOrigin = project.origins.length === 0 ||
+    project.origins.some(
+      (origin) => isMatch(origin, hostname)
+    )
 
   if (!allowOrigin) {
     // forbidden
@@ -32,7 +35,7 @@ export default async (req, res, next) => {
 
   req._params = {
     ...req._params,
-    url: url,
+    url,
     urlHash: sh.unique(url)
   }
 

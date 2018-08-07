@@ -29,7 +29,7 @@ export default async (file, args) => {
   }
 
   image.webp({
-    quality: quality,
+    quality,
     alphaQuality: quality
   })
 
