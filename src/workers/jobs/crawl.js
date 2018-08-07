@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import mime from 'mime'
 import cache from 'services/cache'
+import da from 'services/da'
 import crawler from 'services/crawler'
 
 export default async (payload) => {
@@ -13,8 +14,9 @@ export default async (payload) => {
       if (!payload.url) {
         throw new Error('Not crawlable')
       }
-
-      file = await crawler.crawl(payload.url)
+      const slug = payload.origin.split('/')[0]
+      const { headers } = await da.getProject(slug)
+      file = await crawler.crawl(payload.url, headers)
 
       await cache.put(payload.origin, file)
 
