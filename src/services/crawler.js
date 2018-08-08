@@ -7,7 +7,7 @@ import { URL } from 'url'
 import config from 'infrastructure/config'
 import localpath from 'services/localpath'
 
-const download = async (url, crawlPath, headersCustom) => {
+const download = async (url, crawlPath, headers) => {
 
   const response = await new Promise((resolve, reject) => {
     // skip querystring
@@ -17,7 +17,7 @@ const download = async (url, crawlPath, headersCustom) => {
 
     const res = {}
 
-    got.stream(u.toString(), { headers: { headersCustom: `${ headersCustom }` } })
+    got.stream(u.toString(), { headers: `${ headers }` })
       .on('error', reject)
       .on('response', response => {
         const contentType = response.headers['content-type']
@@ -44,9 +44,13 @@ const download = async (url, crawlPath, headersCustom) => {
 }
 
 export default {
-  crawl: async (url, headersCustom) => {
+  crawl: async (url, headers = []) => {
     const crawlPath = await localpath()
-
-    return await download(url, crawlPath, headersCustom)
+    const customHeaders = headers.reduce((result, item) => {
+      var key = Object.keys(item)[0]
+      result[key] = item[key]
+      return result
+    }, {})
+    return await download(url, crawlPath, customHeaders)
   }
 }
