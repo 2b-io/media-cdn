@@ -15,7 +15,7 @@ export default async (req, res, next) => {
 
   req._params = {
     ...req._params,
-    url: url,
+    url,
     urlHash: sh.unique(url)
   }
 

@@ -8,7 +8,7 @@ import universal from 'server/endpoints/universal'
 
 const app = express()
 
-// app.use(morgan('dev'))
+app.use(morgan('dev'))
 app.enable('trust proxy')
 app.disable('x-powered-by')
 
@@ -21,7 +21,7 @@ app.use('/p', pretty)
 app.use('/s', store)
 app.use('/u', universal)
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.sendStatus(404)
 })
 

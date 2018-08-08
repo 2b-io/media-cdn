@@ -15,7 +15,7 @@ const main = async () => {
       prefix
     }).connect(),
     rpc.createProducer({
-      name: `worker-distributor-${Date.now()}`,
+      name: `worker-distributor-${ Date.now() }`,
       host,
       prefix
     }).connect()

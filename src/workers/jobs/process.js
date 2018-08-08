@@ -3,7 +3,7 @@ import deserializeError from 'deserialize-error'
 const crawl = async (payload, producer) => {
   return await new Promise((resolve, reject) => {
     const s = Date.now()
-    console.log(`CRAWL ${payload.url} -> ${payload.origin}...`)
+    console.log(`CRAWL ${ payload.url } -> ${ payload.origin }...`)
 
     producer.request()
       .content({
@@ -13,11 +13,11 @@ const crawl = async (payload, producer) => {
           origin: payload.origin
         }
       })
-      .waitFor(`crawl:${payload.origin}`)
+      .waitFor(`crawl:${ payload.origin }`)
       .sendTo('worker')
       .ttl(30e3)
       .onReply(async (error, content) => {
-        console.log(`CRAWL ${payload.url} -> ${payload.origin}... ${Date.now() - s}`)
+        console.log(`CRAWL ${ payload.url } -> ${ payload.origin }... ${ Date.now() - s }ms`)
 
         if (error) {
           reject(deserializeError(error))
@@ -32,7 +32,7 @@ const crawl = async (payload, producer) => {
 const optimize = async (payload, producer) => {
   return await new Promise((resolve, reject) => {
     const s = Date.now()
-    console.log(`OPTIMIZE ${payload.origin} -> ${payload.target}...`)
+    console.log(`OPTIMIZE ${ payload.origin } -> ${ payload.target }...`)
 
     producer.request()
       .content({
@@ -47,7 +47,7 @@ const optimize = async (payload, producer) => {
       .sendTo('worker')
       .ttl(30e3)
       .onReply(async (error, content) => {
-        console.log(`OPTIMIZE ${payload.origin} -> ${payload.target}... ${Date.now() - s}`)
+        console.log(`OPTIMIZE ${ payload.origin } -> ${ payload.target }... ${ Date.now() - s }ms`)
 
         if (error) {
           reject(deserializeError(error))
