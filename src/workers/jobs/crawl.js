@@ -16,7 +16,11 @@ export default async (payload) => {
 
       file = await crawler.crawl(payload.url, payload.headers)
 
-      await cache.put(payload.origin, file)
+      await cache.put(payload.origin, file, {
+        meta: {
+          'origin-url': payload.url
+        }
+      })
 
       return file
     } finally {
