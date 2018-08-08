@@ -6,7 +6,7 @@ import crawler from 'services/crawler'
 export default async (payload) => {
   const meta = await cache.head(payload.origin)
 
-  if (!meta || true) {
+  if (!meta) {
     let file
 
     try {
