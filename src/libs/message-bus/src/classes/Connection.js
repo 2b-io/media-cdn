@@ -1,6 +1,7 @@
 import amqp from 'amqplib'
 import debug from 'debug'
 import delay from 'delay'
+import { Buffer } from 'safe-buffer'
 import uuid from 'uuid'
 
 class Connection {
@@ -118,10 +119,9 @@ class Connection {
     return await this._channel.publish(
       this._exchange,
       routing,
-      new Buffer(
-        JSON.stringify({
-          ...content
-        })
+      Buffer.from(
+        JSON.stringify(content),
+        'utf-8'
       ),
       {
         expiration: 120e3.toString(),

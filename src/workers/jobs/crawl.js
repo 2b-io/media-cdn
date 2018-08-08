@@ -14,7 +14,7 @@ export default async (payload) => {
         throw new Error('Not crawlable')
       }
 
-      file = await crawler.crawl(payload.url)
+      file = await crawler.crawl(payload.url, payload.headers)
 
       await cache.put(payload.origin, file)
 

@@ -63,7 +63,8 @@ export default [
           args: {
             ...req._params.preset.values,
             ...req._params.args
-          }
+          },
+          headers: req._params.project.headers
         }
       })
       .waitFor(`process:${ req._params.target }`)
