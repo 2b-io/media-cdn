@@ -47,8 +47,9 @@ export default {
   crawl: async (url, headers = []) => {
     const crawlPath = await localpath()
     const customHeaders = headers.reduce((result, item) => {
-      var key = Object.keys(item)[0]
-      result[key] = item[key]
+      let key = Object.keys(item)[0]
+      let value = item[key]
+      result[key] = value
       return result
     }, {})
     return await download(url, crawlPath, customHeaders)
