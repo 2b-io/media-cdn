@@ -17,7 +17,7 @@ const download = async (url, crawlPath, headersCustom) => {
 
     const res = {}
 
-    got.stream(u.toString(),{ headers: { headersCustom: `${ headersCustom }` }})
+    got.stream(u.toString(), { headers: { headersCustom: `${ headersCustom }` } })
       .on('error', reject)
       .on('response', response => {
         const contentType = response.headers['content-type']
