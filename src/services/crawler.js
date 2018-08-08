@@ -6,8 +6,7 @@ import { URL } from 'url'
 
 import localpath from 'services/localpath'
 
-const download = async (url, crawlPath, headers) => {
-
+const download = async (url, crawlPath, headers = {}) => {
   const response = await new Promise((resolve, reject) => {
     // skip querystring
     const u = new URL(normalizeUrl(url, {
@@ -16,7 +15,7 @@ const download = async (url, crawlPath, headers) => {
 
     const res = {}
 
-    got.stream(u.toString(), { headers: `${ headers }` })
+    got.stream(u.toString(), { headers })
       .on('error', reject)
       .on('response', (response) => {
         const contentType = response.headers['content-type']
@@ -43,14 +42,23 @@ const download = async (url, crawlPath, headers) => {
 }
 
 export default {
-  crawl: async (url, headers = []) => {
+  async crawl(url, headers = []) {
     const crawlPath = await localpath()
-    const customHeaders = headers.reduce((result, item) => {
-      let key = Object.keys(item)[0]
-      let value = item[key]
-      result[key] = value
-      return result
-    }, {})
-    return await download(url, crawlPath, customHeaders)
+
+    return await download(
+      url,
+      crawlPath,
+      headers
+        .filter(Boolean)
+        .filter(
+          ({ name, value }) => !!(name && value)
+        )
+        .reduce(
+          (headers, { name, value }) => ({
+            ...headers,
+            [ name ]: value
+          }), {}
+        )
+    )
   }
 }
