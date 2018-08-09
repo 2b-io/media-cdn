@@ -1,8 +1,6 @@
-import bodyParser from 'body-parser'
-
 import invalidCache from 'services/invalidCache'
 
-export default async (req, res, next) => {
+export default async (req, res) => {
   const result = await invalidCache(req.body.patterns)
   if ( result.Invalidation) {
     res.status(201).json({
