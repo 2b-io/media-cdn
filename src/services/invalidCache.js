@@ -1,13 +1,12 @@
-import randomstring from 'randomstring'
+import serializeError from 'serialize-error'
+
 import cloudFront from 'infrastructure/cloudfront'
 import config from 'infrastructure/config'
 
-const invalidCache = (patterns = []) => {
+const invalidCache = async (patterns = []) => {
 
-  const reference = randomstring.generate({
-    length: 12,
-    charset: 'alphabetic'
-  })
+  let date = new Date()
+  let reference = String(date.getTime())
 
   const params = {
     DistributionId: config.aws.cloudFront.distributionId,
@@ -20,10 +19,10 @@ const invalidCache = (patterns = []) => {
     }
   }
 
-  cloudFront.createInvalidation(params, (err, data) => {
-    if (err) console.log(err, err.stack)
-    else console.log(data)
-  })
+  return await cloudFront.createInvalidation(params, (err, data) => {
+    if (err) { return serializeError(err.stack) }
+    else { return data }
+  }).promise()
 }
 
 export default invalidCache

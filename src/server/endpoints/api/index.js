@@ -5,7 +5,9 @@ import initRoutes from './routes'
 
 const app = express()
 
-app.use(bodyParser())
+app.use(bodyParser.urlencoded({ extended: false }))
+ 
+app.use(bodyParser.json())
 
 initRoutes(app)
 
