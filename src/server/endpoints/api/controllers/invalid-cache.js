@@ -1,15 +1,16 @@
+import serializeError from 'serialize-error'
+
 import invalidCache from 'services/invalidCache'
 
 export default async (req, res) => {
-  const result = await invalidCache(req.body.patterns)
-  if ( result.Invalidation) {
+  try {
+    invalidCache(req.body.patterns)
     res.status(201).json({
       succeed: true
     })
-  }else {
-    res.status(400).json({
-      succeed: false
-    })
+  } catch (e) {
+    res.status(400).json(
+      serializeError(e)
+    )
   }
-
 }
