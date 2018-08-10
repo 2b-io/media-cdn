@@ -3,8 +3,8 @@ import config from 'infrastructure/config'
 
 const invalidCache = async (patterns = []) => {
 
-  let date = new Date()
-  let reference = String(date.getTime())
+  const date = new Date()
+  const reference = String(date.getTime())
 
   const params = {
     DistributionId: config.aws.cloudFront.distributionId,
