@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
 
+import cloudFront from 'infrastructure/cloudfront'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'
@@ -11,7 +12,7 @@ const { version = '0.0.1' } = config
 export const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
-  head: async (key) => {
+  async head(key) {
     try {
       return await s3.headObject({
         Bucket: s3.config.bucket,
@@ -22,7 +23,7 @@ export default {
       return null
     }
   },
-  put: async (key, file, options = {}) => {
+  async put(key, file, options = {}) {
     return await s3.putObject({
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
@@ -32,7 +33,7 @@ export default {
       Metadata: options.meta || {}
     }).promise()
   },
-  get: async (key) => {
+  async get(key) {
     const downloadPath = await localpath()
     const res = {}
 
@@ -49,7 +50,24 @@ export default {
 
     return res
   },
-  stream: (key) => {
+  async invalid(patterns = []) {
+    const date = new Date()
+    const reference = String(date.getTime())
+
+    const params = {
+      DistributionId: config.aws.cloudFront.distributionId,
+      InvalidationBatch: {
+        CallerReference: reference,
+        Paths: {
+          Quantity: patterns.length,
+          Items: patterns
+        }
+      }
+    }
+
+    return await cloudFront.createInvalidation(params).promise()
+  },
+  stream(key) {
     return s3.getObject({
       Bucket: s3.config.bucket,
       Key: cloudPath(key)
