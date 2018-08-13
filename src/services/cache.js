@@ -67,6 +67,46 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
+  async search(path, originUrl) {
+
+    const listParams = {
+      Bucket: config.aws.s3.bucket,
+      Prefix: path
+    }
+
+    const listedObjects = await s3.listObjectsV2(listParams).promise()
+
+    if (listedObjects.Contents.length === 0) { return }
+
+    return listedObjects.Contents.find(async ({ Key }) => {
+      const data = await s3.getObject({ Bucket: config.aws.s3.bucket, Key }).promise()
+        if (originUrl === data.Metadata[ 'origin-url' ]) {
+          return
+        }
+    })
+  },
+  async delete(object) {
+
+    const listParams = {
+      Bucket: config.aws.s3.bucket,
+      Prefix: object
+    }
+
+    const listedObjects = await s3.listObjectsV2(listParams).promise()
+
+    if (listedObjects.Contents.length === 0) { return }
+
+    const deleteParams = {
+      Bucket: config.aws.s3.bucket,
+      Delete: { Objects: [] }
+    }
+
+    listedObjects.Contents.forEach(async ({ Key }) => {
+      deleteParams.Delete.Objects.push({ Key })
+    })
+
+    return await s3.deleteObjects(deleteParams).promise()
+  },
   stream(key) {
     return s3.getObject({
       Bucket: s3.config.bucket,
