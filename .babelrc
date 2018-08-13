@@ -9,7 +9,7 @@
   ],
   "plugins": [
     ["module-resolver", {
-      "root": ["../src"],
+      "root": ["./src"],
     }],
     ["transform-runtime", {
       "polyfill": false,

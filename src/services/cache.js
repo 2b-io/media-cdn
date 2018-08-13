@@ -8,7 +8,7 @@ import localpath from 'services/localpath'
 
 const { version = '0.0.1' } = config
 
-const cloudPath = (key) => `${ version }/${ key }`
+export const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
   head: async (key) => {

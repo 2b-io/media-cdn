@@ -1,24 +1,9 @@
 import env from 'dotenv'
-import fs from 'fs-extra'
 import path from 'path'
 
 const rootDir = path.resolve(__dirname, '..')
-const envPath = path.resolve(rootDir, '../internals/.env')
 
-const envExisted = fs.pathExistsSync(envPath)
-
-if (!envExisted) {
-  console.warn(`
-    Could not found [ internals/.env ].
-    You can create one by copying [ internals/.example.env ]...
-  `)
-
-  throw Error('The server should be configured before starting')
-}
-
-env.config({
-  path: envPath
-})
+env.config()
 
 export default {
   __rootDir: rootDir,
@@ -42,5 +27,6 @@ export default {
     }
   },
   mongodb: process.env.MONGO,
-  tmpDir: process.env.TMP_DIR || path.resolve(__dirname, '../../tmp')
+  scraperUrl: process.env.SCRAPER_URL,
+  tmpDir: process.env.TMP_DIR || path.resolve(rootDir, '../tmp')
 }
