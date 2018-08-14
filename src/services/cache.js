@@ -67,7 +67,7 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search({prefix, pattern}) {
+  async search({ prefix, pattern }) {
     const listParams = {
       Bucket: config.aws.s3.bucket,
       Prefix: prefix
