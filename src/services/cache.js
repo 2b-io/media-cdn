@@ -76,13 +76,15 @@ export default {
 
     const listedObjects = await s3.listObjectsV2(listParams).promise()
 
-    if (listedObjects.Contents.length === 0) { return }
+    if (!listedObjects.Contents.length) {
+      return
+    }
 
     return listedObjects.Contents.find(async ({ Key }) => {
       const data = await s3.getObject({ Bucket: config.aws.s3.bucket, Key }).promise()
-        if (originUrl === data.Metadata[ 'origin-url' ]) {
-          return
-        }
+      if (originUrl === data.Metadata[ 'origin-url' ]) {
+        return
+      }
     })
   },
   async delete(object) {
@@ -93,8 +95,9 @@ export default {
     }
 
     const listedObjects = await s3.listObjectsV2(listParams).promise()
-
-    if (listedObjects.Contents.length === 0) { return }
+    if (!listedObjects.Contents.length) {
+      return
+    }
 
     const deleteParams = {
       Bucket: config.aws.s3.bucket,
