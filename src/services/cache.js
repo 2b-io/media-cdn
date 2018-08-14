@@ -67,11 +67,10 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search(path, originUrl) {
-
+  async search({prefix, originUrl}) {
     const listParams = {
       Bucket: config.aws.s3.bucket,
-      Prefix: path
+      Prefix: prefix
     }
 
     const listedObjects = await s3.listObjectsV2(listParams).promise()
@@ -79,13 +78,24 @@ export default {
     if (!listedObjects.Contents.length) {
       return
     }
+    if (originUrl.indexOf("*") === -1) {
+      return listedObjects.Contents.find(async ({ Key }) => {
+        const data = await s3.getObject({ Bucket: config.aws.s3.bucket, Key }).promise()
+        if (originUrl === data.Metadata[ 'origin-url' ]) {
+          return
+        }
+      })
+    }
 
-    return listedObjects.Contents.find(async ({ Key }) => {
-      const data = await s3.getObject({ Bucket: config.aws.s3.bucket, Key }).promise()
-      if (originUrl === data.Metadata[ 'origin-url' ]) {
-        return
-      }
-    })
+    const listFiles = await Promise.all(listedObjects.Contents.map(async ({ Key }) => {
+      const object = await s3.headObject({ Bucket: config.aws.s3.bucket, Key }).promise()
+      return { path: Key, ...object }
+    }))
+
+    const regex = new RegExp(
+      originUrl.replace(/\*/, '(.+)')
+    )
+    return listFiles.filter(file => regex.test(file.Metadata['origin-url']))
   },
   async delete(object) {
 
