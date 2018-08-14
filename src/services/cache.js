@@ -67,6 +67,91 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
+  async search(prefix, patterns) {
+    const allObjects = await s3.listObjectsV2({
+      Bucket: s3.config.bucket,
+      Prefix: prefix
+    }).promise()
+
+    if (!allObjects.Contents.length) {
+      return []
+    }
+
+    // filter top-level objects
+    const originObjects = allObjects.Contents
+      .filter(
+        (object) => object.Key.split('/').length === 3
+      )
+
+    // get attached data of each origin object
+    const attachedData = await Promise.all(
+      originObjects
+        .map(
+          (object) => s3.headObject({
+            Bucket: s3.config.bucket,
+            Key: object.Key
+          }).promise()
+        )
+    )
+
+    // merge attached data
+    const originObjectsWithData = originObjects.map(
+      (origin, index) => ({
+        ...origin,
+        data: attachedData[ index ]
+      })
+    )
+
+    // find by patterns
+    return patterns
+      .map(
+        (pattern) => {
+          const regex = new RegExp(pattern.replace(/\*/g, '(.+)'))
+
+          return originObjectsWithData
+            .filter(
+              (object) => regex.test(object.data.Metadata[ 'origin-url' ])
+            )
+            .map(
+              (object) => object.Key
+            )
+        }
+      )
+      .reduce(
+        (all, keys) => [ ...all, ...keys ]
+      )
+      .filter(
+        (key, index, keys) => keys.indexOf(key) === index
+      )
+  },
+  async delete(keys) {
+    const relatedObjects = await Promise.all(
+      keys.map(
+        (key) => s3.listObjectsV2({
+          Bucket: s3.config.bucket,
+          Prefix: key
+        }).promise()
+      )
+    )
+
+    const relatedKeys = relatedObjects
+      .map(
+        ({ Contents }) => Contents.map(
+          (object) => object.Key
+        )
+      )
+      .reduce(
+        (allKeys, keys) => [ ...allKeys, ...keys ],
+        []
+      )
+
+    return await s3.deleteObjects({
+      Bucket: s3.config.bucket,
+      Delete: {
+        Objects: relatedKeys.map((key) => ({ Key: key }))
+      }
+    }).promise()
+  },
   stream(key) {
     return s3.getObject({
       Bucket: s3.config.bucket,

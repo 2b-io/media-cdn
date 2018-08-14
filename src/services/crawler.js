@@ -48,7 +48,7 @@ export default {
     return await download(
       url,
       crawlPath,
-      headers
+      (headers || [])
         .filter(Boolean)
         .filter(
           ({ name, value }) => !!(name && value)
