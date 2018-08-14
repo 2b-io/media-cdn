@@ -67,7 +67,7 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search({prefix, originUrl}) {
+  async search({prefix, pattern}) {
     const listParams = {
       Bucket: config.aws.s3.bucket,
       Prefix: prefix
@@ -78,22 +78,23 @@ export default {
     if (!listedObjects.Contents.length) {
       return
     }
-    if (originUrl.indexOf("*") === -1) {
+
+    if (pattern.indexOf('*') === -1) {
+
       return listedObjects.Contents.find(async ({ Key }) => {
-        const data = await s3.getObject({ Bucket: config.aws.s3.bucket, Key }).promise()
-        if (originUrl === data.Metadata[ 'origin-url' ]) {
+        const data = await s3.headObject({ Bucket: config.aws.s3.bucket, Key }).promise()
+        if (pattern === data.Metadata[ 'origin-url' ]) {
           return
         }
       })
     }
-
     const listFiles = await Promise.all(listedObjects.Contents.map(async ({ Key }) => {
       const object = await s3.headObject({ Bucket: config.aws.s3.bucket, Key }).promise()
-      return { path: Key, ...object }
+      return { Key, ...object }
     }))
 
     const regex = new RegExp(
-      originUrl.replace(/\*/, '(.+)')
+      pattern.replace(/\*/, '(.+)')
     )
     return listFiles.filter(file => regex.test(file.Metadata['origin-url']))
   },
