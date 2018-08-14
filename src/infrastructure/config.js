@@ -1,9 +1,6 @@
-import env from 'dotenv'
 import path from 'path'
 
 const rootDir = path.resolve(__dirname, '..')
-
-env.config()
 
 export default {
   __rootDir: rootDir,
