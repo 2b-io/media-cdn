@@ -11,7 +11,7 @@ const crawl = async (payload, producer) => {
         payload: {
           url: payload.url,
           origin: payload.origin,
-          headers: payload.headers
+          headers: payload.headers || []
         }
       })
       .waitFor(`crawl:${ payload.origin }`)

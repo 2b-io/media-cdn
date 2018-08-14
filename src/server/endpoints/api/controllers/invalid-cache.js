@@ -1,49 +1,49 @@
 import serializeError from 'serialize-error'
 
-import { standardizePretty, standardizeUniversal } from 'common/standardize'
 import config from 'infrastructure/config'
 import cache from 'services/cache'
 import project from 'services/project'
 
 export default async (req, res) => {
-
   try {
     const { patterns, slug } = req.body
-    const patternsCloudfront = []
-    if (patterns.length) {
-      await patterns.map( async (pattern) => {
 
-        const { prettyOrigin } = await project.get(slug)
-
-        if (prettyOrigin) {
-          patternsCloudfront.push(standardizePretty(pattern, slug))
-        }else {
-          patternsCloudfront.push(standardizeUniversal(pattern, slug))
-        }
-
-        const params = { prefix: `${ config.version }/${ req.body.slug }`, pattern }
-        const listFiles = await cache.search(params)
-        if (!listFiles) {
-          return
-        }
-        if (listFiles.length) {
-          listFiles.forEach((file) => {
-            cache.delete(file.Key)
-          })
-        } else {
-          cache.delete(listFiles.Key)
-        }
-      })
-
-      await cache.invalid(patternsCloudfront)
+    if (!patterns.length) {
+      return res.status(201).json({ succeed: true })
     }
 
-    res.status(201).json({
-      succeed: true
-    })
+    const { prettyOrigin } = await project.get(slug)
+
+    // delete on s3
+    const s3Prefix = `${ config.version }/${ slug }`
+
+    const s3Keys = await cache.search(s3Prefix, patterns)
+
+    await cache.delete(s3Keys)
+
+    // delete on cloudfront
+    const cloudfrontPatterns = patterns
+      .map(
+        (pattern) => ({
+          pretty: prettyOrigin && pattern.indexOf(prettyOrigin) === 0 ?
+            `/p/${ slug }${ pattern.replace(prettyOrigin, '') }` :
+            null,
+          universal: `/u/${ slug }?*url=${ encodeURIComponent(pattern) }*`
+        })
+      )
+      .reduce(
+        (cloudfrontPatterns, pattern) => [
+          ...cloudfrontPatterns,
+          pattern.pretty,
+          pattern.universal
+        ], []
+      )
+      .filter(Boolean)
+
+    await cache.invalid(cloudfrontPatterns)
+
+    return res.status(201).json({ succeed: true })
   } catch (e) {
-    res.status(500).json(
-      serializeError(e)
-    )
+    res.status(500).json(serializeError(e))
   }
 }
