@@ -19,7 +19,9 @@ export default async (req, res) => {
 
     const s3Keys = await cache.search(s3Prefix, patterns)
 
-    await cache.delete(s3Keys)
+    if (s3Keys.length) {
+      await cache.delete(s3Keys)
+    }
 
     // delete on cloudfront
     const cloudfrontPatterns = patterns
@@ -51,7 +53,9 @@ export default async (req, res) => {
       )
       .filter(Boolean)
 
-    await cache.invalid(cloudfrontPatterns)
+    if (cloudfrontPatterns.length) {
+      await cache.invalid(cloudfrontPatterns)
+    }
 
     return res.status(201).json({ succeed: true })
   } catch (e) {
