@@ -24,18 +24,29 @@ export default async (req, res) => {
     // delete on cloudfront
     const cloudfrontPatterns = patterns
       .map(
-        (pattern) => ({
-          pretty: prettyOrigin && pattern.indexOf(prettyOrigin) === 0 ?
-            `/p/${ slug }${ pattern.replace(prettyOrigin, '') }` :
-            null,
-          universal: `/u/${ slug }?*url=${ encodeURIComponent(pattern) }*`
-        })
+        (pattern) => {
+          const withoutQuerystring = pattern.split('?').shift()
+
+          return {
+            universal: [
+              `/u/${ slug }?url=${ withoutQuerystring }*`,
+              `/u/${ slug }?*url=${ withoutQuerystring }*`,
+              `/u/${ slug }?url=${ encodeURIComponent(withoutQuerystring) }*`,
+              `/u/${ slug }?*url=${ encodeURIComponent(withoutQuerystring) }*`,
+              `/u/${ slug }?url=${ encodeURIComponent(pattern) }*`,
+              `/u/${ slug }?*url=${ encodeURIComponent(pattern) }*`
+            ],
+            pretty: prettyOrigin && pattern.indexOf(prettyOrigin) === 0 ?
+              `/p/${ slug }${ pattern.replace(prettyOrigin, '') }` :
+              null,
+          }
+        }
       )
       .reduce(
         (cloudfrontPatterns, pattern) => [
           ...cloudfrontPatterns,
-          pattern.pretty,
-          pattern.universal
+          ...pattern.universal,
+          pattern.pretty
         ], []
       )
       .filter(Boolean)
