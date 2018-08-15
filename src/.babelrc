@@ -8,12 +8,12 @@
     "stage-2"
   ],
   "plugins": [
-    ["module-resolver", {
-      "root": ["./src"],
-    }],
-    ["transform-runtime", {
+    [ "module-resolver", {
+      "root": [ "./src" ],
+    } ],
+    [ "transform-runtime", {
       "polyfill": false,
       "regenerator": true
-    }]
+    } ]
   ]
 }
