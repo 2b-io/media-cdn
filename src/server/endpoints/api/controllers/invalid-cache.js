@@ -12,11 +12,18 @@ export default async (req, res) => {
       return res.status(201).json({ succeed: true })
     }
 
+    // delete all file in project s3 and cloudfront
+    if (patterns[0] === '/*') {
+      await cache.invalid([`/u/${ slug }/*`, `/p/${ slug }/*`])
+      await cache.deleteAll(`${ config.version }/${ slug }`)
+
+      return res.status(201).json({ succeed: true })
+    }
+
     const { prettyOrigin } = await project.get(slug)
 
     // delete on s3
     const s3Prefix = `${ config.version }/${ slug }`
-
     const s3Keys = await cache.search(s3Prefix, patterns)
 
     if (s3Keys.length) {
@@ -59,6 +66,7 @@ export default async (req, res) => {
 
     return res.status(201).json({ succeed: true })
   } catch (e) {
+    console.log("e", e);
     res.status(500).json(serializeError(e))
   }
 }
