@@ -8,12 +8,12 @@ export default async (ext) => {
   const today = new Date()
   const localpath = path.join(
     config.tmpDir,
-    `${today.getFullYear()}`,
-    `${today.getMonth()}`,
+    `${ today.getFullYear() }`,
+    `${ today.getMonth() }`,
     uuid.v4()
   )
 
   await fs.ensureDir(path.dirname(localpath))
 
-  return ext ? `${localpath}.${ext}` : localpath
+  return ext ? `${ localpath }.${ ext }` : localpath
 }

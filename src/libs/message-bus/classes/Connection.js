@@ -1,6 +1,7 @@
 import amqp from 'amqplib'
 import debug from 'debug'
 import delay from 'delay'
+import { Buffer } from 'safe-buffer'
 import uuid from 'uuid'
 
 class Connection {
@@ -16,13 +17,13 @@ class Connection {
     this._retryCount = 0
     this._ready = 0
     this._channel = null
-    this._exchange = `${this.props.prefix}global`
-    this._queue = `${this.props.prefix}${this.props.name}`
+    this._exchange = `${ this.props.prefix }global`
+    this._queue = `${ this.props.prefix }${ this.props.name }`
     this._log = debug('message-bus')
   }
 
   log(...msg) {
-    return this._log(`[${this.props.name}]`, ...msg)
+    return this._log(`[${ this.props.name }]`, ...msg)
   }
 
   parseContent(msg) {
@@ -42,7 +43,7 @@ class Connection {
   }
 
   async connect() {
-    this.log(`Connecting... retries: ${this._retryCount}`)
+    this.log(`Connecting... retries: ${ this._retryCount }`)
 
     try {
       const conn = await amqp.connect(this.props.host)
@@ -78,7 +79,6 @@ class Connection {
 
   async _init() {
     const channel = this._channel
-    const { name } = this.props
 
     await channel.assertExchange(
       this._exchange,
@@ -99,8 +99,7 @@ class Connection {
     await channel.bindQueue(this._queue, this._exchange, this.props.name)
 
     await channel.consume(this._queue, async (msg) => {
-      this.log(`Message received: [${msg.properties.replyTo}] -> [${this.props.name}]`)
-      const content = JSON.parse(msg.content.toString())
+      this.log(`Message received: [${ msg.properties.replyTo }] -> [${ this.props.name }]`)
 
       if (typeof this.handleMessage === 'function') {
         await this.handleMessage(msg)
@@ -108,22 +107,21 @@ class Connection {
 
       await channel.ack(msg)
 
-      this.log(`Message acknowledged`)
+      this.log('Message acknowledged')
     }, {
       noAck: false
     })
   }
 
   async publish(routing, content, options) {
-    this.log(`Message sent: [${this.props.name}] -> [${routing}]`)
+    this.log(`Message sent: [${ this.props.name }] -> [${ routing }]`)
 
     return await this._channel.publish(
       this._exchange,
       routing,
-      new Buffer(
-        JSON.stringify({
-          ...content
-        })
+      Buffer.from(
+        JSON.stringify(content),
+        'utf-8'
       ),
       {
         expiration: 120e3.toString(),

@@ -4,10 +4,9 @@ import mime from 'mime'
 import normalizeUrl from 'normalize-url'
 import { URL } from 'url'
 
-import config from 'infrastructure/config'
 import localpath from 'services/localpath'
 
-const download = async (url, crawlPath) => {
+const download = async (url, crawlPath, headers = {}) => {
   const response = await new Promise((resolve, reject) => {
     // skip querystring
     const u = new URL(normalizeUrl(url, {
@@ -16,9 +15,9 @@ const download = async (url, crawlPath) => {
 
     const res = {}
 
-    got.stream(u.toString())
+    got.stream(u.toString(), { headers })
       .on('error', reject)
-      .on('response', response => {
+      .on('response', (response) => {
         const contentType = response.headers['content-type']
 
         res.contentType = contentType ?
@@ -27,7 +26,7 @@ const download = async (url, crawlPath) => {
 
         if (res.contentType) {
           res.ext = mime.getExtension(contentType)
-          res.path = `${crawlPath}.${res.ext}`
+          res.path = `${ crawlPath }.${ res.ext }`
         }
       })
       .pipe(fs.createWriteStream(crawlPath))
@@ -43,9 +42,23 @@ const download = async (url, crawlPath) => {
 }
 
 export default {
-  crawl: async (url) => {
+  async crawl(url, headers = []) {
     const crawlPath = await localpath()
 
-    return await download(url, crawlPath)
+    return await download(
+      url,
+      crawlPath,
+      (headers || [])
+        .filter(Boolean)
+        .filter(
+          ({ name, value }) => !!(name && value)
+        )
+        .reduce(
+          (headers, { name, value }) => ({
+            ...headers,
+            [ name ]: value
+          }), {}
+        )
+    )
   }
 }

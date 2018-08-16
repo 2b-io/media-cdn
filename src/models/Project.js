@@ -12,6 +12,7 @@ const schema = mongoose.Schema({
     trim: true
   },
   origins: [ String ],
+  headers: [ { name: String, value: String } ],
   disabled: {
     type: Boolean,
     default: false

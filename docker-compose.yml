@@ -3,7 +3,7 @@ services:
   media-cdn:
     build: .
     container_name: media.cdn
-    command: bash -c "npm i && tail -f /dev/null"
+    command: bash -c "tail -f /dev/null"
     volumes:
       - .:/usr/src
       - /usr/src/node_modules
