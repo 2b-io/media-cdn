@@ -13,8 +13,8 @@ export default async (req, res) => {
     }
 
     // delete all file in project s3 and cloudfront
-    if (patterns[0] === '/*') {
-      await cache.invalid([`/u/${ slug }/*`, `/p/${ slug }/*`])
+    if (patterns[ 0 ] === '/*') {
+      await cache.invalid([ `/u/${ slug }/*`, `/p/${ slug }/*` ])
       await cache.deleteAll(`${ config.version }/${ slug }`)
 
       return res.status(201).json({ succeed: true })
@@ -66,7 +66,6 @@ export default async (req, res) => {
 
     return res.status(201).json({ succeed: true })
   } catch (e) {
-    console.log("e", e);
     res.status(500).json(serializeError(e))
   }
 }
