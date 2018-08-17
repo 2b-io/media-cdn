@@ -124,6 +124,25 @@ export default {
         (key, index, keys) => keys.indexOf(key) === index
       )
   },
+  async deleteAll(prefix) {
+
+    const allObjects = await s3.listObjectsV2({
+      Bucket: s3.config.bucket,
+      Prefix: prefix
+    }).promise()
+
+    if (!allObjects.Contents.length) {
+      return []
+    }
+
+    return await s3.deleteObjects({
+      Bucket: s3.config.bucket,
+      Delete: {
+        Objects: allObjects.Contents.map(({ Key }) => ({ Key }))
+      }
+    }).promise()
+  },
+
   async delete(keys) {
     const relatedObjects = await Promise.all(
       keys.map(
