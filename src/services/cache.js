@@ -33,6 +33,7 @@ export default {
       Metadata: options.meta || {}
     }).promise()
   },
+
   async get(key) {
     const downloadPath = await localpath()
     const res = {}
