@@ -13,6 +13,6 @@ export default multer({
       return done(
         null,
         `${ today.getFullYear() }/${ today.getMonth() }/${ uuid.v4() }.${ mime.getExtension(file.mimetype) }`
-    ) }
+      ) }
   })
 }).single('media')
