@@ -3,8 +3,6 @@ import multer from 'multer'
 import uuid from 'uuid'
 import config from 'infrastructure/config'
 
-const today = new Date()
-
 export default multer({
   // dest: config.tmpDir
 
@@ -13,7 +11,8 @@ export default multer({
     filename: (req, file, done) => {
       const today = new Date()
       return done(
-        null,`${ today.getFullYear() }/${ today.getMonth() }/${ uuid.v4() }.${ mime.getExtension(file.mimetype) }`
-    )}
+        null,
+        `${ today.getFullYear() }/${ today.getMonth() }/${ uuid.v4() }.${ mime.getExtension(file.mimetype) }`
+    ) }
   })
 }).single('media')
