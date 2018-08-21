@@ -16,6 +16,13 @@ export default async (req, res) => {
   const origin = `${ slug }/${ key }`
   const ext = mime.getExtension(mimetype)
 
+  const originUrl = ext ?
+    `${ slug }/${ originalname }.${ ext }` :
+    `${ slug }/${ originalname }`
+
+  const urlHash = ext ?
+    `${ base }/s/${ origin }.${ ext }` :
+    `${ base }/s/${ origin }`
   try {
     const file = {
       contentType: mimetype,
@@ -24,11 +31,11 @@ export default async (req, res) => {
 
     await cache.put(origin, file, {
       meta: {
-        'origin-url': `${ slug }/${ originalname }.${ ext }`
+        'origin-url': originUrl
       }
     })
 
-    res.status(201).json(`${ base }/s/${ origin }.${ ext }`)
+    res.status(201).json(urlHash)
 
     await fs.remove(path)
 
