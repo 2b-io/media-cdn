@@ -11,8 +11,8 @@ const { server: { base } } = config
 export default async (req, res) => {
 
   const { slug } = req.body
-  const { mimetype, filename, path, originalname } = req.file
-  const key = sh.unique(filename)
+  const { mimetype, path, originalname } = req.file
+  const key = sh.unique(originalname)
   const origin = `${ slug }/${ key }`
   const ext = mime.getExtension(mimetype)
 
