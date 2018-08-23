@@ -4,16 +4,16 @@ import imageminSvgo  from 'imagemin-svgo'
 import path from 'path'
 import localpath from 'services/localpath'
 
-const optimizeSVG = async (input, output, args) => {
+const optimizeSVG = async (input, output, plugins) => {
 
   const dir = path.join(path.dirname(output), 'svg')
 
   await fs.ensureDir(dir)
 
-  const files =  await imagemin([ input ], dir, {
+  const files = await imagemin([ input ], dir, {
     use: [
       imageminSvgo({
-        plugins: args
+        plugins
       })
     ]
   })
@@ -23,46 +23,49 @@ const optimizeSVG = async (input, output, args) => {
 
 export default async (file, args) => {
   const output = await localpath(file.ext)
-  args = [
-    {
-      convertColors: true
-    }, {
-      removeComments: true
-    }, {
-      minifyStyles: true
-    }, {
-      removeUselessStrokeAndFill: true
-    }, {
-      mergePaths: true
-    }, {
-      cleanupAttrs: true
-    }, {
-      removeEmptyText: true
-    }, {
-      removeDoctype: true
-    }, {
-      removeEmptyContainers: true
-    }, {
-      collapseGroups: true
-    }, {
-      removeNonInheritableGroupAttrs: true
-    }, {
-      removeUnknownsAndDefaults: true
-    }, {
-      convertPathData: true
-    }, {
-      removeHiddenElems: true
-    }, {
-      convertTransform: true
-    }, {
-      cleanupIDs: true
-    }, {
-      cleanupNumericValues: true
-    }, {
-      removeStyleElement: true
-    }
+  const {
+    convertColors = true,
+    removeComments = true,
+    minifyStyles = true,
+    removeUselessStrokeAndFill = true,
+    mergePaths = true,
+    cleanupAttrs = true,
+    removeEmptyText = true,
+    removeDoctype = true,
+    removeEmptyContainers = true,
+    collapseGroups = true,
+    removeNonInheritableGroupAttrs = true,
+    removeUnknownsAndDefaults = true,
+    convertPathData = true,
+    removeHiddenElems = true,
+    convertTransform = true,
+    cleanupIDs = true,
+    cleanupNumericValues = true,
+    removeStyleElement = true,
+  } = args
+
+  const plugins = [
+    { convertColors },
+    { removeComments },
+    { minifyStyles },
+    { removeUselessStrokeAndFill },
+    { mergePaths },
+    { cleanupAttrs },
+    { removeEmptyText },
+    { removeDoctype },
+    { removeEmptyContainers },
+    { collapseGroups },
+    { removeNonInheritableGroupAttrs },
+    { removeUnknownsAndDefaults },
+    { convertPathData },
+    { removeHiddenElems },
+    { convertTransform },
+    { cleanupIDs },
+    { cleanupNumericValues },
+    { removeStyleElement }
   ]
-  await optimizeSVG(file.path, output, args)
+
+  await optimizeSVG(file.path, output, plugins)
 
   return {
     contentType: file.contentType,
