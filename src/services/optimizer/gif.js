@@ -30,7 +30,7 @@ const optimizeGif = async (input, output, args) => {
     }
   }
   const optimizedGif = await pify(execFile)(gifsicle, params)
-    .then( err => {
+    .then( (err) => {
       if (err) {
         return err
       }
