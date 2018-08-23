@@ -45,7 +45,7 @@ const crawlByWorker = async (payload) => {
 export default async (payload) => {
   const meta = await cache.head(payload.origin)
 
-  if (!meta) {
+  if (!meta || true) {
     if (!payload.url) {
       throw new Error('Not crawlable')
     }

@@ -11,6 +11,26 @@ const { version = '0.0.1' } = config
 
 export const cloudPath = (key) => `${ version }/${ key }`
 
+export const getObjects = async (prefix) => {
+  return await s3.listObjectsV2({
+    Bucket: s3.config.bucket,
+    Delimiter: '/',
+    Prefix: prefix+'/'
+  }).promise()
+}
+export const getObject = async (key) => {
+  return await s3.getObject({
+    Bucket: s3.config.bucket,
+    Key: key
+  }).promise()
+}
+export const deleteObject = async (key) => {
+  return await s3.deleteObject({
+    Bucket: s3.config.bucket,
+    Key: key
+  }).promise()
+}
+
 export default {
   async head(key) {
     try {
@@ -68,24 +88,16 @@ export default {
     return await cloudFront.createInvalidation(params).promise()
   },
   async search(prefix, patterns) {
-    const allObjects = await s3.listObjectsV2({
-      Bucket: s3.config.bucket,
-      Prefix: prefix
-    }).promise()
+
+    const allObjects = await getObjects(prefix)
 
     if (!allObjects.Contents.length) {
       return []
     }
 
-    // filter top-level objects
-    const originObjects = allObjects.Contents
-      .filter(
-        (object) => object.Key.split('/').length === 3
-      )
-
     // get attached data of each origin object
     const attachedData = await Promise.all(
-      originObjects
+      allObjects.Contents
         .map(
           (object) => s3.headObject({
             Bucket: s3.config.bucket,
@@ -95,7 +107,7 @@ export default {
     )
 
     // merge attached data
-    const originObjectsWithData = originObjects.map(
+    const originObjectsWithData = allObjects.Contents.map(
       (origin, index) => ({
         ...origin,
         data: attachedData[ index ]
