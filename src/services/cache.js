@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
 
+import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloudfront'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -10,26 +11,6 @@ import localpath from 'services/localpath'
 const { version = '0.0.1' } = config
 
 export const cloudPath = (key) => `${ version }/${ key }`
-
-export const getObjects = async (prefix) => {
-  return await s3.listObjectsV2({
-    Bucket: s3.config.bucket,
-    Delimiter: '/',
-    Prefix: prefix+'/'
-  }).promise()
-}
-export const getObject = async (key) => {
-  return await s3.getObject({
-    Bucket: s3.config.bucket,
-    Key: key
-  }).promise()
-}
-export const deleteObject = async (key) => {
-  return await s3.deleteObject({
-    Bucket: s3.config.bucket,
-    Key: key
-  }).promise()
-}
 
 export default {
   async head(key) {
