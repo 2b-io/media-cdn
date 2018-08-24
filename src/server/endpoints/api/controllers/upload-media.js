@@ -12,7 +12,7 @@ const { server: { base } } = config
 
 export default async (req, res) => {
 
-  const { slug } = req.body
+  const { slug } = req.params
   const { mimetype, path, originalname } = req.file
   const file = {
     contentType: mimetype,
