@@ -9,7 +9,7 @@ export const getObjects = async (prefix) => {
 }
 
 export const getObject = async (key) => {
-  return await s3.getObject({
+  return await s3.headObject({
     Bucket: s3.config.bucket,
     Key: key
   }).promise()

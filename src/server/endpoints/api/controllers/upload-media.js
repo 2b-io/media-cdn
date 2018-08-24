@@ -3,8 +3,10 @@ import mime from 'mime'
 import serializeError from 'serialize-error'
 import sh from 'shorthash'
 
+import formatMediaData from '../media/format-media-data'
 import config from 'infrastructure/config'
 import cache from 'services/cache'
+import { getObject } from 'services/media'
 
 const { server: { base } } = config
 
@@ -18,23 +20,17 @@ export default async (req, res) => {
   }
   const key = sh.unique(originalname)
   const origin = `${ slug }/${ key }`
-  const ext = mime.getExtension(mimetype)
-
-  const originUrl = ext ?
-    `${ slug }/${ originalname }.${ ext }` :
-    `${ slug }/${ originalname }`
-
-  const urlHash = ext ?
-    `${ base }/s/${ origin }.${ ext }` :
-    `${ base }/s/${ origin }`
-
   try {
-    await cache.put(origin, file, {
+    const result = await cache.put(origin, file, {
       meta: {
-        'origin-url': originUrl
+        'origin-url': ''
       }
     })
-    res.status(201).json({ url: urlHash })
+    if (result) {
+      const s3Object = await getObject(`${ config.version }/${ slug }/${ key }`)
+      const mediaData = await formatMediaData(s3Object, slug, key)
+      res.status(201).json(mediaData)
+    }
   }
   catch (e) {
     res.status(500).json(serializeError(e))
