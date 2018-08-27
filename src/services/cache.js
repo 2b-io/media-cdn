@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
 
+import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloudfront'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
@@ -68,24 +69,16 @@ export default {
     return await cloudFront.createInvalidation(params).promise()
   },
   async search(prefix, patterns) {
-    const allObjects = await s3.listObjectsV2({
-      Bucket: s3.config.bucket,
-      Prefix: prefix
-    }).promise()
+
+    const allObjects = await getObjects(prefix)
 
     if (!allObjects.Contents.length) {
       return []
     }
 
-    // filter top-level objects
-    const originObjects = allObjects.Contents
-      .filter(
-        (object) => object.Key.split('/').length === 3
-      )
-
     // get attached data of each origin object
     const attachedData = await Promise.all(
-      originObjects
+      allObjects.Contents
         .map(
           (object) => s3.headObject({
             Bucket: s3.config.bucket,
@@ -95,7 +88,7 @@ export default {
     )
 
     // merge attached data
-    const originObjectsWithData = originObjects.map(
+    const originObjectsWithData = allObjects.Contents.map(
       (origin, index) => ({
         ...origin,
         data: attachedData[ index ]
