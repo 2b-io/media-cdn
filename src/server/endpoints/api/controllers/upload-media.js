@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import mime from 'mime'
+
 import serializeError from 'serialize-error'
 import sh from 'shorthash'
 
@@ -7,8 +7,6 @@ import formatMediaData from '../media/format-media-data'
 import config from 'infrastructure/config'
 import cache from 'services/cache'
 import { getObject } from 'services/media'
-
-const { server: { base } } = config
 
 export default async (req, res) => {
 

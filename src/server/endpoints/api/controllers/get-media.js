@@ -5,8 +5,7 @@ import config from 'infrastructure/config'
 import { getObject } from 'services/media'
 
 export default async (req, res) => {
-  const { slug } = req.headers
-  const { id } = req.params
+  const { id, slug } = req.params
   try {
     const s3Object = await getObject(`${ config.version }/${ slug }/${ id }`)
     const mediaData = await formatMediaData(s3Object, slug, id)

@@ -6,8 +6,8 @@ import project from 'services/project'
 
 export default async (req, res) => {
   try {
-    const { patterns, slug } = req.body
-
+    const { patterns } = req.body
+    const { slug } = req.params
     if (!patterns.length) {
       return res.status(201).json({ succeed: true })
     }

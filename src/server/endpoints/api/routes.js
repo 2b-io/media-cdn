@@ -7,9 +7,11 @@ import handleUpload from 'server/middlewares/handle-upload'
 
 
 export default (app) => {
-  app.post('/cache-invalidations', invalidCache)
-  app.post('/media', handleUpload, uploadMedia)
-  app.get('/media', getListMedia)
-  app.get('/media/:id', getMedia)
-  app.delete('/media/:id', deleteMedia)
+
+  app.post('/projects/:slug/cache-invalidations', invalidCache)
+
+  app.post('/projects/:slug/media', handleUpload, uploadMedia)
+  app.get('/projects/:slug/media', getListMedia)
+  app.get('/projects/:slug/media/:id', getMedia)
+  app.delete('/projects/:slug/media/:id', deleteMedia)
 }
