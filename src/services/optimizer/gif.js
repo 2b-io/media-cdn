@@ -7,7 +7,6 @@ import sizeOf from 'image-size'
 import uuid from 'uuid'
 import localpath from 'services/localpath'
 
-
 const processGif = async ({ params, additionalParams }) => {
   await pify(execFile)(gifsicle, [
     ...additionalParams,
@@ -15,62 +14,72 @@ const processGif = async ({ params, additionalParams }) => {
   ])
 }
 
-const resizeCover = async ({ originWidth, originHeight, mode, width, height, params, output, outputGif }) => {
+const resizeCrop = async ({ originWidth, originHeight, width, height, params, output, outputGif }) => {
   if (originWidth >= originHeight) {
-    if (originHeight <= height) {
-      return await coverFitWidth({ width, height, params, output, outputGif })
+    if (originWidth < width || originHeight < height) {
+      if (width > height && ((height/originHeight ) > 2)) {
+        return await coverFitWidth({ width, height, params, output, outputGif })
+      }
     }
-    if (originWidth <= width || originHeight >= height) {
-      return await coverFitHeight({ width, height, params, output, outputGif })
+    if (originWidth > width || originHeight > height) {
+      if (width > height) {
+        return await coverFitWidth({ width, height, params, output, outputGif })
+      }
     }
+    return await coverFitHeight({ width, height, params, output, outputGif })
   }
-  if (originWidth <= originHeight) {
-    if (originHeight >= height || originWidth <= width ) {
-      return await coverFitHeight({ width, height, params, output, outputGif })
+
+  if (originWidth < originHeight) {
+    if (originWidth < width || originHeight < height) {
+      if (width < height && ((width/originWidth )< 2)) {
+        return await coverFitHeight({ width, height, params, output, outputGif })
+      }
     }
-    if (originWidth >= width || originHeight <= height ) {
-      return await coverFitWidth({ width, height, params, output, outputGif })
+    if (originWidth > width || originHeight > height) {
+      if (width < height) {
+        return await coverFitHeight({ width, height, params, output, outputGif })
+      }
     }
+    return await coverFitWidth({ width, height, params, output, outputGif })
   }
 }
 
 const coverFitWidth = async ( { width, height, params, output, outputGif } ) =>{
 
-  await processGif({ additionalParams: [ '--resize-height', height ] } )
+  await processGif({ additionalParams: [ '--resize-width', width ], params } )
   await fs.move(outputGif, output)
-  const { width: outputResizeWidth } =  await pify(sizeOf(output))
-
-  return [ '--crop', `${ (outputResizeWidth - width)/2 },0 + ${ width }x${ height }` ]
+  const { height: outputResizeHeight } = await pify(sizeOf(output))
+  return [ '--crop', `0,${ parseInt(Math.abs(outputResizeHeight - height)/2) }+${ width }x${ height }` ]
 }
 
 const coverFitHeight = async ( { width, height, params, output, outputGif } ) =>{
 
-  await processGif({ additionalParams: [ '--resize-width', width ], params } )
+  await processGif({ additionalParams: [ '--resize-height', height ], params } )
   await fs.move(outputGif, output)
-  const { height: outputResizeHeight } = await pify(sizeOf(output))
-
-  return [ '--crop', `0,${ (outputResizeHeight - height)/2 } + ${ width }x${ height }` ]
+  const { width: outputResizeWidth } = await pify(sizeOf(output))
+  return [ '--crop', `${  parseInt(Math.abs((outputResizeWidth - width)/2)) },0+${ width }x${ height }` ]
 
 }
 const additionalParams = async ({ originWidth, originHeight, mode, width = 'auto', height = 'auto' }) => {
   if (mode === 'contain') {
-    return [
-      '--resize-fit', `${ height }x${ width }`,
-    ]
+    return [ '--resize-fit', `${ height }x${ width }` ]
   }
   if (mode === 'cover') {
     if (originWidth > originHeight) {
-      return [
-        '--crop', `${ (originWidth-originHeight)/2 },0+${ width }x${ height }`
-      ]
+      if (originHeight > height) {
+        return [
+          '--crop', `${ (originWidth - width)/2 },0+${ width }x${ height }`
+        ]
+      }
     }
     if (originWidth < originHeight) {
-      return [
-        '--crop', `${ (originWidth-originHeight)/2 },0+${ width }x${ height }`
-      ]
+      if (originWidth > width) {
+        return [
+          '--crop', `0, ${ (originHeight - height)/2 } +${ width }x${ height }`
+        ]
+      }
     }
   }
-
   return []
 }
 
@@ -92,14 +101,24 @@ const optimizeGif = async (fileInput, output, args) => {
   const originSize = await pify(sizeOf(fileInput))
 
   const { width: originWidth, height: originHeight } = originSize
+  //   process mode crop
   if (mode === 'crop') {
-    const paramsCover = await resizeCover({ originWidth, originHeight, mode, width, height, params, outputGif, output })
+    const paramsCover = await resizeCrop({ originWidth, originHeight, mode, width, height, params, outputGif, output })
     await processGif({ params: [ '-i', output, '-o', outputGif ], additionalParams: paramsCover })
     await fs.remove(output)
     await fs.move(outputGif, output)
     return
   }
-  processGif(params, additionalParams(originWidth, originHeight, mode, width, height))
+  // process mode cover and contain
+  await processGif({
+    params,
+    additionalParams: await additionalParams({
+      originWidth,
+      originHeight,
+      mode,
+      width,
+      height
+    }) })
   await fs.remove(output)
   await fs.move(outputGif, output)
 }
@@ -127,7 +146,6 @@ export default async (file, args) => {
       path: output
     }
   }
-
 
   await optimizeGif(file.path, output, args)
 
