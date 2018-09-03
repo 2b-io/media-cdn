@@ -17,7 +17,7 @@ const optimizePNG = async (input, output, args) => {
     ...args,
     '-o', outputPng, 
     input
-    ])
+  ])
   await fs.remove(output)
   await fs.move(outputPng, output)
 }
