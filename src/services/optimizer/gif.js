@@ -14,76 +14,80 @@ const processGif = async ({ params, additionalParams }) => {
   ])
 }
 
-const resizeCrop = async ({ originWidth, originHeight, width, height, params, output, outputGif }) => {
-  if (originWidth >= originHeight) {
-    if (originWidth < width || originHeight < height) {
-      if (width > height && ((height/originHeight ) > 2)) {
-        return await coverFitWidth({ width, height, params, output, outputGif })
-      }
-    }
-    if (originWidth > width || originHeight > height) {
-      if (width > height) {
-        return await coverFitWidth({ width, height, params, output, outputGif })
-      }
-    }
-    return await coverFitHeight({ width, height, params, output, outputGif })
+const resizeCrop = async ({ originWidth, originHeight, width, height, params, output }) => {
+  const ratio = width / height
+  const originRatio = originWidth / originHeight
+
+  // width x height rong hon originWidth x originHeight
+  if (ratio < originRatio) {
+    // resize theo height
+    return await coverFitHeight({ width, height, params, output })
+
+  } else {
+    // resize theo width
+    return await coverFitWidth({ width, height, params, output })
   }
 
-  if (originWidth < originHeight) {
-    if (originWidth < width || originHeight < height) {
-      if (width < height && ((width/originWidth )< 2)) {
-        return await coverFitHeight({ width, height, params, output, outputGif })
-      }
-    }
-    if (originWidth > width || originHeight > height) {
-      if (width < height) {
-        return await coverFitHeight({ width, height, params, output, outputGif })
-      }
-    }
-    return await coverFitWidth({ width, height, params, output, outputGif })
-  }
 }
 
-const coverFitWidth = async ( { width, height, params, output, outputGif } ) =>{
+const coverFitWidth = async ( { width, height, params, output } ) =>{
 
   await processGif({ additionalParams: [ '--resize-width', width ], params } )
-  await fs.move(outputGif, output)
+  // await fs.move(outputGif, output)
   const { height: outputResizeHeight } = await pify(sizeOf(output))
-  return [ '--crop', `0,${ parseInt(Math.abs(outputResizeHeight - height)/2) }+${ width }x${ height }` ]
+
+  return [ '--crop', `0,${ parseInt(Math.abs(outputResizeHeight - height) / 2) }+${ width }x${ height }` ]
 }
 
-const coverFitHeight = async ( { width, height, params, output, outputGif } ) =>{
+const coverFitHeight = async ( { width, height, params, output } ) =>{
 
   await processGif({ additionalParams: [ '--resize-height', height ], params } )
-  await fs.move(outputGif, output)
+  // await fs.move(outputGif, output)
   const { width: outputResizeWidth } = await pify(sizeOf(output))
-  return [ '--crop', `${  parseInt(Math.abs((outputResizeWidth - width)/2)) },0+${ width }x${ height }` ]
+  return [ '--crop', `${  parseInt(Math.abs((outputResizeWidth - width) / 2)) },0+${ width }x${ height }` ]
 
 }
-const additionalParams = async ({ originWidth, originHeight, mode, width = 'auto', height = 'auto' }) => {
+const additionalParams = ({ originWidth, originHeight, mode, width = 'auto', height = 'auto' }) => {
   if (mode === 'contain') {
-    return [ '--resize-fit', `${ height }x${ width }` ]
+    if ( height === 'auto') {
+      return [ '--resize-fit-width', `${ width }` ]
+    }
+    if ( width === 'auto') {
+      return [ '--resize-fit-height', `${ height }` ]
+    }
+    return [ '--resize-fit', `${ width }x${ height }` ]
   }
   if (mode === 'cover') {
-    if (originWidth > originHeight) {
-      if (originHeight > height) {
+    // landscape
+    if (originWidth >= originHeight) {
+      if (height === 'auto') {
         return [
-          '--crop', `${ (originWidth - width)/2 },0+${ width }x${ height }`
+          '--resize-width', `${ width }`
         ]
       }
-    }
-    if (originWidth < originHeight) {
-      if (originWidth > width) {
+      return [
+        '--resize-height', `${ height }`
+      ]
+    } else {
+      if (width === 'auto') {
         return [
-          '--crop', `0, ${ (originHeight - height)/2 } +${ width }x${ height }`
+          '--resize-height', `${ height }`
         ]
       }
+      return [
+        '--resize-width', `${ width }`
+      ]
     }
   }
   return []
 }
 
-const optimizeGif = async (fileInput, output, args) => {
+
+const optimizeGif = async (
+  fileInput,
+  output,
+  args
+) => {
 
   const dir = path.join(path.dirname(output), 'gif')
   const { height, width, optimize = '-O2', mode } = args
@@ -103,22 +107,38 @@ const optimizeGif = async (fileInput, output, args) => {
   const { width: originWidth, height: originHeight } = originSize
   //   process mode crop
   if (mode === 'crop') {
-    const paramsCover = await resizeCrop({ originWidth, originHeight, mode, width, height, params, outputGif, output })
-    await processGif({ params: [ '-i', output, '-o', outputGif ], additionalParams: paramsCover })
-    await fs.remove(output)
+    // step 1: resize & optimize -> resize only
+    // output = ket qua lan 1
+    const cropParams = await resizeCrop({ originWidth, originHeight, mode, width, height, params, output: outputGif })
+
     await fs.move(outputGif, output)
+
+    console.log(outputGif, output)
+
+    // step 2: crop & optimize
+    await processGif({ params: [ '-i', output, '-o', outputGif ], additionalParams: cropParams })
+
+    // xoa output file o step 1
+    await fs.remove(output)
+
+    // move output file o step 2 ve file ket qua
+    await fs.move(outputGif, output)
+
     return
   }
+
   // process mode cover and contain
   await processGif({
     params,
-    additionalParams: await additionalParams({
+    additionalParams: additionalParams({
       originWidth,
       originHeight,
       mode,
       width,
       height
-    }) })
+    })
+  })
+
   await fs.remove(output)
   await fs.move(outputGif, output)
 }
@@ -127,25 +147,25 @@ const optimizeGif = async (fileInput, output, args) => {
 export default async (file, args) => {
   const output = await localpath(file.ext)
 
-  const {
-    width = 'auto',
-    height = 'auto',
-    optimize
-  } = args
+  // const {
+  //   width = 'auto',
+  //   height = 'auto',
+  //   optimize
+  // } = args
 
-  const resize = !(width === 'auto' && height === 'auto')
+  // const resize = !(width === 'auto' && height === 'auto')
 
-  if (!resize) {
-    await optimizeGif(file.path, output, {
-      optimize
-    })
-
-    return {
-      contentType: file.contentType,
-      ext: file.ext,
-      path: output
-    }
-  }
+  // if (!resize) {
+  //   await optimizeGif(file.path, output, {
+  //     optimize
+  //   })
+  //
+  //   return {
+  //     contentType: file.contentType,
+  //     ext: file.ext,
+  //     path: output
+  //   }
+  // }
 
   await optimizeGif(file.path, output, args)
 
