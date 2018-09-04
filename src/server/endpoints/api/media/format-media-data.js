@@ -19,6 +19,7 @@ const formatMediaData = async (s3Object, slug, key) => {
     contentLength: ContentLength,
     lastModified: LastModified,
     path: hashUrl,
+    cdnUrl: base,
     originUrl
   })
 }
