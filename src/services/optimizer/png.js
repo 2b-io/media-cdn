@@ -1,6 +1,5 @@
 import { execFile } from 'child_process'
 import fs from 'fs-extra'
-import imagemin from 'imagemin'
 import path from 'path'
 import pify from 'pify'
 import pngquant from 'pngquant-bin'
@@ -15,7 +14,7 @@ const optimizePNG = async (input, output, args) => {
   const outputPng = path.join(dir, uuid.v4())
   await pify(execFile)(pngquant, [
     ...args,
-    '-o', outputPng, 
+    '-o', outputPng,
     input
   ])
   await fs.remove(output)
@@ -29,7 +28,7 @@ export default async (file, args) => {
     width = 'auto',
     height = 'auto',
     quality = 80,
-    speed = 10 
+    speed = 10
   } = args
 
   const resize = !(width === 'auto' && height === 'auto')
