@@ -7,14 +7,14 @@ import sizeOf from 'image-size'
 import uuid from 'uuid'
 import localpath from 'services/localpath'
 
-const processGif = async ({ params, additionalParams }) => {
+const processGif = async ({ paramsGif }) => {
   await pify(execFile)(gifsicle, [
-    ...additionalParams,
-    ...params
+    ...paramsGif
   ])
 }
 
 const resizeCrop = async ({ originWidth, originHeight, width, height, params, output }) => {
+
   const ratio = width / height
   const originRatio = originWidth / originHeight
 
@@ -32,7 +32,7 @@ const resizeCrop = async ({ originWidth, originHeight, width, height, params, ou
 
 const coverFitWidth = async ( { width, height, params, output } ) =>{
 
-  await processGif({ additionalParams: [ '--resize-width', width ], params } )
+  await processGif({ paramsGif: [ ...params, '--resize-width', width ] })
   // await fs.move(outputGif, output)
   const { height: outputResizeHeight } = await pify(sizeOf(output))
 
@@ -41,7 +41,7 @@ const coverFitWidth = async ( { width, height, params, output } ) =>{
 
 const coverFitHeight = async ( { width, height, params, output } ) =>{
 
-  await processGif({ additionalParams: [ '--resize-height', height ], params } )
+  await processGif({ paramsGif: [ ...params, '--resize-height', height ] } )
   // await fs.move(outputGif, output)
   const { width: outputResizeWidth } = await pify(sizeOf(output))
   return [ '--crop', `${  parseInt(Math.abs((outputResizeWidth - width) / 2)) },0+${ width }x${ height }` ]
@@ -50,17 +50,25 @@ const coverFitHeight = async ( { width, height, params, output } ) =>{
 const additionalParams = ({ originWidth, originHeight, mode, width = 'auto', height = 'auto' }) => {
   if (mode === 'contain') {
     if ( height === 'auto') {
-      return [ '--resize-fit-width', `${ width }` ]
+      return [
+        '--resize-fit-width', `${ width }`
+      ]
     }
     if ( width === 'auto') {
-      return [ '--resize-fit-height', `${ height }` ]
+      return [
+        '--resize-fit-height', `${ height }`
+      ]
     }
-    return [ '--resize-fit', `${ width }x${ height }` ]
+    return [
+      '--resize-fit', `${ width }x${ height }`
+    ]
   }
   if (mode === 'cover') {
     // landscape
+    const ratio = width / height
+    const originRatio = originWidth / originHeight
     if (originWidth >= originHeight) {
-      if (height === 'auto') {
+      if (height === 'auto' || originRatio < ratio) {
         return [
           '--resize-width', `${ width }`
         ]
@@ -69,7 +77,7 @@ const additionalParams = ({ originWidth, originHeight, mode, width = 'auto', hei
         '--resize-height', `${ height }`
       ]
     } else {
-      if (width === 'auto') {
+      if (width === 'auto' || originRatio > ratio) {
         return [
           '--resize-height', `${ height }`
         ]
@@ -105,6 +113,9 @@ const optimizeGif = async (
   const originSize = await pify(sizeOf(fileInput))
 
   const { width: originWidth, height: originHeight } = originSize
+  if (width > originWidth || height > originHeight) {
+    return
+  }
   //   process mode crop
   if (mode === 'crop') {
     // step 1: resize & optimize -> resize only
@@ -113,10 +124,9 @@ const optimizeGif = async (
 
     await fs.move(outputGif, output)
 
-    console.log(outputGif, output)
 
     // step 2: crop & optimize
-    await processGif({ params: [ '-i', output, '-o', outputGif ], additionalParams: cropParams })
+    await processGif({ paramsGif: [ ...cropParams, '-i', output, '-o', outputGif ] })
 
     // xoa output file o step 1
     await fs.remove(output)
@@ -129,14 +139,16 @@ const optimizeGif = async (
 
   // process mode cover and contain
   await processGif({
-    params,
-    additionalParams: additionalParams({
-      originWidth,
-      originHeight,
-      mode,
-      width,
-      height
-    })
+    paramsGif: [
+      ...additionalParams({
+        originWidth,
+        originHeight,
+        mode,
+        width,
+        height
+      }),
+      ...params
+    ],
   })
 
   await fs.remove(output)
@@ -146,26 +158,6 @@ const optimizeGif = async (
 
 export default async (file, args) => {
   const output = await localpath(file.ext)
-
-  // const {
-  //   width = 'auto',
-  //   height = 'auto',
-  //   optimize
-  // } = args
-
-  // const resize = !(width === 'auto' && height === 'auto')
-
-  // if (!resize) {
-  //   await optimizeGif(file.path, output, {
-  //     optimize
-  //   })
-  //
-  //   return {
-  //     contentType: file.contentType,
-  //     ext: file.ext,
-  //     path: output
-  //   }
-  // }
 
   await optimizeGif(file.path, output, args)
 
