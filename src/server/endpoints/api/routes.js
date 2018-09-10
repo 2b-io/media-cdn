@@ -1,3 +1,4 @@
+import createDistribution from './controllers/cloudfront/create-distribution'
 import invalidCache from './controllers/invalid-cache'
 import uploadMedia from './controllers/upload-media'
 import getListMedia from './controllers/get-list-media'
@@ -9,6 +10,7 @@ import handleUpload from 'server/middlewares/handle-upload'
 export default (app) => {
 
   app.post('/projects/:slug/cache-invalidations', invalidCache)
+  app.post('/projects/distribution-create', createDistribution)
 
   app.post('/projects/:slug/media', handleUpload, uploadMedia)
   app.get('/projects/:slug/media', getListMedia)
