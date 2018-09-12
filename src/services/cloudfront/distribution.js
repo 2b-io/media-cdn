@@ -121,5 +121,11 @@ export default {
       }
     }
     return await cloudFront.createDistribution(params).promise()
+  },
+  async get({ id }) {
+    return await cloudFront.getDistribution({Id: id}).promise()
+  },
+  async delete({ id }) {
+    return await cloudFront.deleteDistribution({Id: id, IfMatch: 'E3MF493D2D0T8S'}).promise()
   }
 }
