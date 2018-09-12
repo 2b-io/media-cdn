@@ -7,7 +7,7 @@ export default async (req, res) => {
   const { targetOriginId, domainName } = config.aws.cloudFront
 
   try {
-    const distributionInfo = await distribution.create({ targetOriginId, domainName })
+    const distributionInfo = await distribution.create({ options: { targetOriginId, targetOriginDomain } })
 
     res.status(201).json(distributionInfo)
   } catch (e) {

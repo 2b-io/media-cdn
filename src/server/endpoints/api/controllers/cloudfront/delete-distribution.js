@@ -1,6 +1,5 @@
 import serializeError from 'serialize-error'
 
-import config from 'infrastructure/config'
 import distribution from 'services/cloudfront/distribution'
 
 export default async (req, res) => {
