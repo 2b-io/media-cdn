@@ -28,7 +28,7 @@ export default {
       accessKeyId: process.env.AWS_CLOUDFRONT_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY,
       targetOriginId: process.env.AWS_CLOUDFRONT_TARGET_ORIGIN_ID,
-      domainName: process.env.AWS_CLOUDFRONT_DOMAIN_NAME
+      targetOriginDomain: process.env.AWS_CLOUDFRONT_DOMAIN_NAME
     }
   },
   mongodb: process.env.MONGO,
