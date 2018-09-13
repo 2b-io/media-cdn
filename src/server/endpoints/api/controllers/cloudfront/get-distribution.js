@@ -3,10 +3,10 @@ import serializeError from 'serialize-error'
 import distribution from 'services/cloudfront/distribution'
 
 export default async (req, res) => {
-  const { id } = req.params
+  const { identifier } = req.params
 
   try {
-    const distributionInfo = await distribution.get({ id })
+    const distributionInfo = await distribution.get({ identifier })
 
     res.status(200).json(distributionInfo)
   } catch (e) {

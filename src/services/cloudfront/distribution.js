@@ -138,8 +138,8 @@ export default {
       } })
     return await cloudFront.createDistribution(params).promise()
   },
-  async get({ id }) {
-    return await cloudFront.getDistribution({ Id: id }).promise()
+  async get({ identifier }) {
+    return await cloudFront.getDistribution({ Id: identifier }).promise()
   },
   async update({ identifier, enabled }) {
     const distributionParams = await cloudFront.getDistributionConfig({ Id: identifier }).promise()
@@ -154,7 +154,7 @@ export default {
     }
     return await cloudFront.updateDistribution(params).promise()
   },
-  async delete({ id, Etag }) {
-    return await cloudFront.deleteDistribution({ Id: id, IfMatch: Etag }).promise()
+  async delete({ identifier, Etag }) {
+    return await cloudFront.deleteDistribution({ Id: identifier, IfMatch: Etag }).promise()
   }
 }
