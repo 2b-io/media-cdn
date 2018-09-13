@@ -23,10 +23,12 @@ export default {
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY
     },
     cloudFront: {
-      distributionId: process.env.AWS_CLOUDFRONT_DISTRIBUTION_ID,
+      // distributionId: process.env.AWS_CLOUDFRONT_DISTRIBUTION_ID,
       region: process.env.AWS_CLOUDFRONT_REGION,
       accessKeyId: process.env.AWS_CLOUDFRONT_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY
+      secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY,
+      targetOriginId: process.env.AWS_CLOUDFRONT_TARGET_ORIGIN_ID,
+      targetOriginDomain: process.env.AWS_CLOUDFRONT_DOMAIN_NAME
     }
   },
   mongodb: process.env.MONGO,

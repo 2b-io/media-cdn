@@ -11,13 +11,10 @@ const router = express()
 
 router.get('/:slug/*', join(
   (req, res, next) => {
-    if (req.params[0]) {
-      return next()
+    if (!req.params[0]) {
+      return res.sendStatus(400)
     }
-
-    res.sendStatus(400)
-  },
-  (req, res, next) => {
+    
     req._params = {
       hash: req.query.p || 'default',
       slug: req.params.slug

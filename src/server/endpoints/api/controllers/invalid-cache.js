@@ -6,9 +6,17 @@ import project from 'services/project'
 
 export default async (req, res) => {
   try {
-    const { patterns, slug } = req.body
-
+    const { patterns } = req.body
+    const { slug } = req.params
     if (!patterns.length) {
+      return res.status(201).json({ succeed: true })
+    }
+
+    // delete all file in project s3 and cloudfront
+    if (patterns[ 0 ] === '/*') {
+      await cache.invalid([ `/u/${ slug }/*`, `/p/${ slug }/*` ])
+      await cache.deleteAll(`${ config.version }/${ slug }`)
+
       return res.status(201).json({ succeed: true })
     }
 
@@ -16,7 +24,6 @@ export default async (req, res) => {
 
     // delete on s3
     const s3Prefix = `${ config.version }/${ slug }`
-
     const s3Keys = await cache.search(s3Prefix, patterns)
 
     if (s3Keys.length) {
