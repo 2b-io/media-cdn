@@ -98,6 +98,7 @@ export default [
       res.set('Pragma', 'no-cache')
       res.set('Expires', '0')
       res.set('Surrogate-Control', 'no-store')
+
       return res.sendStatus(500)
     }
 
@@ -117,6 +118,15 @@ export default [
     res.set('x-origin-path', staticPath.origin(params))
     res.set('x-target-path', staticPath.target(params))
 
-    cache.stream(target).pipe(res)
+    cache.stream(target)
+      .on('error', () => {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+        res.set('Pragma', 'no-cache')
+        res.set('Expires', '0')
+        res.set('Surrogate-Control', 'no-store')
+
+        return res.sendStatus(500)
+      })
+      .pipe(res)
   }
 ]
