@@ -14,7 +14,7 @@ router.get('/:slug/*', join(
     if (!req.params[0]) {
       return res.sendStatus(400)
     }
-
+    
     req._params = {
       hash: req.query.p || 'default',
       slug: req.params.slug
