@@ -6,7 +6,7 @@ const createDistributionParams = ({
     targetOriginId,
     targetOriginDomain,
     reference,
-    identifier
+    comment = ''
   }
 }) => ({
   DistributionConfig: {
@@ -43,7 +43,6 @@ const createDistributionParams = ({
     },
     DefaultCacheBehavior: {
       TargetOriginId: targetOriginId,
-
       ForwardedValues: {
         QueryString: true,
         Cookies: {
@@ -98,15 +97,15 @@ const createDistributionParams = ({
       Quantity: 0,
       Items: []
     },
-    Comment: '',
+    Comment: comment,
     Logging: {
       Enabled: false,
       IncludeCookies: false,
       Bucket: '',
       Prefix: ''
     },
-    PriceClass: 'PriceClass_All',
     Enabled: enabled,
+    PriceClass: 'PriceClass_All',
     ViewerCertificate: {
       CloudFrontDefaultCertificate: true,
       MinimumProtocolVersion: 'TLSv1',
@@ -121,17 +120,23 @@ const createDistributionParams = ({
     },
     WebACLId: '',
     HttpVersion: 'http2',
-    IsIPV6Enabled: true,
-    Id: identifier
+    IsIPV6Enabled: true
   }
 })
 
 
 export default {
-  async create({ targetOriginId, targetOriginDomain }) {
+  async create({ targetOriginId, targetOriginDomain, comment }) {
     const date = new Date()
     const reference = String(date.getTime())
-    return await cloudFront.createDistribution(createDistributionParams({ options: { targetOriginId, targetOriginDomain, reference } })).promise()
+    const params = createDistributionParams({
+      options: {
+        targetOriginId,
+        targetOriginDomain,
+        reference,
+        comment
+      } })
+    return await cloudFront.createDistribution(params).promise()
   },
   async get({ id }) {
     return await cloudFront.getDistribution({ Id: id }).promise()
@@ -139,7 +144,14 @@ export default {
   async update({ identifier, enabled }) {
     const distributionParams = await cloudFront.getDistributionConfig({ Id: identifier }).promise()
     const { DistributionConfig, ETag } = distributionParams
-    const params = { DistributionConfig: { ...DistributionConfig, Enabled: enabled, Id: identifier, IfMatch: ETag } }
+    const params = {
+      DistributionConfig: {
+        ...DistributionConfig,
+        Enabled: enabled
+      },
+      Id: identifier,
+      IfMatch: ETag
+    }
     return await cloudFront.updateDistribution(params).promise()
   },
   async delete({ id, Etag }) {

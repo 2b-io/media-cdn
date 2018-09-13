@@ -4,10 +4,12 @@ import config from 'infrastructure/config'
 import distribution from 'services/cloudfront/distribution'
 
 export default async (req, res) => {
-  const { targetOriginId, domainName } = config.aws.cloudFront
-
+  const { targetOriginId, targetOriginDomain } = config.aws.cloudFront
+  const { projectName } = req.body
+  const { development } = config
+  const comment = `${ development? 'dev' : ''  }-${ projectName }`
   try {
-    const distributionInfo = await distribution.create({ options: { targetOriginId, targetOriginDomain } })
+    const distributionInfo = await distribution.create({ targetOriginId, targetOriginDomain, comment })
 
     res.status(201).json(distributionInfo)
   } catch (e) {
