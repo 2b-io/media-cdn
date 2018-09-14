@@ -11,11 +11,14 @@ const router = express()
 
 router.get('/:slug/*', join(
   (req, res, next) => {
-    if (req.params[0]) {
-      return next()
+    if (!req.params[0]) {
+      return next({
+        statusCode: 400,
+        reason: 'URL is missing'
+      })
     }
 
-    res.sendStatus(400)
+    next()
   },
   (req, res, next) => {
     req._params = {

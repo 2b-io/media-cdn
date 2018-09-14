@@ -6,7 +6,10 @@ export default async (req, res, next) => {
   const preset = req._params.preset = await da.getPreset(hash, _id)
 
   if (!preset) {
-    return res.sendStatus(400)
+    return next({
+      statusCode: 400,
+      reason: 'Preset not found'
+    })
   }
 
   next()

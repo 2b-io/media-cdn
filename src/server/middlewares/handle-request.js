@@ -72,7 +72,10 @@ export default [
       .ttl(60e3)
       .onReply(async (error) => {
         if (error) {
-          return res.status(500).send(error)
+          return next({
+            statusCode: 500,
+            reason: error
+          })
         }
 
         next()
@@ -84,7 +87,7 @@ export default [
       return next()
     }
 
-    console.log(`PROCESS ${ req._params.target }`)
+    console.log(`HEAD AGAIN ${ req._params.target }`)
 
     req._meta = await cache.head(req._params.target)
 
@@ -99,7 +102,10 @@ export default [
       res.set('Expires', '0')
       res.set('Surrogate-Control', 'no-store')
 
-      return res.sendStatus(500)
+      return next({
+        statusCode: 500,
+        reason: 'Worker failed to process'
+      })
     }
 
     console.log(`PIPE ${ req._params.target }`)
@@ -119,13 +125,11 @@ export default [
     res.set('x-target-path', staticPath.target(params))
 
     cache.stream(target)
-      .on('error', () => {
-        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-        res.set('Pragma', 'no-cache')
-        res.set('Expires', '0')
-        res.set('Surrogate-Control', 'no-store')
-
-        return res.sendStatus(500)
+      .on('error', (error) => {
+        return next({
+          statusCode: 500,
+          reason: error
+        })
       })
       .pipe(res)
   }
