@@ -5,7 +5,6 @@ import distribution from 'services/cloudfront/distribution'
 export default async (req, res) => {
   const { identifier } = req.params
   const { enabled } = req.body
-
   try {
     const distributionInfo = await distribution.update({ identifier, enabled })
 
