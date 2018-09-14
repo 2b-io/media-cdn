@@ -4,8 +4,11 @@ export default (...middlewareDefs) => flatten(middlewareDefs).map(
   middleware => async (req, res, next) => {
     try {
       await middleware(req, res, next)
-    } catch (e) {
-      res.sendStatus(500)
+    } catch (error) {
+      next({
+        statusCode: 500,
+        reason: error
+      })
     }
   }
 )

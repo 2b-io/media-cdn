@@ -120,7 +120,10 @@ router.get('/:slug/:uh.:ext?', join(
     const meta = req._meta = await cache.head(req._params.origin)
 
     if (!meta) {
-      return res.sendStatus(404)
+      return next({
+        statusCode: 404,
+        reason: 'Not found'
+      })
     }
 
     next()

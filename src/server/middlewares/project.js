@@ -6,7 +6,10 @@ export default async (req, res, next) => {
   const project = req._params.project = await da.getProject(slug)
 
   if (!project) {
-    return res.sendStatus(400)
+    return next({
+      statusCode: 400,
+      reason: 'Project not found'
+    })
   }
 
   next()
