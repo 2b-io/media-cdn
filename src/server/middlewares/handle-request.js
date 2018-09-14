@@ -93,7 +93,7 @@ export default [
 
     next()
   },
-  (req, res) => {
+  (req, res, next) => {
     const meta = req._meta
 
     if (!meta) {
