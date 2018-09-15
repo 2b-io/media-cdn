@@ -12,11 +12,12 @@ const { version = '0.0.1' } = config
 export const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
-  async head(key) {
+  async head(key, etag) {
     try {
       return await s3.headObject({
         Bucket: s3.config.bucket,
-        Key: cloudPath(key)
+        Key: cloudPath(key),
+        IfMatch: etag
       }).promise()
     } catch (e) {
       // TODO check not found
@@ -24,7 +25,7 @@ export default {
     }
   },
   async put(key, file, options = {}) {
-    return await s3.putObject({
+    return await s3.upload({
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
@@ -33,13 +34,14 @@ export default {
       Metadata: options.meta || {}
     }).promise()
   },
-  async get(key) {
+  async get(key, etag) {
     const downloadPath = await localpath()
     const res = {}
 
     const data = await s3.getObject({
       Bucket: s3.config.bucket,
-      Key: cloudPath(key)
+      Key: cloudPath(key),
+      IfMatch: etag
     }).promise()
 
     res.contentType = data.ContentType
@@ -152,10 +154,11 @@ export default {
       }
     }).promise()
   },
-  stream(key) {
+  stream(key, etag) {
     return s3.getObject({
       Bucket: s3.config.bucket,
-      Key: cloudPath(key)
+      Key: cloudPath(key),
+      IfMatch: etag
     }).createReadStream()
   }
 }

@@ -30,7 +30,7 @@ const crawl = async (payload, producer) => {
   })
 }
 
-const optimize = async (payload, producer) => {
+const optimize = async (payload, producer, meta) => {
   return await new Promise((resolve, reject) => {
     const s = Date.now()
     console.log(`OPTIMIZE ${ payload.origin } -> ${ payload.target }...`)
@@ -41,7 +41,8 @@ const optimize = async (payload, producer) => {
         payload: {
           origin: payload.origin,
           target: payload.target,
-          args: payload.args
+          args: payload.args,
+          meta,
         }
       })
       .waitFor(`optimize:${payload.origin}`)
@@ -65,7 +66,7 @@ export default async (payload, producer) => {
     await crawl(payload, producer) :
     payload.origin
 
-  const target = await optimize(payload, producer)
+  const target = await optimize(payload, producer, origin.meta)
 
   return { origin, target }
 }

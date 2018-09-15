@@ -70,13 +70,15 @@ export default [
       .waitFor(`process:${ req._params.target }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error) => {
+      .onReply(async (error, content) => {
         if (error) {
           return next({
             statusCode: 500,
             reason: error
           })
         }
+
+        req._result = content
 
         next()
       })
@@ -89,7 +91,13 @@ export default [
 
     console.log(`HEAD AGAIN ${ req._params.target }`)
 
-    req._meta = await cache.head(req._params.target)
+    const etag = req._result &&
+      req._result.target &&
+      req._result.target.meta &&
+      req._result.target.meta.ETag ||
+      undefined
+
+    req._meta = await cache.head(req._params.target, etag)
 
     next()
   },
@@ -97,11 +105,6 @@ export default [
     const meta = req._meta
 
     if (!meta) {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-      res.set('Pragma', 'no-cache')
-      res.set('Expires', '0')
-      res.set('Surrogate-Control', 'no-store')
-
       return next({
         statusCode: 500,
         reason: 'Worker failed to process'

@@ -31,13 +31,16 @@ const crawlByWorker = async (payload) => {
   try {
     file = await crawler.crawl(payload.url, payload.headers)
 
-    await cache.put(payload.origin, file, {
+    const upload = await cache.put(payload.origin, file, {
       meta: {
         'origin-url': payload.url
       }
     })
 
-    return file
+    return {
+      ...file,
+      meta: upload
+    }
   } finally {
     if (file) {
       await fs.remove(file.path)
@@ -49,7 +52,7 @@ const crawlByWorker = async (payload) => {
 export default async (payload) => {
   const meta = await cache.head(payload.origin)
 
-  if (!meta) {
+  if (!meta || true) {
     if (!payload.url) {
       throw new Error('Not crawlable')
     }
@@ -62,7 +65,8 @@ export default async (payload) => {
   } else {
     return {
       contentType: meta.ContentType,
-      ext: mime.getExtension(meta.ContentType)
+      ext: mime.getExtension(meta.ContentType),
+      meta
     }
   }
 }
