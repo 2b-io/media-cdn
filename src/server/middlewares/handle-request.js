@@ -3,6 +3,8 @@ import sh from 'shorthash'
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
 
+import retry from './utils/retry'
+
 export default [
   (req, res, next) => {
     if (req._params.origin || req._params.target) {
@@ -40,7 +42,11 @@ export default [
 
     console.log(`HEAD ${ req._params.target }`)
 
-    req._meta = await cache.head(req._params.target)
+    try {
+      req._meta = await cache.head(req._params.target)
+    } catch (error) {
+      console.log(`NOTFOUND ${ req._params.target }`)
+    }
 
     next()
   },
@@ -89,6 +95,13 @@ export default [
       return next()
     }
 
+    if (!req._result) {
+      return next({
+        status: 500,
+        reason: 'Worker failed to process'
+      })
+    }
+
     console.log(`HEAD AGAIN ${ req._params.target }`)
 
     const etag = req._result &&
@@ -97,19 +110,19 @@ export default [
       req._result.target.meta.ETag ||
       undefined
 
-    req._meta = await cache.head(req._params.target, etag)
+    try {
+      req._meta = await retry(3)(cache.head)(req._params.target, etag)
+    } catch (error) {
+      return next({
+        status: 500,
+        reason: error
+      })
+    }
 
     next()
   },
   (req, res, next) => {
     const meta = req._meta
-
-    if (!meta) {
-      return next({
-        statusCode: 500,
-        reason: 'Worker failed to process'
-      })
-    }
 
     console.log(`PIPE ${ req._params.target }`)
 

@@ -13,16 +13,11 @@ export const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
   async head(key, etag) {
-    try {
-      return await s3.headObject({
-        Bucket: s3.config.bucket,
-        Key: cloudPath(key),
-        IfMatch: etag
-      }).promise()
-    } catch (e) {
-      // TODO check not found
-      return null
-    }
+    return await s3.headObject({
+      Bucket: s3.config.bucket,
+      Key: cloudPath(key),
+      IfMatch: etag
+    }).promise()
   },
   async put(key, file, options = {}) {
     return await s3.upload({
