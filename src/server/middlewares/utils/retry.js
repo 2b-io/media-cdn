@@ -1,6 +1,6 @@
 import delay from 'delay'
 
-export default (retryTimes = 1, interval = 1000) => {
+export default (retryTimes = 1, baseInterval = 100, exponentialBackoff = true) => {
   return (func) => async (...args) => {
     let result;
     let executeTimes = 0;
@@ -9,7 +9,9 @@ export default (retryTimes = 1, interval = 1000) => {
     do {
       executeTimes++
 
-      console.log(`Executing ${ func.name } ${ executeTimes } times...`)
+      if (executeTimes > 1) {
+        console.log(`Executing ${ func.name } ${ executeTimes } times...`)
+      }
 
       try {
         result = await func(...args)
@@ -19,7 +21,11 @@ export default (retryTimes = 1, interval = 1000) => {
         executeError = error
 
         if (executeTimes < retryTimes) {
-          console.log(`Retry in ${ interval }ms...`)
+          const interval = exponentialBackoff ?
+            baseInterval * Math.pow(2, executeTimes - 1) :
+            baseInterval
+
+          console.error(`Retry ${ func.name } in ${ interval }ms...`)
 
           await delay(interval)
         }

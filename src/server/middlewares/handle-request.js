@@ -111,11 +111,11 @@ export default [
       undefined
 
     try {
-      req._meta = await retry(3)(cache.head)(req._params.target, etag)
+      req._meta = await retry(8)(cache.head)(req._params.target, etag)
     } catch (error) {
       return next({
         status: 500,
-        reason: error
+        reason: 'Failed to get S3 object (Consistency Model)'
       })
     }
 
