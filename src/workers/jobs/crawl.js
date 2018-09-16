@@ -50,9 +50,15 @@ const crawlByWorker = async (payload) => {
 
 
 export default async (payload) => {
-  const meta = await cache.head(payload.origin)
+  try {
+    let meta = await cache.head(payload.origin)
 
-  if (!meta) {
+    return {
+      contentType: meta.ContentType,
+      ext: mime.getExtension(meta.ContentType),
+      meta
+    }
+  } catch (error) {
     if (!payload.url) {
       throw new Error('Not crawlable')
     }
@@ -61,12 +67,6 @@ export default async (payload) => {
       return await crawlByScraper(payload)
     } else {
       return await crawlByWorker(payload)
-    }
-  } else {
-    return {
-      contentType: meta.ContentType,
-      ext: mime.getExtension(meta.ContentType),
-      meta
     }
   }
 }
