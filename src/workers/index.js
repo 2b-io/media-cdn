@@ -2,6 +2,7 @@ import rpc from 'libs/message-bus'
 import config from 'infrastructure/config'
 
 import crawl from './jobs/crawl'
+import head from './jobs/head'
 import process from './jobs/process'
 import optimize from './jobs/optimize'
 
@@ -33,6 +34,9 @@ const main = async () => {
 
       case 'optimize':
         return await optimize(payload)
+
+      case 'head':
+        return await head(payload)
     }
 
     return { succeed: false }

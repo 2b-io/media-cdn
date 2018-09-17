@@ -6,13 +6,16 @@ export default async (payload) => {
   let origin, target
 
   try {
-    origin = await cache.get(payload.origin)
+    origin = await cache.get(payload.origin, payload.meta ? payload.meta.ETag : undefined)
 
     target = await optimizer.optimize(origin, payload.args)
 
-    await cache.put(payload.target, target)
+    const upload = await cache.put(payload.target, target)
 
-    return target
+    return {
+      ...target,
+      meta: upload
+    }
   } finally {
     if (origin) {
       await fs.remove(origin.path)

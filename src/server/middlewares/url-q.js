@@ -17,7 +17,10 @@ export default async (req, res, next) => {
 
   if (!url) {
     // bad request
-    return res.sendStatus(400)
+    return next({
+      status: 400,
+      reason: 'URL is missing'
+    })
   }
 
   const { hostname } = new URL(url)
@@ -30,7 +33,10 @@ export default async (req, res, next) => {
 
   if (!allowOrigin) {
     // forbidden
-    return res.sendStatus(403)
+    return next({
+      statusCode: 403,
+      reason: 'Origin Forbidden'
+    })
   }
 
   req._params = {

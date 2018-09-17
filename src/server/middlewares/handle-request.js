@@ -40,7 +40,11 @@ export default [
 
     console.log(`HEAD ${ req._params.target }`)
 
-    req._meta = await cache.head(req._params.target)
+    try {
+      req._meta = await cache.head(req._params.target)
+    } catch (error) {
+      console.log(`NOTFOUND ${ req._params.target }`)
+    }
 
     next()
   },
@@ -70,37 +74,32 @@ export default [
       .waitFor(`process:${ req._params.target }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error) => {
+      .onReply(async (error, content) => {
         if (error) {
-          return res.status(500).send(error)
+          return next({
+            statusCode: 500,
+            reason: error
+          })
         }
+
+        req._meta = content.meta
 
         next()
       })
       .send()
   },
   async (req, res, next) => {
-    if (req._meta) {
-      return next()
+    if (!req._meta) {
+      return next({
+        status: 500,
+        reason: 'Worker failed to process'
+      })
     }
-
-    console.log(`PROCESS ${ req._params.target }`)
-
-    req._meta = await cache.head(req._params.target)
 
     next()
   },
-  (req, res) => {
+  (req, res, next) => {
     const meta = req._meta
-
-    if (!meta) {
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-      res.set('Pragma', 'no-cache')
-      res.set('Expires', '0')
-      res.set('Surrogate-Control', 'no-store')
-
-      return res.sendStatus(500)
-    }
 
     console.log(`PIPE ${ req._params.target }`)
 
@@ -119,13 +118,11 @@ export default [
     res.set('x-target-path', staticPath.target(params))
 
     cache.stream(target)
-      .on('error', () => {
-        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-        res.set('Pragma', 'no-cache')
-        res.set('Expires', '0')
-        res.set('Surrogate-Control', 'no-store')
-
-        return res.sendStatus(500)
+      .on('error', (error) => {
+        return next({
+          statusCode: 500,
+          reason: error
+        })
       })
       .pipe(res)
   }

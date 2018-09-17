@@ -1,6 +1,6 @@
 {
   "name": "@media-network/media-cdn",
-  "version": "v0.0.2-prod",
+  "version": "v0.0.5-prod",
   "description": "Easy-integrated online service to create media real time from original media",
   "main": "index.js",
   "repository": "git@github.com:media-network/media-cdn.git",
