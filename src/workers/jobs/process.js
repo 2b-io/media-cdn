@@ -30,6 +30,35 @@ const crawl = async (payload, producer) => {
   })
 }
 
+const head = async (payload, producer, meta) => {
+  return await new Promise((resolve, reject) => {
+    const s = Date.now()
+    console.log(`HEAD ${ payload.target }...`)
+
+    producer.request()
+      .content({
+        job: 'head',
+        payload: {
+          target: payload.target,
+          meta,
+        }
+      })
+      .waitFor(`head:${ payload.target }`)
+      .sendTo('worker')
+      .ttl(30e3)
+      .onReply(async (error, content) => {
+        console.log(`HEAD ${ payload.target }... ${ Date.now() -s }ms`)
+
+        if (error) {
+          reject(deserializeError(error))
+        } else {
+          resolve(content)
+        }
+      })
+      .send()
+  })
+}
+
 const optimize = async (payload, producer, meta) => {
   return await new Promise((resolve, reject) => {
     const s = Date.now()
@@ -45,7 +74,7 @@ const optimize = async (payload, producer, meta) => {
           meta,
         }
       })
-      .waitFor(`optimize:${payload.origin}`)
+      .waitFor(`optimize:${ payload.target }`)
       .sendTo('worker')
       .ttl(30e3)
       .onReply(async (error, content) => {
@@ -66,7 +95,9 @@ export default async (payload, producer) => {
     await crawl(payload, producer) :
     payload.origin
 
-  const target = await optimize(payload, producer, origin.meta)
+  const target = await optimize(payload, producer)
 
-  return { origin, target }
+  const meta = await head(payload, producer, target.meta)
+
+  return { origin, target, meta }
 }

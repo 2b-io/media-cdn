@@ -3,8 +3,6 @@ import sh from 'shorthash'
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
 
-import retry from './utils/retry'
-
 export default [
   (req, res, next) => {
     if (req._params.origin || req._params.target) {
@@ -84,38 +82,17 @@ export default [
           })
         }
 
-        req._result = content
+        req._meta = content.meta
 
         next()
       })
       .send()
   },
   async (req, res, next) => {
-    if (req._meta) {
-      return next()
-    }
-
-    if (!req._result) {
+    if (!req._meta) {
       return next({
         status: 500,
         reason: 'Worker failed to process'
-      })
-    }
-
-    console.log(`HEAD AGAIN ${ req._params.target }`)
-
-    const etag = req._result &&
-      req._result.target &&
-      req._result.target.meta &&
-      req._result.target.meta.ETag ||
-      undefined
-
-    try {
-      req._meta = await retry(8)(cache.head)(req._params.target, etag)
-    } catch (error) {
-      return next({
-        status: 500,
-        reason: 'Failed to get S3 object (Consistency Model)'
       })
     }
 
