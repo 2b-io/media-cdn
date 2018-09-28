@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import mime from 'mime'
-import ms from 'ms'
 
 import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloudfront'
@@ -25,7 +24,6 @@ export default {
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
-      CacheControl: `max-age=${ ms('7d') / 1000 }`,
       Body: fs.createReadStream(file.path),
       Metadata: options.meta || {}
     }).promise()

@@ -1,4 +1,5 @@
 import mime from 'mime'
+import ms from 'ms'
 import sh from 'shorthash'
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
@@ -112,7 +113,7 @@ export default [
     res.set('content-length', meta.ContentLength)
     res.set('last-Modified', meta.LastModified)
     res.set('etag', meta.ETag)
-    res.set('cache-control', meta.CacheControl)
+    res.set('cache-control', `max-age=${ ms('90d') / 1000 }`)
 
     res.set('x-origin-path', staticPath.origin(params))
     res.set('x-target-path', staticPath.target(params))
