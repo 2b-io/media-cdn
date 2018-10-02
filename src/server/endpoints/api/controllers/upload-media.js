@@ -10,14 +10,14 @@ import { getObject } from 'services/media'
 
 export default async (req, res) => {
 
-  const { slug } = req.params
+  const { identifier } = req.params
   const { mimetype, path, originalname } = req.file
   const file = {
     contentType: mimetype,
     path
   }
   const key = sh.unique(originalname)
-  const origin = `${ slug }/${ key }`
+  const origin = `${ identifier }/${ key }`
   try {
     const result = await cache.put(origin, file, {
       meta: {
@@ -25,8 +25,8 @@ export default async (req, res) => {
       }
     })
     if (result) {
-      const s3Object = await getObject(`${ config.version }/${ slug }/${ key }`)
-      const mediaData = await formatMediaData(s3Object, slug, key)
+      const s3Object = await getObject(`${ config.version }/${ identifier }/${ key }`)
+      const mediaData = await formatMediaData(s3Object, identifier, key)
       res.status(201).json(mediaData)
     }
   }

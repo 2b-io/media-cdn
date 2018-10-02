@@ -9,11 +9,11 @@ import join from 'server/middlewares/utils/join'
 
 const router = express()
 
-router.get([ '/:slug', '/:slug/media' ], join(
+router.get([ '/:identifier', '/:identifier/media' ], join(
   async (req, res, next) => {
     req._params = {
       hash: req.query.p || 'default',
-      slug: req.params.slug
+      identifier: req.params.identifier
     }
 
     next()

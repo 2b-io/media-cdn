@@ -5,15 +5,15 @@ import config from 'infrastructure/config'
 import { getObjects, getObject } from 'services/media'
 
 export default async (req, res) => {
-  const { slug } = req.params
+  const { identifier } = req.params
 
   try {
-    const s3Objects = await getObjects(`${ config.version }/${ slug }`)
+    const s3Objects = await getObjects(`${ config.version }/${ identifier }`)
 
     const mediaData = await Promise.all(s3Objects.Contents.map( async (_s3Object) => {
       const s3Object = await getObject(_s3Object.Key)
       const key = _s3Object.Key.split('/')[2]
-      return await formatMediaData(s3Object, slug, key)
+      return await formatMediaData(s3Object, identifier, key)
     }))
     res.status(200).json(mediaData)
   } catch (e) {

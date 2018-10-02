@@ -12,12 +12,12 @@ import handleRequest from 'server/middlewares/handle-request'
 const router = express()
 
 router.get([
-  '/:slug/:uh/:p/:m\\_:w\\x:h.:ext?',
-  '/:slug/:uh/:m\\_:w\\x:h.:ext?'
+  '/:identifier/:uh/:p/:m\\_:w\\x:h.:ext?',
+  '/:identifier/:uh/:m\\_:w\\x:h.:ext?'
 ], join(
   async (req, res, next) => {
     req._params = {
-      slug: req.params.slug,
+      identifier: req.params.identifier,
       hash: req.params.p || 'default'
     }
 
@@ -36,7 +36,7 @@ router.get([
   getPreset,
   async (req, res, next) => {
     const {
-      slug, ext,
+      identifier, ext,
       uh: urlHash,
       p: hash = 'default',
       m: mode,
@@ -55,8 +55,8 @@ router.get([
 
     req._params = {
       ...req._params,
-      origin: `${ slug }/${ urlHash }`,
-      target: `${ slug }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`,
+      origin: `${ identifier }/${ urlHash }`,
+      target: `${ identifier }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`,
       ext
     }
 
@@ -105,13 +105,13 @@ router.get([
   handleRequest
 ))
 
-router.get('/:slug/:uh.:ext?', join(
+router.get('/:identifier/:uh.:ext?', join(
   async (req, res, next) => {
-    const { ext, slug, uh: urlHash } = req.params
+    const { ext, identifier, uh: urlHash } = req.params
 
     req._params = {
       ext,
-      origin: `${ slug }/${ urlHash }`
+      origin: `${ identifier }/${ urlHash }`
     }
 
     next()
@@ -158,4 +158,3 @@ router.get('/:slug/:uh.:ext?', join(
 ))
 
 export default router
-
