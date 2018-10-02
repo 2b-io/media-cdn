@@ -1,5 +1,6 @@
 import Preset from 'models/Preset'
 import Project from 'models/Project'
+import PullSetting from 'models/pull-setting'
 
 export default {
   getPreset: async (hash, project) => {
@@ -9,11 +10,16 @@ export default {
       removed: false
     }).lean()
   },
-  getProject: async (slug) => {
+  getProject: async ({ identifier }) => {
     return await Project.findOne({
-      slug,
+      identifier,
       removed: false,
-      disabled: false
+      isActive: true
+    }).lean()
+  },
+  getAllowedOrigins: async (project) => {
+    return await PullSetting.findOne({
+      project
     }).lean()
   }
 }

@@ -3,7 +3,7 @@ import da from 'services/da'
 export default async (req, res, next) => {
   const { identifier } = req._params
 
-  const project = req._params.project = await da.getProject(identifier)
+  const project = req._params.project = await da.getProject({ identifier })
 
   if (!project) {
     return next({
