@@ -3,14 +3,14 @@ import Project from 'models/Project'
 import PullSetting from 'models/pull-setting'
 
 export default {
-  getPreset: async (hash, project) => {
+  getPreset: async (contentType, project) => {
     return await Preset.findOne({
-      hash,
+      contentType,
       project,
       removed: false
     }).lean()
   },
-  getProject: async ({ identifier }) => {
+  getProject: async (identifier) => {
     return await Project.findOne({
       identifier,
       removed: false,
