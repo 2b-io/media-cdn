@@ -1,6 +1,8 @@
 import sh from 'shorthash'
 import { URL } from 'url'
 
+import da from 'services/da'
+
 const isMatch = (origin, domain) => {
   const pattern = origin
     .replace(/\./g, '\\.')
@@ -25,9 +27,10 @@ export default async (req, res, next) => {
 
   const { hostname } = new URL(url)
   const { project } = req._params
+  const { allowedOrigins } = await da.getAllowedOrigins(project._id)
 
-  const allowOrigin = project.origins.length === 0 ||
-    project.origins.some(
+  const allowOrigin = allowedOrigins.length === 0 ||
+    allowedOrigins.some(
       (origin) => isMatch(origin, hostname)
     )
 

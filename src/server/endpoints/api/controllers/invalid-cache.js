@@ -7,23 +7,23 @@ import project from 'services/project'
 export default async (req, res) => {
   try {
     const { patterns } = req.body
-    const { slug } = req.params
+    const { identifier } = req.params
     if (!patterns.length) {
       return res.status(201).json({ succeed: true })
     }
 
     // delete all file in project s3 and cloudfront
     if (patterns[ 0 ] === '/*') {
-      await cache.invalid([ `/u/${ slug }/*`, `/p/${ slug }/*` ])
-      await cache.deleteAll(`${ config.version }/${ slug }`)
+      await cache.invalid([ `/u/${ identifier }/*`, `/p/${ identifier }/*` ])
+      await cache.deleteAll(`${ config.version }/${ identifier }`)
 
       return res.status(201).json({ succeed: true })
     }
 
-    const { prettyOrigin } = await project.get(slug)
+    const { prettyOrigin } = await project.get(identifier)
 
     // delete on s3
-    const s3Prefix = `${ config.version }/${ slug }`
+    const s3Prefix = `${ config.version }/${ identifier }`
     const s3Keys = await cache.search(s3Prefix, patterns)
 
     if (s3Keys.length) {
@@ -38,15 +38,15 @@ export default async (req, res) => {
 
           return {
             universal: [
-              `/u/${ slug }?url=${ withoutQuerystring }*`,
-              `/u/${ slug }?*url=${ withoutQuerystring }*`,
-              `/u/${ slug }?url=${ encodeURIComponent(withoutQuerystring) }*`,
-              `/u/${ slug }?*url=${ encodeURIComponent(withoutQuerystring) }*`,
-              `/u/${ slug }?url=${ encodeURIComponent(pattern) }*`,
-              `/u/${ slug }?*url=${ encodeURIComponent(pattern) }*`
+              `/u/${ identifier }?url=${ withoutQuerystring }*`,
+              `/u/${ identifier }?*url=${ withoutQuerystring }*`,
+              `/u/${ identifier }?url=${ encodeURIComponent(withoutQuerystring) }*`,
+              `/u/${ identifier }?*url=${ encodeURIComponent(withoutQuerystring) }*`,
+              `/u/${ identifier }?url=${ encodeURIComponent(pattern) }*`,
+              `/u/${ identifier }?*url=${ encodeURIComponent(pattern) }*`
             ],
             pretty: prettyOrigin && pattern.indexOf(prettyOrigin) === 0 ?
-              `/p/${ slug }${ pattern.replace(prettyOrigin, '') }` :
+              `/p/${ identifier }${ pattern.replace(prettyOrigin, '') }` :
               null,
           }
         }

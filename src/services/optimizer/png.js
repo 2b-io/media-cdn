@@ -27,8 +27,10 @@ export default async (file, args) => {
     mode = 'cover',
     width = 'auto',
     height = 'auto',
-    quality = 80,
-    speed = 10
+    quality = 100,
+    speed = 10,
+    progressive = false,
+    compressionLevel = 9
   } = args
 
   const resize = !(width === 'auto' && height === 'auto')
@@ -62,7 +64,8 @@ export default async (file, args) => {
   }
 
   image.png({
-    compressionLevel: 9
+    compressionLevel,
+    progressive
   })
 
 

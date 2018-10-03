@@ -16,7 +16,7 @@ export default [
         width = 'auto',
         height = 'auto'
       },
-      project: { slug },
+      project: { identifier },
       preset: { hash, values },
       urlHash
     } = req._params
@@ -28,9 +28,14 @@ export default [
       )
     )
 
-    req._params.origin = `${ slug }/${ urlHash }`
+    req._params.origin = `${ identifier }/${ urlHash }`
 
-    req._params.target = `${ slug }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`
+    // get file goc + tim preset the content-type
+
+    req._params.target = `${ identifier }/${ urlHash }/${ hash }/${ valueHash }/${ mode }_${ width }x${ height }`
+
+
+    // req._params.target = `${ projectId }/${ urlHash }/${ presetHash }/${ mode }_${ width }x${ height }.${ ext }`
 
     next()
   },

@@ -9,7 +9,7 @@ import join from 'server/middlewares/utils/join'
 
 const router = express()
 
-router.get('/:slug/*', join(
+router.get('/:identifier/*', join(
   (req, res, next) => {
     if (!req.params[0]) {
       return next({
@@ -23,7 +23,7 @@ router.get('/:slug/*', join(
   (req, res, next) => {
     req._params = {
       hash: req.query.p || 'default',
-      slug: req.params.slug
+      identifier: req.params.identifier
     }
 
     next()

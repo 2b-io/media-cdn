@@ -6,8 +6,8 @@ export default async (file, args) => {
     mode = 'cover',
     width = 'auto',
     height = 'auto',
-    quality = 80,
-    progressive = true
+    quality = 100,
+    progressive = false
   } = args
 
   const image = sharp(file.path)
