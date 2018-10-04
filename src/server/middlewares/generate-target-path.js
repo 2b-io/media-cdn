@@ -6,7 +6,7 @@ const SUPPORT_RESIZE = [
   'image/png'
 ]
 
-export default async function generateTargetPath(req, res, next) {
+export default function generateTargetPath(req, res, next) {
   const { preset } = req._params
 
   if (!preset) {
@@ -24,7 +24,7 @@ export default async function generateTargetPath(req, res, next) {
     },
     project: { identifier },
     preset: { contentType, parameters = {} },
-    urlHash,
+    hashedURL,
     ext
   } = req._params
 
@@ -39,8 +39,8 @@ export default async function generateTargetPath(req, res, next) {
   const resizable = SUPPORT_RESIZE.includes(contentType)
 
   req._params.target = resizable ?
-    `${ identifier }/${ urlHash }/${ presetHash }/${ mode }_${ width }x${ height }.${ ext }` :
-    `${ identifier }/${ urlHash }/${ presetHash }.${ ext }`
+    `${ identifier }/${ hashedURL }/${ presetHash }/${ mode }_${ width }x${ height }.${ ext }` :
+    `${ identifier }/${ hashedURL }/${ presetHash }.${ ext }`
 
   next()
 }

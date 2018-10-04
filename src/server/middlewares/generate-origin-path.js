@@ -1,9 +1,7 @@
-export default async function generateOriginPath(req, res, next) {
+export default function generateOriginPath(req, res, next) {
+  const { project: { identifier }, hashedURL } = req._params
 
-  const { project: { identifier }, urlHash } = req._params
-
-  req._params.origin = `${ identifier }/${ urlHash }`
+  req._params.origin = `${ identifier }/${ hashedURL }`
 
   next()
-
 }

@@ -46,7 +46,7 @@ export default [
         .waitFor(`optimize:${ req._params.target }`)
         .sendTo('worker')
         .ttl(60e3)
-        .onReply(async (error, content) => {
+        .onReply((error, content) => {
           console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
 
           if (error) {
@@ -60,7 +60,7 @@ export default [
 
     next()
   },
-  async function getTargetMeta(req, res, next) {
+  function getTargetMeta(req, res, next) {
     if (req._targetMeta) {
       return next()
     }
@@ -77,7 +77,7 @@ export default [
       .waitFor(`head:${ req._params.target }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error, content) => {
+      .onReply((error, content) => {
         if (error) {
           return next({
             statusCode: 500,

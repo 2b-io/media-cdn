@@ -1,3 +1,4 @@
+import Infrastructure from 'models/infrastructure'
 import Preset from 'models/Preset'
 import Project from 'models/Project'
 import PullSetting from 'models/pull-setting'
@@ -10,9 +11,13 @@ export default {
       isActive: true
     }).lean()
   },
-  getProject: async (identifier) => {
+  getProject: async (domain) => {
+    const infrastructure = await Infrastructure.findOne({
+      domain
+    }).lean()
+
     return await Project.findOne({
-      identifier,
+      _id: infrastructure.project,
       isActive: true
     }).lean()
   },

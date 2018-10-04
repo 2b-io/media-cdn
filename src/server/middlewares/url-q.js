@@ -13,7 +13,7 @@ const isMatch = (origin, domain) => {
   return regex.test(domain)
 }
 
-export default async (req, res, next) => {
+export default function parseUrlFromQuery(req, res, next) {
   const { query } = req
   const url = query.url || query.src
 
@@ -27,7 +27,7 @@ export default async (req, res, next) => {
 
   const { hostname } = new URL(url)
   const { project } = req._params
-  const { allowedOrigins } = await req._params.pullSetting
+  const { allowedOrigins } = req._params.pullSetting
 
   const allowOrigin = allowedOrigins.length === 0 ||
     allowedOrigins.some(
@@ -45,7 +45,7 @@ export default async (req, res, next) => {
   req._params = {
     ...req._params,
     url,
-    urlHash: sh.unique(url)
+    hashedURL: sh.unique(url)
   }
 
   next()

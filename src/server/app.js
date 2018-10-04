@@ -20,9 +20,9 @@ pretty.disable('x-powered-by')
 universal.disable('x-powered-by')
 
 app.use('/api/v1', api)
-app.use('/p', pretty)
 // app.use('/s', store)
 app.use('/u', universal)
+app.use('/', pretty)
 
 app.use((req, res) => {
   res.sendStatus(404)

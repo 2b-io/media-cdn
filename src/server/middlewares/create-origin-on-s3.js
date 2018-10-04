@@ -18,7 +18,7 @@ export default [
 
     next()
   },
-  async function crawlOrigin(req, res, next) {
+  function crawlOrigin(req, res, next) {
     if (req._originMeta) {
       return next()
     }
@@ -37,7 +37,7 @@ export default [
       .waitFor(`crawl:${ req._params.origin }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error, content) => {
+      .onReply((error, content) => {
         if (error) {
           return next({
             statusCode: 500,
@@ -49,7 +49,7 @@ export default [
       })
       .send()
   },
-  async function getOriginMeta(req, res, next) {
+  function getOriginMeta(req, res, next) {
     if (req._originMeta) {
       return next()
     }
@@ -66,7 +66,7 @@ export default [
       .waitFor(`head:${ req._params.origin }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply(async (error, content) => {
+      .onReply((error, content) => {
         if (error) {
           return next({
             statusCode: 500,
@@ -80,7 +80,7 @@ export default [
       })
       .send()
   },
-  async function getContenType(req, res, next) {
+  function getContenType(req, res, next) {
     if (!req._originMeta) {
       return next({
         status: 500,

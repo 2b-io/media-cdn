@@ -28,7 +28,6 @@ export default function respondTarget(req, res, next) {
   res.set('cache-control', `max-age=${ ms('90d') / 1000 }`)
 
   res.set('x-origin-path', staticPath.origin(params))
-
   res.set('x-target-path', staticPath.target(params))
 
   cache.stream(target)

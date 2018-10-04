@@ -1,5 +1,6 @@
 import express from 'express'
 
+import initParamsObject from 'server/middlewares/init-params-object'
 import parseArgsFromQuery from 'server/middlewares/args-q'
 import createOriginOnS3 from 'server/middlewares/create-origin-on-s3'
 import createTargetOnS3 from 'server/middlewares/create-target-on-s3'
@@ -14,14 +15,8 @@ import join from 'server/middlewares/utils/join'
 
 const router = express()
 
-router.get([ '/:identifier', '/:identifier/media' ], join(
-  async (req, res, next) => {
-    req._params = {
-      identifier: req.params.identifier
-    }
-
-    next()
-  },
+router.get('/', join(
+  initParamsObject,
   getProject,
   getPullSetting,
   parseUrlFromQuery,
