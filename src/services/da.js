@@ -12,7 +12,6 @@ export default {
   getProject: async (identifier) => {
     return await Project.findOne({
       identifier,
-      removed: false,
       isActive: true
     }).lean()
   },

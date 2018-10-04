@@ -4,8 +4,11 @@ import cache from 'services/cache'
 
 export default [
   async function checkExistTarget(req, res, next) {
-
     if (req.query.f) {
+      return next()
+    }
+
+    if (req._targetMeta) {
       return next()
     }
 

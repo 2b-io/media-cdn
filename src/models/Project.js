@@ -15,11 +15,6 @@ const schema = mongoose.Schema({
   status: {
     type: String
   },
-  removed: {
-    type: Boolean,
-    default: false,
-    index: true
-  },
   created: {
     type: Number
   },
