@@ -68,13 +68,13 @@ const cropGIF = async (originWidth, originHeight, width, height, file, keepWidth
   }
 }
 
-const optimizeGIF = async (input, output, { width = 'auto', height = 'auto', mode }) => {
+const optimizeGIF = async (input, output, { width = 'auto', height = 'auto', mode }, parameters) => {
   const { width: originWidth, height: originHeight } = await pify(sizeOf)(input)
 
   const needResize = !(width === 'auto' && height === 'auto')
 
   const baseParams = [
-    '-O2',
+    parameters.optimize || '-O2',
     '-i', input,
     '-o', output
   ]
@@ -93,10 +93,10 @@ const optimizeGIF = async (input, output, { width = 'auto', height = 'auto', mod
   }
 }
 
-export default async (file, args) => {
+export default async (file, args, parameters) => {
   const output = await localpath(file.ext)
 
-  await optimizeGIF(file.path, output, args)
+  await optimizeGIF(file.path, output, args, parameters)
 
   return {
     contentType: file.contentType,

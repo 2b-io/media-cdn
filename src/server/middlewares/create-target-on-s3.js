@@ -14,6 +14,7 @@ export default [
     }
 
     console.log(`HEAD_TARGET ${ req._params.target }`)
+
     try {
       req._targetMeta = await cache.head(req._params.target)
     } catch (error) {
