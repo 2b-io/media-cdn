@@ -1,6 +1,6 @@
 import da from 'services/da'
 
-export default async (req, res, next) => {
+export default async function getPreset(req, res, next) {
   const { contentType, project: { _id } } = req._params
   const preset = req._params.preset = await da.getPreset(contentType, _id)
   if (!preset) {

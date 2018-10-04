@@ -16,7 +16,7 @@ export default {
       isActive: true
     }).lean()
   },
-  getAllowedOrigins: async (project) => {
+  getPullSetting: async (project) => {
     return await PullSetting.findOne({
       project
     }).lean()

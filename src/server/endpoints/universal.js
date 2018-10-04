@@ -3,12 +3,11 @@ import express from 'express'
 import parseArgsFromQuery from 'server/middlewares/args-q'
 import createOriginOnS3 from 'server/middlewares/create-origin-on-s3'
 import createTargetOnS3 from 'server/middlewares/create-target-on-s3'
-import handleRequest from 'server/middlewares/handle-request'
 import generateTargetPath from 'server/middlewares/generate-target-path'
 import generateOriginPath from 'server/middlewares/generate-origin-path'
-import getTargetMeta from 'server/middlewares/get-target-meta'
 import getPreset from 'server/middlewares/preset'
 import getProject from 'server/middlewares/project'
+import respondTarget from 'server/middlewares/respond-target'
 import parseUrlFromQuery from 'server/middlewares/url-q'
 import join from 'server/middlewares/utils/join'
 
@@ -30,8 +29,7 @@ router.get([ '/:identifier', '/:identifier/media' ], join(
   parseArgsFromQuery,
   generateTargetPath,
   createTargetOnS3,
-  getTargetMeta,
-  handleRequest
+  respondTarget
 ))
 
 export default router

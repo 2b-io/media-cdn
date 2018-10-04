@@ -9,27 +9,26 @@ export default [
       return next()
     }
 
-    console.log(`HEAD ${ req._params.target }`)
+    console.log(`HEAD_TARGET ${ req._params.target }`)
     try {
       req._targetMeta = await cache.head(req._params.target)
     } catch (error) {
-      console.log(`NOTFOUND ${ req._params.target }`)
+      console.log(`NOTFOUND_TARGET ${ req._params.target }`)
     }
 
     next()
   },
   async function optimizeTarget(req, res, next) {
-
     if (req._targetMeta) {
       return next()
     }
 
-    const producer = req.app.get('rpc')
-
-     await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const s = Date.now()
-      console.log(`OPTIMIZE ${ req._params.origin } -> ${ req._params.target }...`)
-      producer.request()
+
+      console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }...`)
+
+      req.app.get('rpc').request()
         .content({
           job: 'optimize',
           payload: {
@@ -40,20 +39,50 @@ export default [
         })
         .waitFor(`optimize:${ req._params.target }`)
         .sendTo('worker')
-        .ttl(30e3)
+        .ttl(60e3)
         .onReply(async (error, content) => {
-          console.log(`OPTIMIZE ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
+          console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
 
           if (error) {
             reject(deserializeError(error))
           } else {
             resolve(content)
           }
-
         })
         .send()
     })
-    
+
     next()
+  },
+  async function getTargetMeta(req, res, next) {
+    if (req._targetMeta) {
+      return next()
+    }
+
+    console.log(`HEAD_TARGET ${ req._params.target }`)
+
+    req.app.get('rpc').request()
+      .content({
+        job: 'head',
+        payload: {
+          target: req._params.target,
+        }
+      })
+      .waitFor(`head:${ req._params.target }`)
+      .sendTo('worker')
+      .ttl(60e3)
+      .onReply(async (error, content) => {
+        if (error) {
+          return next({
+            statusCode: 500,
+            reason: error
+          })
+        }
+
+        req._targetMeta = content
+
+        next()
+      })
+      .send()
   }
 ]
