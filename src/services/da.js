@@ -6,7 +6,8 @@ export default {
   getPreset: async (contentType, project) => {
     return await Preset.findOne({
       contentType,
-      project
+      project,
+      isActive: true
     }).lean()
   },
   getProject: async (identifier) => {

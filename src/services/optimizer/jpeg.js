@@ -1,14 +1,15 @@
 import sharp from 'sharp'
 import localpath from 'services/localpath'
 
-export default async (file, args) => {
+export default async (file, args, parameters) => {
   const {
     mode = 'cover',
     width = 'auto',
-    height = 'auto',
-    quality = 100,
-    progressive = false
+    height = 'auto'
   } = args
+
+  const quality = parseInt(parameters.quality, 10)
+  const progressive = !!parameters.progressive
 
   const image = sharp(file.path)
 
