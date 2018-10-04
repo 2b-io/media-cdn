@@ -6,9 +6,8 @@ export default {
   origin: (params) => {
     const { origin, ext } = params
 
-    return ext ?
-      `${ base }/s/${ origin }.${ ext }` :
-      `${ base }/s/${ origin }`
+    return `${ base }/s/${ origin }.${ ext }`
+
   },
   target: (params) => {
     const {
@@ -17,14 +16,9 @@ export default {
         mode,
         width = 'auto',
         height = 'auto'
-      },
-      preset: {
-        hash
       }
     } = params
 
-    return ext ?
-      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }.${ ext }` :
-      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }`
+    return `${ base }/s/${ origin }/${ mode }_${ width }x${ height }.${ ext }`
   }
 }

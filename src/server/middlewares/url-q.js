@@ -27,7 +27,7 @@ export default async (req, res, next) => {
 
   const { hostname } = new URL(url)
   const { project } = req._params
-  const { allowedOrigins } = await da.getAllowedOrigins(project._id)
+  const { allowedOrigins } = await da.getPullSetting(project._id)
 
   const allowOrigin = allowedOrigins.length === 0 ||
     allowedOrigins.some(
