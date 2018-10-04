@@ -1,4 +1,5 @@
 import mime from 'mime'
+import deserializeError from 'deserialize-error'
 
 import cache from 'services/cache'
 
@@ -37,7 +38,8 @@ export default [
           payload: {
             origin: req._params.origin,
             target: req._params.target,
-            args: req._params.args
+            args: req._params.args,
+            parameters: req._params.preset.parameters
           }
         })
         .waitFor(`optimize:${ req._params.target }`)

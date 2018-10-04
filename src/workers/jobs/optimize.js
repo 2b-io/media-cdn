@@ -8,7 +8,7 @@ export default async (payload) => {
   try {
     origin = await cache.get(payload.origin, payload.meta ? payload.meta.ETag : undefined)
 
-    target = await optimizer.optimize(origin, payload.args)
+    target = await optimizer.optimize(origin, payload.args, payload.parameters)
 
     const upload = await cache.put(payload.target, target)
 
