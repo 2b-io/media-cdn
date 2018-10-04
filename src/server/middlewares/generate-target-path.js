@@ -1,5 +1,11 @@
 import sh from 'shorthash'
 
+const SUPPORT_RESIZE = [
+  'image/jpeg',
+  'image/gif',
+  'image/png'
+]
+
 export default async function generateTargetPath(req, res, next) {
   const { preset } = req._params
 
@@ -17,7 +23,7 @@ export default async function generateTargetPath(req, res, next) {
       height = 'auto'
     },
     project: { identifier },
-    preset: { contentType, parameters },
+    preset: { contentType, parameters = {} },
     urlHash,
     ext
   } = req._params
@@ -28,7 +34,13 @@ export default async function generateTargetPath(req, res, next) {
       Object.keys(parameters).sort()
     )
   )
-  req._params.target = `${ identifier }/${ urlHash }/${ presetHash }/${ mode }_${ width }x${ height }.${ ext }`
+
+  // TODO generate target depends on content-type
+  const resizable = SUPPORT_RESIZE.includes(contentType)
+
+  req._params.target = resizable ?
+    `${ identifier }/${ urlHash }/${ presetHash }/${ mode }_${ width }x${ height }.${ ext }` :
+    `${ identifier }/${ urlHash }/${ presetHash }.${ ext }`
 
   next()
-  }
+}

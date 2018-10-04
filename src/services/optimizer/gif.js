@@ -93,7 +93,7 @@ const optimizeGIF = async (input, output, { width = 'auto', height = 'auto', mod
   }
 }
 
-export default async (file, args, parameters) => {
+export default async (file, args, parameters = {}) => {
   const output = await localpath(file.ext)
 
   await optimizeGIF(file.path, output, args, parameters)

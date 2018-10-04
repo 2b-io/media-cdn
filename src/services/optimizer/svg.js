@@ -5,7 +5,6 @@ import path from 'path'
 import localpath from 'services/localpath'
 
 const optimizeSVG = async (input, output, plugins) => {
-
   const dir = path.join(path.dirname(output), 'svg')
 
   await fs.ensureDir(dir)
@@ -21,8 +20,9 @@ const optimizeSVG = async (input, output, plugins) => {
   await fs.move(files[0].path, output)
 }
 
-export default async (file, args) => {
+export default async (file, args, parameters = {}) => {
   const output = await localpath(file.ext)
+
   const {
     cleanupAttrs = true,
     inlineStyles = false,
@@ -45,7 +45,7 @@ export default async (file, args) => {
     removeNonInheritableGroupAttrs = true,
     cleanupIDs = true,
     removeStyleElement = true,
-  } = args
+  } = parameters
 
   const plugins = [
     { cleanupAttrs },

@@ -1,7 +1,7 @@
 import sharp from 'sharp'
 import localpath from 'services/localpath'
 
-export default async (file, args, parameters) => {
+export default async (file, args, parameters = {}) => {
   const {
     mode = 'cover',
     width = 'auto',

@@ -21,7 +21,7 @@ const optimizePNG = async (input, output, args) => {
   await fs.move(outputPng, output)
 }
 
-export default async (file, args, parameters) => {
+export default async (file, args, parameters = {}) => {
   const output = await localpath(file.ext)
 
   // arguments for resizing
