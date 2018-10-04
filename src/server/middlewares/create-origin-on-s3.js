@@ -3,22 +3,6 @@ import mime from 'mime'
 import cache from 'services/cache'
 
 export default [
-  async function createOriginPath(req, res, next) {
-    if (req._params.origin || req._params.target) {
-      return next()
-    }
-
-    const {
-      project: { identifier },
-      urlHash
-    } = req._params
-
-    req._params.origin = `${ identifier }/${ urlHash }`
-
-    // req._params.target = `${ identifier }/${ urlHash }`
-
-    next()
-  },
   async function checkExistOrigin(req, res, next) {
     if (req.query.f) {
       return next()
@@ -27,7 +11,7 @@ export default [
     console.log(`HEAD ${ req._params.origin }`)
 
     try {
-      req._meta = await cache.head(req._params.origin)
+      req._originMeta = await cache.head(req._params.origin)
     } catch (error) {
       console.log(`NOTFOUND ${ req._params.origin }`)
     }
@@ -35,14 +19,13 @@ export default [
     next()
   },
   async function crawObject(req, res, next) {
-    if (req._meta) {
+    if (req._originMeta) {
       return next()
     }
 
     console.log(`CRAWL ${ req._params.origin }`)
-
+    
     const producer = req.app.get('rpc')
-
     producer.request()
       .content({
         job: 'crawl',
@@ -70,7 +53,7 @@ export default [
       .send()
   },
   async function  invalidObject (req, res, next) {
-    if (!req._meta) {
+    if (!req._originMeta) {
       return next({
         status: 500,
         reason: 'Worker failed to process'
@@ -80,8 +63,9 @@ export default [
     next()
   },
   async function getContenType (req, res, next) {
-    const ext = mime.getExtension(req._meta.contentType)
-    req._params.contentType = req._meta.contentType
+    const contentType = req._originMeta ? req._originMeta.ContentType : req._meta.contentType
+    const ext = mime.getExtension(contentType)
+    req._params.contentType = contentType
     req._params.ext = ext
 
     next()
