@@ -31,7 +31,7 @@ export default [
         payload: {
           url: req._params.url,
           origin: req._params.origin,
-          headers: [] // TODO get from PullSetting
+          headers: req._params.pullSetting.headers
         }
       })
       .waitFor(`crawl:${ req._params.origin }`)
@@ -56,8 +56,7 @@ export default [
 
     console.log(`HEAD_ORIGIN ${ req._params.origin }`)
 
-    const producer = req.app.get('rpc')
-    producer.request()
+    req.app.get('rpc').request()
       .content({
         job: 'head',
         payload: {

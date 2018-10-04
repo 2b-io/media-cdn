@@ -7,6 +7,7 @@ import generateTargetPath from 'server/middlewares/generate-target-path'
 import generateOriginPath from 'server/middlewares/generate-origin-path'
 import getPreset from 'server/middlewares/preset'
 import getProject from 'server/middlewares/project'
+import getPullSetting from 'server/middlewares/pull-setting'
 import respondTarget from 'server/middlewares/respond-target'
 import parseUrlFromQuery from 'server/middlewares/url-q'
 import join from 'server/middlewares/utils/join'
@@ -22,6 +23,7 @@ router.get([ '/:identifier', '/:identifier/media' ], join(
     next()
   },
   getProject,
+  getPullSetting,
   parseUrlFromQuery,
   generateOriginPath,
   createOriginOnS3,
