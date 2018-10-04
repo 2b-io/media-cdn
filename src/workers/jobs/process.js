@@ -1,7 +1,6 @@
 import deserializeError from 'deserialize-error'
 
 const crawl = async (payload, producer) => {
-
   return await new Promise((resolve, reject) => {
     const s = Date.now()
     console.log(`CRAWL ${ payload.url } -> ${ payload.origin }...`)
@@ -32,7 +31,6 @@ const crawl = async (payload, producer) => {
 }
 
 const head = async (payload, producer, meta) => {
-  console.log('bbb', payload);
   return await new Promise((resolve, reject) => {
     const s = Date.now()
     console.log(`HEAD ${ payload.target }...`)
