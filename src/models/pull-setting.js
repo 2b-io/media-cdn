@@ -17,6 +17,8 @@ const schema = mongoose.Schema({
     index: true
   },
   allowedOrigins: [ String ]
+}, {
+  collection: 'pullSettings'
 })
 
 export default mongoose.model('PullSetting', schema)
