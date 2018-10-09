@@ -11,6 +11,11 @@ import universal from 'server/endpoints/universal'
 
 const app = express()
 
+app.get([
+  '/favicon.ico',
+  '/robots.txt'
+], (req, res) => res.sendStatus(404))
+
 app.use(morgan('dev'))
 app.enable('trust proxy')
 app.disable('x-powered-by')

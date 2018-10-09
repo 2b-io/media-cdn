@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
 import mime from 'mime'
+import ms from 'ms'
 
 import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloudfront'
@@ -20,12 +21,15 @@ export default {
     }).promise()
   },
   async put(key, file, options = {}) {
+    const { meta, ttl } = options
+
     return await s3.upload({
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
       Body: fs.createReadStream(file.path),
-      Metadata: options.meta || {}
+      Expires: ttl ? new Date(Date.now() + ms(ttl)) : undefined,
+      Metadata: meta || {}
     }).promise()
   },
   async get(key, etag) {

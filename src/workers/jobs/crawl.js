@@ -11,7 +11,8 @@ const crawlByScraper = async (payload) => {
     method: 'post',
     body: JSON.stringify({
       ...payload,
-      key: cloudPath(payload.origin)
+      key: cloudPath(payload.origin),
+      ttl: '90d'
     }),
     headers: {
       'Content-Type': 'application/json'
@@ -34,7 +35,8 @@ const crawlByWorker = async (payload) => {
     const upload = await cache.put(payload.origin, file, {
       meta: {
         'origin-url': payload.url
-      }
+      },
+      ttl: '90d'
     })
 
     return {
