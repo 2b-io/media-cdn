@@ -29,6 +29,11 @@ export default {
       secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY,
       targetOriginId: process.env.AWS_CLOUDFRONT_TARGET_ORIGIN_ID,
       targetOriginDomain: process.env.AWS_CLOUDFRONT_DOMAIN_NAME
+    },
+    elasticSearch: {
+      host: process.env.AWS_ELASTIC_SEARCH_HOST,
+      index: process.env.AWS_ELASTIC_SEARCH_INDEX,
+      type: process.env.AWS_ELASTIC_SEARCH_TYPE
     }
   },
   mongodb: process.env.MONGO,
