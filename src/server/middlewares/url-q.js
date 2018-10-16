@@ -1,8 +1,6 @@
 import sh from 'shorthash'
 import { URL } from 'url'
 
-import da from 'services/da'
-
 const isMatch = (origin, domain) => {
   const pattern = origin
     .replace(/\./g, '\\.')
@@ -26,7 +24,6 @@ export default function parseUrlFromQuery(req, res, next) {
   }
 
   const { hostname } = new URL(url)
-  const { project } = req._params
   const { allowedOrigins } = req._params.pullSetting
 
   const allowOrigin = allowedOrigins.length === 0 ||

@@ -1,17 +1,34 @@
 import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
-import distribution from 'services/cloudfront/distribution'
+import cloudFront from 'services/cloudfront/distribution'
+
+const {
+  targetOriginId,
+  targetOriginDomain
+} = config.aws.cloudFront
 
 export default async (req, res) => {
-  const { targetOriginId, targetOriginDomain } = config.aws.cloudFront
-  const { projectName } = req.body
-  const { development } = config
-  const comment = `${ development? 'dev' : ''  }-${ projectName }`
   try {
-    const distributionInfo = await distribution.create({ targetOriginId, targetOriginDomain, comment })
+    const {
+      cname,
+      identifier
+    } = req.body
 
-    res.status(201).json(distributionInfo)
+    const comment = `${ config.development ? 'DEV:' : '' }${ identifier }`
+
+    const {
+      Distribution: distribution
+    } = await cloudFront.create({
+      targetOriginId,
+      targetOriginDomain,
+      comment,
+      aliases: [
+        `${ identifier }.${ cname }`
+      ]
+    })
+
+    res.status(201).json(distribution)
   } catch (e) {
     res.status(500).json(serializeError(e))
   }

@@ -1,6 +1,4 @@
-import mime from 'mime'
 import ms from 'ms'
-import sh from 'shorthash'
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
 
