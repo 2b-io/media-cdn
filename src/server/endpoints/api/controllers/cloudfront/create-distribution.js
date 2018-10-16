@@ -10,25 +10,23 @@ const {
 
 export default async (req, res) => {
   try {
-    const {
-      cname,
-      identifier
-    } = req.body
+    const { identifier } = req.body
 
     const comment = `${ config.development ? 'DEV:' : '' }${ identifier }`
 
     const {
-      Distribution: distribution
-    } = await cloudFront.create({
+      distribution,
+      domain
+    } = await cloudFront.create(identifier, {
       targetOriginId,
       targetOriginDomain,
-      comment,
-      aliases: [
-        `${ identifier }.${ cname }`
-      ]
+      comment
     })
 
-    res.status(201).json(distribution)
+    res.status(201).json({
+      distribution,
+      domain
+    })
   } catch (e) {
     res.status(500).json(serializeError(e))
   }

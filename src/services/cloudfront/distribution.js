@@ -1,4 +1,5 @@
-import cloudFront from 'infrastructure/cloudfront'
+import cloudFront from 'infrastructure/cloud-front'
+import domainService from 'services/domain'
 
 const createDistributionConfig = ({
   enabled = true,
@@ -124,13 +125,33 @@ const createDistributionConfig = ({
 })
 
 export default {
-  async create(params) {
+  async create(identifier, params) {
+    const {
+      HostedZone: {
+        Name: domain
+      }
+    } = await domainService.get()
+
+    const normalizedDomain = domain.split('.').filter(Boolean).join('.')
+
+    const alias = `${ identifier }.${ normalizedDomain }`
+
     const distributionConfig = createDistributionConfig({
       reference: Date.now().toString(),
-      ...params
+      ...params,
+      aliases: [ alias ]
     })
 
-    return await cloudFront.createDistribution(distributionConfig).promise()
+    const {
+      Distribution: distribution
+    } = await cloudFront.createDistribution(distributionConfig).promise()
+
+    await domainService.createRecordSet(alias, distribution.DomainName)
+
+    return {
+      distribution,
+      domain: alias
+    }
   },
   async get(identifier) {
     return await cloudFront.getDistribution({
