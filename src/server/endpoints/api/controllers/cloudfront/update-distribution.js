@@ -1,14 +1,17 @@
 import serializeError from 'serialize-error'
 
-import distribution from 'services/cloudfront/distribution'
+import cloudFront from 'services/cloudfront/distribution'
 
 export default async (req, res) => {
-  const { identifier } = req.params
-  const { enabled } = req.body
   try {
-    const distributionInfo = await distribution.update({ identifier, enabled })
+    const { identifier } = req.params
+    const { enabled } = req.body
 
-    res.status(200).json(distributionInfo)
+    const distribution = await cloudFront.update(identifier, {
+      enabled
+    })
+
+    res.status(200).json(distribution)
   } catch (e) {
     res.status(500).json(serializeError(e))
   }

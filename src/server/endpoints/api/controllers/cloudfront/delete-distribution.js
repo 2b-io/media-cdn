@@ -6,7 +6,7 @@ export default async (req, res) => {
   try {
     const { identifier } = req.params
 
-    await cloudFront.remove({ identifier })
+    await cloudFront.remove(identifier)
 
     res.sendStatus(204)
   } catch (e) {

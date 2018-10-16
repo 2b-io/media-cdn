@@ -134,27 +134,29 @@ export default {
 
     return await cloudFront.createDistribution(distributionConfig).promise()
   },
-  async get({ identifier }) {
+  async get(identifier) {
     return await cloudFront.getDistribution({
       Id: identifier
     }).promise()
   },
-  async update({ identifier, enabled }) {
+  async update(identifier, { enabled }) {
     const {
-      DistributionConfig: distributionConfig
+      DistributionConfig: distributionConfig,
+      ETag: eTag
     } = await cloudFront.getDistributionConfig({
       Id: identifier
     }).promise()
 
     return await cloudFront.updateDistribution({
       Id: identifier,
+      IfMatch: eTag,
       DistributionConfig: {
         ...distributionConfig,
         Enabled: enabled
       }
     }).promise()
   },
-  async remove({ identifier }) {
+  async remove(identifier) {
     return await cloudFront.deleteDistribution({
       Id: identifier
     }).promise()
