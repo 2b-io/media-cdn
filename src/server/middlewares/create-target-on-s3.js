@@ -1,4 +1,3 @@
-import mime from 'mime'
 import deserializeError from 'deserialize-error'
 
 import cache from 'services/cache'

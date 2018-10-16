@@ -1,5 +1,3 @@
-import util from 'util'
-
 import cloudFront from 'infrastructure/cloudfront'
 
 const createDistributionConfig = ({
@@ -157,8 +155,15 @@ export default {
     }).promise()
   },
   async remove(identifier) {
-    return await cloudFront.deleteDistribution({
+    const {
+      ETag: eTag
+    } = await cloudFront.getDistributionConfig({
       Id: identifier
+    }).promise()
+
+    return await cloudFront.deleteDistribution({
+      Id: identifier,
+      IfMatch: eTag
     }).promise()
   }
 }
