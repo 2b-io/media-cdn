@@ -1,19 +1,20 @@
+import util from 'util'
+
 import cloudFront from 'infrastructure/cloudfront'
 
-const createDistributionParams = ({
-  options: {
-    enabled = true,
-    targetOriginId,
-    targetOriginDomain,
-    reference,
-    comment = ''
-  }
+const createDistributionConfig = ({
+  enabled = true,
+  targetOriginId,
+  targetOriginDomain,
+  reference,
+  comment = '',
+  aliases = []
 }) => ({
   DistributionConfig: {
     CallerReference: reference,
     Aliases: {
-      Quantity: 0,
-      Items: []
+      Quantity: aliases.length,
+      Items: aliases
     },
     DefaultRootObject: '',
     Origins: {
@@ -124,37 +125,38 @@ const createDistributionParams = ({
   }
 })
 
-
 export default {
-  async create({ targetOriginId, targetOriginDomain, comment }) {
-    const date = new Date()
-    const reference = String(date.getTime())
-    const params = createDistributionParams({
-      options: {
-        targetOriginId,
-        targetOriginDomain,
-        reference,
-        comment
-      } })
-    return await cloudFront.createDistribution(params).promise()
+  async create(params) {
+    const distributionConfig = createDistributionConfig({
+      reference: Date.now().toString(),
+      ...params
+    })
+
+    return await cloudFront.createDistribution(distributionConfig).promise()
   },
   async get({ identifier }) {
-    return await cloudFront.getDistribution({ Id: identifier }).promise()
+    return await cloudFront.getDistribution({
+      Id: identifier
+    }).promise()
   },
   async update({ identifier, enabled }) {
-    const distributionParams = await cloudFront.getDistributionConfig({ Id: identifier }).promise()
-    const { DistributionConfig, ETag } = distributionParams
-    const params = {
-      DistributionConfig: {
-        ...DistributionConfig,
-        Enabled: enabled
-      },
+    const {
+      DistributionConfig: distributionConfig
+    } = await cloudFront.getDistributionConfig({
+      Id: identifier
+    }).promise()
+
+    return await cloudFront.updateDistribution({
       Id: identifier,
-      IfMatch: ETag
-    }
-    return await cloudFront.updateDistribution(params).promise()
+      DistributionConfig: {
+        ...distributionConfig,
+        Enabled: enabled
+      }
+    }).promise()
   },
-  async delete({ identifier, Etag }) {
-    return await cloudFront.deleteDistribution({ Id: identifier, IfMatch: Etag }).promise()
+  async remove({ identifier }) {
+    return await cloudFront.deleteDistribution({
+      Id: identifier
+    }).promise()
   }
 }
