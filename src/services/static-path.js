@@ -4,21 +4,28 @@ const { server: { base } } = config
 
 export default {
   origin: (params) => {
-    const { origin, ext } = params
+    const {
+      infrastructure: { cname },
+      project: { identifier },
+      origin,
+      ext
+    } = params
 
-    return `${ base }/s/${ origin }.${ ext }`
+    const path = origin.replace(identifier, '')
 
+    return `https://${ cname }/s${ path }.${ ext }`
   },
   target: (params) => {
     const {
-      origin, ext,
-      args: {
-        mode,
-        width = 'auto',
-        height = 'auto'
-      }
+      infrastructure: { cname },
+      project: { identifier },
+      preset,
+      target
     } = params
 
-    return `${ base }/s/${ origin }/${ mode }_${ width }x${ height }.${ ext }`
+    const path = target.replace(identifier, '')
+    const ext = preset ? '' : `.${ params.ext }`
+
+    return `https://${ cname }/s${ path }${ ext }`
   }
 }

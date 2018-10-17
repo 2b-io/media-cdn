@@ -19,10 +19,15 @@ export default {
       ]
     }).lean()
 
-    return await Project.findOne({
+    const project = await Project.findOne({
       _id: infrastructure.project,
       isActive: true
     }).lean()
+
+    return {
+      infrastructure,
+      project
+    }
   },
   getPullSetting: async (project) => {
     return await PullSetting.findOne({
