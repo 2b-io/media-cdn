@@ -2,7 +2,9 @@ import serializeError from 'serialize-error'
 
 import config from 'infrastructure/config'
 import cache from 'services/cache'
-import project from 'services/project'
+import { get as getPullSetting } from 'services/pull-setting'
+import { getProjectByIdentifier } from 'services/project'
+import { searchOriginUrl } from 'services/elastic-search'
 
 export default async (req, res) => {
   try {
@@ -12,22 +14,23 @@ export default async (req, res) => {
       return res.status(201).json({ succeed: true })
     }
 
-    // delete all file in project s3 and cloudfront
-    if (patterns[ 0 ] === '/*') {
-      await cache.invalid([ `/u/${ identifier }/*`, `/p/${ identifier }/*` ])
-      await cache.deleteAll(`${ config.version }/${ identifier }`)
+    let allObjects = []
+    await patterns.reduce(
+      async (previousJob, pattern) => {
+        await previousJob
+        const objects = await searchOriginUrl({ identifier, originUrl: pattern })
+        allObjects = allObjects.concat(objects)
+        return objects
 
-      return res.status(201).json({ succeed: true })
-    }
-
-    const { prettyOrigin } = await project.get(identifier)
+      },Promise.resolve()
+    )
+    const { _id: _project } = await getProjectByIdentifier(identifier)
+    const { pullURL } = await getPullSetting(_project)
 
     // delete on s3
-    const s3Prefix = `${ config.version }/${ identifier }`
-    const s3Keys = await cache.search(s3Prefix, patterns)
-
-    if (s3Keys.length) {
-      await cache.delete(s3Keys)
+    if (allObjects.length) {
+      const keys = allObjects.map(({ _source }) => _source )
+      await cache.delete(keys)
     }
 
     // delete on cloudfront
@@ -45,8 +48,8 @@ export default async (req, res) => {
               `/u/${ identifier }?url=${ encodeURIComponent(pattern) }*`,
               `/u/${ identifier }?*url=${ encodeURIComponent(pattern) }*`
             ],
-            pretty: prettyOrigin && pattern.indexOf(prettyOrigin) === 0 ?
-              `/p/${ identifier }${ pattern.replace(prettyOrigin, '') }` :
+            pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
+              `/p/${ identifier }${ pattern.replace(pullURL, '') }` :
               null,
           }
         }
