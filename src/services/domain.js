@@ -25,7 +25,28 @@ const createRecordSet = async (name, value) => {
           Type: 'A'
         }
       } ],
-      Comment: `CloudFront distribution for ${ name }`
+      Comment: `Map CloudFront distribution for ${ name }`
+    },
+    HostedZoneId: config.aws.route53.hostedZoneId
+  }).promise()
+}
+
+const removeRecordSet = async (name, value) => {
+  return await route53.changeResourceRecordSets({
+    ChangeBatch: {
+      Changes: [ {
+        Action: 'DELETE',
+        ResourceRecordSet: {
+          AliasTarget: {
+            DNSName: value,
+            EvaluateTargetHealth: false,
+            HostedZoneId: 'Z2FDTNDATAQYW2'
+          },
+          Name: name,
+          Type: 'A'
+        }
+      } ],
+      Comment: `Unmap CloudFront distribution for ${ name }`
     },
     HostedZoneId: config.aws.route53.hostedZoneId
   }).promise()
@@ -33,5 +54,6 @@ const createRecordSet = async (name, value) => {
 
 export default {
   get,
-  createRecordSet
+  createRecordSet,
+  removeRecordSet
 }
