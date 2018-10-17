@@ -23,7 +23,6 @@ export default {
       secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY
     },
     cloudFront: {
-      // distributionId: process.env.AWS_CLOUDFRONT_DISTRIBUTION_ID,
       region: process.env.AWS_CLOUDFRONT_REGION,
       accessKeyId: process.env.AWS_CLOUDFRONT_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY,
@@ -34,6 +33,12 @@ export default {
       host: process.env.AWS_ELASTIC_SEARCH_HOST,
       index: process.env.AWS_ELASTIC_SEARCH_INDEX,
       type: process.env.AWS_ELASTIC_SEARCH_TYPE
+    },
+    route53: {
+      region: process.env.AWS_ROUTE53_REGION,
+      accessKeyId: process.env.AWS_ROUTE53_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_ROUTE53_SECRET_ACCESS_KEY,
+      hostedZoneId: process.env.AWS_ROUTE53_HOSTED_ZONE_ID
     }
   },
   mongodb: process.env.MONGO,

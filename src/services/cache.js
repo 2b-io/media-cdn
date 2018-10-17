@@ -3,7 +3,7 @@ import mime from 'mime'
 import ms from 'ms'
 
 import { getObjects } from './media'
-import cloudFront from 'infrastructure/cloudfront'
+import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'

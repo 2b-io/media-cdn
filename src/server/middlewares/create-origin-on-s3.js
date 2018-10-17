@@ -37,7 +37,7 @@ export default [
       .waitFor(`crawl:${ req._params.origin }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply((error, content) => {
+      .onReply((error) => {
         if (error) {
           return next({
             statusCode: 500,

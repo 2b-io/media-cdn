@@ -11,9 +11,12 @@ export default {
       isActive: true
     }).lean()
   },
-  getProject: async (domain) => {
+  getProject: async (hostName) => {
     const infrastructure = await Infrastructure.findOne({
-      domain
+      $or: [
+        { cname: hostName },
+        { domain: hostName }
+      ]
     }).lean()
 
     return await Project.findOne({
