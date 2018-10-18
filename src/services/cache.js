@@ -1,13 +1,14 @@
 import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
+import escape from 'escape-string-regexp'
 
 import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'
-
+import { searchAllObjects } from 'services/elastic-search'
 const { version = '0.0.1' } = config
 
 export const cloudPath = (key) => `${ version }/${ key }`
@@ -50,12 +51,11 @@ export default {
 
     return res
   },
-  async invalid(patterns = []) {
+  async invalid({ patterns = [], distributionId }) {
     const date = new Date()
     const reference = String(date.getTime())
-
     const params = {
-      DistributionId: config.aws.cloudFront.distributionId,
+      DistributionId: distributionId,
       InvalidationBatch: {
         CallerReference: reference,
         Paths: {
@@ -67,101 +67,49 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search(prefix, patterns) {
-
-    const allObjects = await getObjects(prefix)
-
-    if (!allObjects.Contents.length) {
-      return []
-    }
-
-    // get attached data of each origin object
-    const attachedData = await Promise.all(
-      allObjects.Contents
-        .map(
-          (object) => s3.headObject({
-            Bucket: s3.config.bucket,
-            Key: object.Key
-          }).promise()
-        )
+  async search({ identifier, patterns }) {
+    const originObjects = await patterns.reduce(
+      async (previousJob, pattern) => {
+        const previObjects = await previousJob || []
+        const nextObjects = await searchAllObjects({
+          identifier,
+          params: {
+            regexp: {
+              originUrl: `${ escape(`${ pattern }`) }.*`
+            }
+          }
+        })
+        return nextObjects.concat(previObjects)
+      },Promise.resolve()
     )
 
-    // merge attached data
-    const originObjectsWithData = allObjects.Contents.map(
-      (origin, index) => ({
-        ...origin,
-        data: attachedData[ index ]
-      })
+    const allObjects = await originObjects.reduce(
+      async (previousJob, { key: _key }) => {
+        const previObjects = await previousJob || []
+        const nextObjects = await searchAllObjects({
+          identifier,
+          params: {
+            regexp: {
+              key: `${ escape(`${ _key }`) }.*`
+            }
+          }
+        })
+        return nextObjects.concat(previObjects)
+      },Promise.resolve()
     )
-
-    // find by patterns
-    return patterns
-      .map(
-        (pattern) => {
-          const regex = new RegExp(pattern.replace(/\*/g, '(.+)'))
-
-          return originObjectsWithData
-            .filter(
-              (object) => regex.test(object.data.Metadata[ 'origin-url' ])
-            )
-            .map(
-              (object) => object.Key
-            )
-        }
-      )
-      .reduce(
-        (all, keys) => [ ...all, ...keys ]
-      )
-      .filter(
-        (key, index, keys) => keys.indexOf(key) === index
-      )
+    return allKeys
   },
-  async deleteAll(prefix) {
-
-    const allObjects = await s3.listObjectsV2({
-      Bucket: s3.config.bucket,
-      Prefix: prefix
-    }).promise()
-
-    if (!allObjects.Contents.length) {
-      return []
-    }
-
-    return await s3.deleteObjects({
-      Bucket: s3.config.bucket,
-      Delete: {
-        Objects: allObjects.Contents.map(({ Key }) => ({ Key }))
-      }
-    }).promise()
-  },
-
   async delete(keys) {
-    const relatedObjects = await Promise.all(
-      keys.map(
-        (key) => s3.listObjectsV2({
-          Bucket: s3.config.bucket,
-          Prefix: key
-        }).promise()
-      )
-    )
-
-    const relatedKeys = relatedObjects
-      .map(
-        ({ Contents }) => Contents.map(
-          (object) => object.Key
-        )
-      )
-      .reduce(
-        (allKeys, keys) => [ ...allKeys, ...keys ],
-        []
-      )
-
-    return await s3.deleteObjects({
-      Bucket: s3.config.bucket,
-      Delete: {
-        Objects: relatedKeys.map((key) => ({ Key: key }))
-      }
-    }).promise()
+    try {
+      await s3.deleteObjects({
+        Bucket: s3.config.bucket,
+        Delete: {
+          Objects: keys.map(({ key }) => ({ Key: key }))
+        }
+      }).promise()
+    } catch (e) {
+      console.error(e)
+    }
   },
   stream(key, etag) {
     return s3.getObject({

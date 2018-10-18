@@ -18,6 +18,7 @@
     "delay": "2.0.0",
     "deserialize-error": "0.0.3",
     "elasticsearch": "15.1.1",
+    "escape-string-regexp": "1.0.5",
     "express": "4.16.2",
     "fs-extra": "5.0.0",
     "gifsicle": "3.0.4",
