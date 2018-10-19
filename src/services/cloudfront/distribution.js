@@ -3,7 +3,7 @@ import domainService from 'services/domain'
 
 const createDistributionConfig = ({
   enabled = true,
-  targetOriginId,
+  acmCertificateArn,
   targetOriginDomain,
   reference,
   comment = '',
@@ -20,7 +20,7 @@ const createDistributionConfig = ({
       Quantity: 1,
       Items: [
         {
-          Id: targetOriginId,
+          Id: `ELB-${ targetOriginDomain }`,
           DomainName: targetOriginDomain,
           OriginPath: '',
           CustomHeaders: {
@@ -42,7 +42,7 @@ const createDistributionConfig = ({
       ]
     },
     DefaultCacheBehavior: {
-      TargetOriginId: targetOriginId,
+      TargetOriginId: `ELB-${ targetOriginDomain }`,
       ForwardedValues: {
         QueryString: true,
         Cookies: {
@@ -128,9 +128,11 @@ const createDistributionConfig = ({
     Enabled: enabled,
     PriceClass: 'PriceClass_All',
     ViewerCertificate: {
-      CloudFrontDefaultCertificate: true,
-      MinimumProtocolVersion: 'TLSv1',
-      CertificateSource: 'cloudfront'
+      ACMCertificateArn: acmCertificateArn,
+      SSLSupportMethod: 'sni-only',
+      MinimumProtocolVersion: 'TLSv1.1_2016',
+      Certificate: acmCertificateArn,
+      CertificateSource: 'acm'
     },
     Restrictions: {
       GeoRestriction: {

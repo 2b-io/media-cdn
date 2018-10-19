@@ -26,8 +26,8 @@ export default {
       region: process.env.AWS_CLOUDFRONT_REGION,
       accessKeyId: process.env.AWS_CLOUDFRONT_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_CLOUDFRONT_SECRET_ACCESS_KEY,
-      targetOriginId: process.env.AWS_CLOUDFRONT_TARGET_ORIGIN_ID,
-      targetOriginDomain: process.env.AWS_CLOUDFRONT_DOMAIN_NAME
+      targetOriginDomain: process.env.AWS_CLOUDFRONT_TARGET_ORIGIN_DOMAIN,
+      acmCertificateArn: process.env.AWS_CLOUDFRONT_ACM_CERTIFICATE_ARN
     },
     elasticSearch: {
       host: process.env.AWS_ELASTIC_SEARCH_HOST,
