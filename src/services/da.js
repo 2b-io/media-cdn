@@ -42,9 +42,17 @@ const getPullSetting = async (project) => {
   }).lean()
 }
 
+const getProjectByIdentifier = async (identifier) => {
+  return await Project.findOne({
+    identifier,
+    isActive: true
+  }).lean()
+}
+
 export default {
   getInfrastructure,
   getPreset,
   getProject,
-  getPullSetting
+  getPullSetting,
+  getProjectByIdentifier
 }
