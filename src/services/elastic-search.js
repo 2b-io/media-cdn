@@ -3,7 +3,6 @@ import elasticSearch from 'infrastructure/elastic-search'
 
 const INDEX_NAME = `${ config.aws.elasticSearch.prefix }media`
 const TYPE_NAME = `${ config.aws.elasticSearch.prefix }media`
-const PAGE_FROM = 0
 const PAGE_SIZE = 10
 
 const searchByParams = async ({ identifier, params, from, size }) => {
@@ -30,7 +29,7 @@ const searchByParams = async ({ identifier, params, from, size }) => {
   })
 }
 
-export const searchAllObjects = async ({ identifier, params }) => {
+const searchAllObjects = async ({ identifier, params }) => {
   let totalHits = 0
   let total = 0
   let sources = []
@@ -41,7 +40,7 @@ export const searchAllObjects = async ({ identifier, params }) => {
         total: _total,
         hits
       }
-    } = await searchByParams({ identifier, params, from: PAGE_FROM, size: PAGE_SIZE })
+    } = await searchByParams({ identifier, params, from: totalHits, size: PAGE_SIZE })
 
     totalHits = totalHits + hits.length
     total = _total
@@ -50,4 +49,8 @@ export const searchAllObjects = async ({ identifier, params }) => {
   } while (totalHits < total)
 
   return sources
+}
+
+export default {
+  searchAllObjects
 }

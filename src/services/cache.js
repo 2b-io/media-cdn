@@ -8,8 +8,10 @@ import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'
-import { searchAllObjects } from 'services/elastic-search'
+import elasticSearch from 'services/elastic-search'
 const { version = '0.0.1' } = config
+
+const MAX_KEYS = 1000
 
 export const cloudPath = (key) => `${ version }/${ key }`
 
@@ -71,13 +73,13 @@ export default {
     const originObjects = await patterns.reduce(
       async (previousJob, pattern) => {
         const previObjects = await previousJob || []
-        const nextObjects = await searchAllObjects({
+        const nextObjects = await elasticSearch.searchAllObjects({
           identifier,
           params: {
             regexp: {
               originUrl: pattern.endsWith('*') ?
-              `${ escape(`${ pattern.replace('*', '') }`) }.*` :
-              `${ escape(`${ pattern }`) }.*`
+                `${ escape(pattern.substring(0, pattern.length - 1)) }.*` :
+                `${ escape(pattern) }.*`
             }
           }
         })
@@ -86,13 +88,13 @@ export default {
     )
 
     const allObjects = await originObjects.reduce(
-      async (previousJob, { key: _key }) => {
+      async (previousJob, { key: originKey }) => {
         const previObjects = await previousJob || []
-        const nextObjects = await searchAllObjects({
+        const nextObjects = await elasticSearch.searchAllObjects({
           identifier,
           params: {
             regexp: {
-              key: `${ escape(`${ _key }`) }.*`
+              key: `${ escape(originKey) }.*`
             }
           }
         })
@@ -102,12 +104,18 @@ export default {
     return allObjects
   },
   async delete(keys) {
-    await s3.deleteObjects({
-      Bucket: s3.config.bucket,
-      Delete: {
-        Objects: keys.map(({ key }) => ({ Key: key }))
-      }
-    }).promise()
+    let keyFrom = 0
+    do {
+      const subKeys = keys.slice(keyFrom, keyFrom + MAX_KEYS)
+      await s3.deleteObjects({
+        Bucket: s3.config.bucket,
+        Delete: {
+          Objects: subKeys.map(({ key }) => ({ Key: key }))
+        }
+      }).promise()
+
+      keyFrom = keyFrom + subKeys.length
+    } while (keyFrom < keys.length)
   },
   stream(key, etag) {
     return s3.getObject({
