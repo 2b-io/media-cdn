@@ -75,12 +75,14 @@ export default {
           identifier,
           params: {
             regexp: {
-              originUrl: `${ escape(`${ pattern }`) }.*`
+              originUrl: pattern.endsWith('*') ?
+              `${ escape(`${ pattern.replace('*', '') }`) }.*` :
+              `${ escape(`${ pattern }`) }.*`
             }
           }
         })
         return nextObjects.concat(previObjects)
-      },Promise.resolve()
+      }, Promise.resolve()
     )
 
     const allObjects = await originObjects.reduce(
@@ -95,21 +97,17 @@ export default {
           }
         })
         return nextObjects.concat(previObjects)
-      },Promise.resolve()
+      }, Promise.resolve()
     )
-    return allKeys
+    return allObjects
   },
   async delete(keys) {
-    try {
-      await s3.deleteObjects({
-        Bucket: s3.config.bucket,
-        Delete: {
-          Objects: keys.map(({ key }) => ({ Key: key }))
-        }
-      }).promise()
-    } catch (e) {
-      console.error(e)
-    }
+    await s3.deleteObjects({
+      Bucket: s3.config.bucket,
+      Delete: {
+        Objects: keys.map(({ key }) => ({ Key: key }))
+      }
+    }).promise()
   },
   stream(key, etag) {
     return s3.getObject({

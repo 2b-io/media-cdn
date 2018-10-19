@@ -31,22 +31,23 @@ const searchByParams = async ({ identifier, params, from, size }) => {
 }
 
 export const searchAllObjects = async ({ identifier, params }) => {
-  const {
-    hits: {
-      total,
-      hits
-    }
-  } = await searchByParams({ identifier, params, from: PAGE_FROM, size: PAGE_SIZE })
+  let totalHits = 0
+  let total = 0
+  let sources = []
 
-  if (total < PAGE_SIZE) {
-    return hits.map(({ _source }) => _source)
-  } else {
-    let listResults = []
-    for (var i = 0; i <= total; i = i + PAGE_SIZE) {
-      const results = await searchByParams({ identifier, params, from: i, size: PAGE_SIZE })
-      listResults = listResults.concat(results.hits.hits)
-    }
+  do {
+    const {
+      hits: {
+        total: _total,
+        hits
+      }
+    } = await searchByParams({ identifier, params, from: PAGE_FROM, size: PAGE_SIZE })
 
-    return listResults.map(({ _source }) => _source)
-  }
+    totalHits = totalHits + hits.length
+    total = _total
+
+    sources = sources.concat(hits.map(({ _source }) => _source))
+  } while (totalHits < total)
+
+  return sources
 }
