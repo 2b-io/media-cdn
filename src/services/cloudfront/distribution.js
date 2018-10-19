@@ -49,8 +49,16 @@ const createDistributionConfig = ({
           Forward: 'none'
         },
         Headers: {
-          Quantity: 0,
-          Items: []
+          Quantity: 7,
+          Items: [
+            'Access-Control-Allow-Headers',
+            'Access-Control-Allow-Methods',
+            'Access-Control-Allow-Origin',
+            'Access-Control-Request-Headers',
+            'Access-Control-Request-Method',
+            'Host',
+            'Origin'
+          ]
         },
         QueryStringCacheKeys: {
           Quantity: 0,
@@ -94,8 +102,21 @@ const createDistributionConfig = ({
       Items: []
     },
     CustomErrorResponses: {
-      Quantity: 0,
-      Items: []
+      Quantity: 2,
+      Items: [
+        {
+          ErrorCode: 400,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: 30
+        },
+        {
+          ErrorCode: 500,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: 30
+        }
+      ]
     },
     Comment: comment,
     Logging: {
