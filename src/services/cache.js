@@ -1,14 +1,15 @@
+import escape from 'escape-string-regexp'
 import fs from 'fs-extra'
 import mime from 'mime'
 import ms from 'ms'
-import escape from 'escape-string-regexp'
 
 import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
-import localpath from 'services/localpath'
 import elasticSearch from 'services/elastic-search'
+import localpath from 'services/localpath'
+
 const { version = '0.0.1' } = config
 
 const MAX_KEYS = 1000
