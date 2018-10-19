@@ -33,7 +33,7 @@ export default async (req, res) => {
                 `/u/?url=${ encodeURIComponent(pattern) }`,
               ],
               pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
-                `/${ pattern.replace(pullURL, '') }` :
+                `${ pattern.replace(pullURL, '') }` :
                 null,
             }
           } else {
@@ -44,7 +44,7 @@ export default async (req, res) => {
                 `/u/?url=${ encodeURIComponent(pattern) }*`,
               ],
               pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
-                `/${ pattern.replace(pullURL, '') }` :
+                `${ pattern.replace(pullURL, '') }*` :
                 null,
             }
           }
