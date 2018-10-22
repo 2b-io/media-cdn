@@ -8,14 +8,18 @@ export default [
       return next()
     }
 
-    if (req._targetMeta) {
-      return next()
-    }
-
     console.log(`HEAD_TARGET ${ req._params.target }`)
 
     try {
       req._targetMeta = await cache.head(req._params.target)
+
+      const { Expires: expires } = req._targetMeta
+
+      if (!expires || Date.now() > new Date(expires)) {
+        console.log(`TARGET_EXPIRED ${ req._params.target }`)
+
+        req._targetExpired = true
+      }
     } catch (error) {
       console.log(`NOTFOUND_TARGET ${ req._params.target }`)
     }
@@ -23,41 +27,41 @@ export default [
     next()
   },
   async function optimizeTarget(req, res, next) {
-    if (req._targetMeta) {
+    if (!req._targetExpired && req._targetMeta) {
       return next()
     }
 
-    await new Promise((resolve, reject) => {
-      const s = Date.now()
+    const s = Date.now()
 
-      console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }...`)
+    console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }...`)
 
-      req.app.get('rpc').request()
-        .content({
-          job: 'optimize',
-          payload: {
-            origin: req._params.origin,
-            target: req._params.target,
-            args: req._params.args,
-            parameters: req._params.preset.parameters
-          }
-        })
-        .waitFor(`optimize:${ req._params.target }`)
-        .sendTo('worker')
-        .ttl(60e3)
-        .onReply((error, content) => {
-          console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
+    req.app.get('rpc').request()
+      .content({
+        job: 'optimize',
+        payload: {
+          origin: req._params.origin,
+          target: req._params.target,
+          args: req._params.args,
+          parameters: req._params.preset.parameters,
+          expires: req._originMeta.Expires
+        }
+      })
+      .waitFor(`optimize:${ req._params.target }`)
+      .sendTo('worker')
+      .ttl(60e3)
+      .onReply((error, content) => {
+        console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
 
-          if (error) {
-            reject(deserializeError(error))
-          } else {
-            resolve(content)
-          }
-        })
-        .send()
-    })
+        if (error) {
+          return next({
+            statusCode: 500,
+            reason: error
+          })
+        }
 
-    next()
+        next()
+      })
+      .send()
   },
   function getTargetMeta(req, res, next) {
     if (req._targetMeta) {

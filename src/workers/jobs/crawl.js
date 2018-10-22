@@ -11,8 +11,7 @@ const crawlByScraper = async (payload) => {
     method: 'post',
     body: JSON.stringify({
       ...payload,
-      key: cloudPath(payload.origin),
-      ttl: '90d'
+      key: cloudPath(payload.origin)
     }),
     headers: {
       'Content-Type': 'application/json'
@@ -36,7 +35,7 @@ const crawlByWorker = async (payload) => {
       meta: {
         'origin-url': payload.url
       },
-      ttl: '90d'
+      ttl: payload.ttl
     })
 
     return {
@@ -50,10 +49,13 @@ const crawlByWorker = async (payload) => {
   }
 }
 
-
 export default async (payload) => {
   try {
-    let meta = await cache.head(payload.origin)
+    if (payload.force) {
+      throw 'Force crawl'
+    }
+
+    const meta = await cache.head(payload.origin)
 
     return {
       contentType: meta.ContentType,

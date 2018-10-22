@@ -1,7 +1,14 @@
+import CacheSetting from 'models/cache-setting'
 import Infrastructure from 'models/infrastructure'
 import Preset from 'models/Preset'
 import Project from 'models/Project'
 import PullSetting from 'models/pull-setting'
+
+const getCacheSetting = async (projectId) => {
+  return await CacheSetting.findOne({
+    project: projectId
+  })
+}
 
 const getInfrastructure = async (identifier) => {
   return await Infrastructure.findOne({
@@ -36,9 +43,9 @@ const getProject = async (hostName) => {
   }
 }
 
-const getPullSetting = async (project) => {
+const getPullSetting = async (projectId) => {
   return await PullSetting.findOne({
-    project
+    project: projectId
   }).lean()
 }
 
@@ -50,6 +57,7 @@ const getProjectByIdentifier = async (identifier) => {
 }
 
 export default {
+  getCacheSetting,
   getInfrastructure,
   getPreset,
   getProject,

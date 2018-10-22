@@ -6,6 +6,7 @@ import createOriginOnS3 from 'server/middlewares/create-origin-on-s3'
 import createTargetOnS3 from 'server/middlewares/create-target-on-s3'
 import generateTargetPath from 'server/middlewares/generate-target-path'
 import generateOriginPath from 'server/middlewares/generate-origin-path'
+import getCacheSetting from 'server/middlewares/cache-setting'
 import getPreset from 'server/middlewares/preset'
 import getProject from 'server/middlewares/project'
 import getPullSetting from 'server/middlewares/pull-setting'
@@ -19,6 +20,7 @@ router.get('/', join(
   initParamsObject,
   getProject,
   getPullSetting,
+  getCacheSetting,
   parseUrlFromQuery,
   generateOriginPath,
   createOriginOnS3,

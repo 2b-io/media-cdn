@@ -1,7 +1,6 @@
 import escape from 'escape-string-regexp'
 import fs from 'fs-extra'
 import mime from 'mime'
-import ms from 'ms'
 
 import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloud-front'
@@ -25,14 +24,19 @@ export default {
     }).promise()
   },
   async put(key, file, options = {}) {
-    const { meta, ttl } = options
+    const { expires, meta, ttl } = options
 
     return await s3.upload({
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
       Body: fs.createReadStream(file.path),
-      Expires: ttl ? new Date(Date.now() + ms(ttl)) : undefined,
+      Expires: expires ?
+        new Date(expires) : (
+          ttl ?
+            new Date(Date.now() + ttl * 1000) :
+            undefined
+        ),
       Metadata: meta || {}
     }).promise()
   },
