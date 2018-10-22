@@ -8,6 +8,11 @@ const getInfrastructure = async (identifier) => {
     identifier
   })
 }
+const getInfrastructureByProject = async ({ projectId }) => {
+  return await Infrastructure.findOne({
+    project: projectId
+  })
+}
 
 const getPreset = async (contentType, project) => {
   return await Preset.findOne({
@@ -51,6 +56,7 @@ const getProjectByIdentifier = async (identifier) => {
 
 export default {
   getInfrastructure,
+  getInfrastructureByProject,
   getPreset,
   getProject,
   getPullSetting,

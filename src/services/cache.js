@@ -70,7 +70,7 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search({ identifier, patterns }) {
+  async searchByPatterns({ identifier, patterns }) {
     const originObjects = await patterns.reduce(
       async (previousJob, pattern) => {
         const previObjects = await previousJob || []
@@ -103,6 +103,21 @@ export default {
       }, Promise.resolve()
     )
     return allObjects
+  },
+  async searchByPreset({ identifier, presetHash }) {
+    return await elasticSearch.searchAllObjects({
+      identifier,
+      params: {
+        term: {
+          preset: presetHash
+        }
+      }
+    })
+  },
+  async searchByProject({ identifier }) {
+    return await elasticSearch.searchAllObjects({
+      identifier
+    })
   },
   async delete(keys) {
     let keyFrom = 0
