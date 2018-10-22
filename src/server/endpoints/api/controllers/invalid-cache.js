@@ -95,17 +95,19 @@ export default async (req, res) => {
 
     if (presetHash) {
       await invalidByPreset({ identifier, presetHash })
+      return res.status(201).json({ succeed: true })
     }
 
-    if (patterns[0] === ['/*']) {
+    if (patterns[0] === '/*') {
       await invalidByProject({ identifier })
     } else {
       await invalidByPatterns({ identifier, patterns })
     }
-    
+
     return res.status(201).json({ succeed: true })
   }
   catch (e) {
+    console.log('e', e);
     res.status(500).json(serializeError(e))
   }
 }
