@@ -3,7 +3,7 @@ import domainService from 'services/domain'
 
 const createDistributionConfig = ({
   enabled = true,
-  targetOriginId,
+  acmCertificateArn,
   targetOriginDomain,
   reference,
   comment = '',
@@ -20,7 +20,7 @@ const createDistributionConfig = ({
       Quantity: 1,
       Items: [
         {
-          Id: targetOriginId,
+          Id: `ELB-${ targetOriginDomain }`,
           DomainName: targetOriginDomain,
           OriginPath: '',
           CustomHeaders: {
@@ -42,15 +42,23 @@ const createDistributionConfig = ({
       ]
     },
     DefaultCacheBehavior: {
-      TargetOriginId: targetOriginId,
+      TargetOriginId: `ELB-${ targetOriginDomain }`,
       ForwardedValues: {
         QueryString: true,
         Cookies: {
           Forward: 'none'
         },
         Headers: {
-          Quantity: 0,
-          Items: []
+          Quantity: 7,
+          Items: [
+            'Access-Control-Allow-Headers',
+            'Access-Control-Allow-Methods',
+            'Access-Control-Allow-Origin',
+            'Access-Control-Request-Headers',
+            'Access-Control-Request-Method',
+            'Host',
+            'Origin'
+          ]
         },
         QueryStringCacheKeys: {
           Quantity: 0,
@@ -94,8 +102,21 @@ const createDistributionConfig = ({
       Items: []
     },
     CustomErrorResponses: {
-      Quantity: 0,
-      Items: []
+      Quantity: 2,
+      Items: [
+        {
+          ErrorCode: 400,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: 30
+        },
+        {
+          ErrorCode: 500,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: 30
+        }
+      ]
     },
     Comment: comment,
     Logging: {
@@ -107,9 +128,11 @@ const createDistributionConfig = ({
     Enabled: enabled,
     PriceClass: 'PriceClass_All',
     ViewerCertificate: {
-      CloudFrontDefaultCertificate: true,
-      MinimumProtocolVersion: 'TLSv1',
-      CertificateSource: 'cloudfront'
+      ACMCertificateArn: acmCertificateArn,
+      SSLSupportMethod: 'sni-only',
+      MinimumProtocolVersion: 'TLSv1.1_2016',
+      Certificate: acmCertificateArn,
+      CertificateSource: 'acm'
     },
     Restrictions: {
       GeoRestriction: {

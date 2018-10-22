@@ -9,9 +9,7 @@ import deleteMedia from './controllers/delete-media'
 import getMedia from './controllers/get-media'
 import handleUpload from 'server/middlewares/handle-upload'
 
-
 export default (app) => {
-
   app.post('/projects/:identifier/cache-invalidations', invalidCache)
 
   app.post('/distributions', createDistribution)

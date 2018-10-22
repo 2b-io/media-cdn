@@ -4,7 +4,7 @@ import config from 'infrastructure/config'
 import cloudFront from 'services/cloudfront/distribution'
 
 const {
-  targetOriginId,
+  acmCertificateArn,
   targetOriginDomain
 } = config.aws.cloudFront
 
@@ -18,7 +18,7 @@ export default async (req, res) => {
       distribution,
       domain
     } = await cloudFront.create(identifier, {
-      targetOriginId,
+      acmCertificateArn,
       targetOriginDomain,
       comment
     })
