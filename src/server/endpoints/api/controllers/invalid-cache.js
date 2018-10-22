@@ -10,7 +10,7 @@ const invalidByPatterns = async ({ identifier, patterns }) => {
   const allObjects = await cache.searchByPatterns({ identifier, patterns })
   // delete on s3
   if (allObjects.length) {
-    // await cache.delete(allObjects)
+    await cache.delete(allObjects)
   }
   // delete on cloudfront
   const cloudfrontPatterns = patterns
@@ -72,9 +72,9 @@ const invalidByPreset = async ({ identifier, presetHash }) => {
   await cache.invalid({ patterns: ['/*'], distributionId })
 }
 
-const invalidByProject = async ({ identifier, presetHash }) => {
+const invalidByProject = async ({ identifier }) => {
   const project = await da.getProjectByIdentifier(identifier)
-  const allObjects = await cache.searchByProject({ identifier, presetHash })
+  const allObjects = await cache.searchByProject({ identifier })
   // delete on s3
   if (allObjects.length) {
     await cache.delete(allObjects)
@@ -94,14 +94,16 @@ export default async (req, res) => {
     }
 
     if (presetHash) {
-      invalidByPreset({ identifier, presetHash })
+      await invalidByPreset({ identifier, presetHash })
     }
 
     if (patterns[0] === ['/*']) {
-      invalidByProject({ identifier, patterns })
+      await invalidByProject({ identifier })
     } else {
-      invalidByPatterns({ identifier, patterns })
+      await invalidByPatterns({ identifier, patterns })
     }
+    
+    return res.status(201).json({ succeed: true })
   }
   catch (e) {
     res.status(500).json(serializeError(e))
