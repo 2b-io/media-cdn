@@ -43,7 +43,7 @@ export default [
           target: req._params.target,
           args: req._params.args,
           parameters: req._params.preset.parameters,
-          expires: req._originMeta.Expires.getTime()
+          expires: req._originMeta.Expires.valueOf()
         }
       })
       .waitFor(`optimize:${ req._params.target }`)
@@ -64,7 +64,7 @@ export default [
       .send()
   },
   function getTargetMeta(req, res, next) {
-    if (req._targetMeta) {
+    if (!req._targetExpired && req._targetMeta) {
       return next()
     }
 

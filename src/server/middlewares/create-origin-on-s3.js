@@ -60,7 +60,7 @@ export default [
       .send()
   },
   function getOriginMeta(req, res, next) {
-    if (req._originMeta) {
+    if (!req._originExpired && req._originMeta) {
       return next()
     }
 
