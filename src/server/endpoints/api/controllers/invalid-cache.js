@@ -55,8 +55,6 @@ const invalidByPatterns = async ({ identifier, patterns }) => {
     const { identifier: distributionId } = await da.getInfrastructureByProject({ projectId: project._id })
     await cache.invalid({ patterns: cloudfrontPatterns, distributionId })
   }
-
-  return res.status(201).json({ succeed: true })
 }
 
 const invalidByPreset = async ({ identifier, presetHash }) => {
@@ -81,7 +79,7 @@ const invalidByProject = async ({ identifier }) => {
   }
   // delete on cloudfront
   const { identifier: distributionId } = await da.getInfrastructureByProject({ projectId: project._id })
-  await cache.invalid({ patterns: ['/*'], distributionId })
+  await cache.invalid({ patterns: [ '/*' ], distributionId })
 }
 
 export default async (req, res) => {
@@ -107,7 +105,6 @@ export default async (req, res) => {
     return res.status(201).json({ succeed: true })
   }
   catch (e) {
-    console.log('e', e);
     res.status(500).json(serializeError(e))
   }
 }
