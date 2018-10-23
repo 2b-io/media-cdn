@@ -77,7 +77,7 @@ export default {
       async (previousJob, pattern) => {
         const prevObjects = await previousJob || []
         const nextObjects = await elasticSearch.searchAllObjects({
-          identifier,
+          projectIdentifier,
           params: {
             regexp: {
               originUrl: pattern.endsWith('*') ?
@@ -95,7 +95,7 @@ export default {
       async (previousJob, { key: originKey }) => {
         const prevObjects = await previousJob || []
         const nextObjects = await elasticSearch.searchAllObjects({
-          identifier,
+          projectIdentifier,
           params: {
             regexp: {
               key: `${ escape(originKey) }.*`
