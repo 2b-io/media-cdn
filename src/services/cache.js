@@ -58,13 +58,11 @@ export default {
 
     return res
   },
-  async invalid({ patterns = [], distributionId }) {
-    const date = new Date()
-    const reference = String(date.getTime())
+  async invalidate(distributionId, patterns = []) {
     const params = {
       DistributionId: distributionId,
       InvalidationBatch: {
-        CallerReference: reference,
+        CallerReference: Date.now().toString(),
         Paths: {
           Quantity: patterns.length,
           Items: patterns
@@ -74,10 +72,10 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search({ identifier, patterns }) {
+  async searchByPatterns(projectIdentifier, patterns) {
     const originObjects = await patterns.reduce(
       async (previousJob, pattern) => {
-        const previObjects = await previousJob || []
+        const prevObjects = await previousJob || []
         const nextObjects = await elasticSearch.searchAllObjects({
           identifier,
           params: {
@@ -88,13 +86,14 @@ export default {
             }
           }
         })
-        return nextObjects.concat(previObjects)
+
+        return [ ...prevObjects, ...nextObjects ]
       }, Promise.resolve()
     )
 
     const allObjects = await originObjects.reduce(
       async (previousJob, { key: originKey }) => {
-        const previObjects = await previousJob || []
+        const prevObjects = await previousJob || []
         const nextObjects = await elasticSearch.searchAllObjects({
           identifier,
           params: {
@@ -103,10 +102,27 @@ export default {
             }
           }
         })
-        return nextObjects.concat(previObjects)
+
+        return [ ...prevObjects, ...nextObjects ]
       }, Promise.resolve()
     )
+
     return allObjects
+  },
+  async searchByPresetHash(projectIdentifier, presetHash) {
+    return await elasticSearch.searchAllObjects({
+      projectIdentifier,
+      params: {
+        term: {
+          preset: presetHash
+        }
+      }
+    })
+  },
+  async searchByProject(projectIdentifier) {
+    return await elasticSearch.searchAllObjects({
+      projectIdentifier
+    })
   },
   async delete(keys) {
     let keyFrom = 0

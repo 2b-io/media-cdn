@@ -5,7 +5,7 @@ const INDEX_NAME = `${ config.aws.elasticSearch.prefix }media`
 const TYPE_NAME = `${ config.aws.elasticSearch.prefix }media`
 const PAGE_SIZE = 10
 
-const searchByParams = async ({ identifier, params, from, size }) => {
+const searchWithParams = async ({ identifier, params, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
@@ -29,7 +29,23 @@ const searchByParams = async ({ identifier, params, from, size }) => {
   })
 }
 
-const searchAllObjects = async ({ identifier, params }) => {
+const searchWithoutParams = async ({ identifier, from, size }) => {
+  return await elasticSearch.search({
+    from,
+    size,
+    index: INDEX_NAME,
+    type: TYPE_NAME,
+    body: {
+      query: {
+        term: {
+          identifier
+        }
+      }
+    }
+  })
+}
+
+const searchAllObjects = async ({ projectIdentifier, params }) => {
   let totalHits = 0
   let total = 0
   let sources = []
@@ -40,12 +56,26 @@ const searchAllObjects = async ({ identifier, params }) => {
         total: _total,
         hits
       }
-    } = await searchByParams({ identifier, params, from: totalHits, size: PAGE_SIZE })
+    } = params ?
+      await searchWithParams({
+        projectIdentifier,
+        params,
+        from: totalHits,
+        size: PAGE_SIZE
+      }) :
+      await searchWithoutParams({
+        projectIdentifier,
+        from: totalHits,
+        size: PAGE_SIZE
+      })
 
     totalHits = totalHits + hits.length
     total = _total
 
-    sources = sources.concat(hits.map(({ _source }) => _source))
+    sources = [
+      ...sources,
+      ...hits.map(({ _source }) => _source)
+    ]
   } while (totalHits < total)
 
   return sources
