@@ -16,14 +16,6 @@ const invalidateByPreset = async (projectIdentifier, presetHash) => {
   await cache.invalidate(distributionId, [ '/*' ])
 }
 
-const invalidByProject = async ({ identifier }) => {
-  const allObjects = await cache.searchByProject({ identifier })
-  // delete on s3
-  if (allObjects.length) {
-    await cache.delete(allObjects)
-  }
-}
-
 export default async (req, res, next) => {
   try {
     const { presetHash, projectIdentifier } = req.params
