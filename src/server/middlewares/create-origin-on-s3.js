@@ -15,7 +15,7 @@ export default [
 
       const { Expires: expires } = req._originMeta
 
-      if (!expires || Date.now() > new Date(expires)) {
+      if (!expires || Date.now() > expires) {
         console.log(`ORIGIN_EXPIRED ${ req._params.origin }`)
 
         req._originExpired = true

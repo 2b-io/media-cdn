@@ -15,7 +15,7 @@ export default [
 
       const { Expires: expires } = req._targetMeta
 
-      if (!expires || Date.now() > new Date(expires)) {
+      if (!expires || Date.now() > expires) {
         console.log(`TARGET_EXPIRED ${ req._params.target }`)
 
         req._targetExpired = true
@@ -43,7 +43,7 @@ export default [
           target: req._params.target,
           args: req._params.args,
           parameters: req._params.preset.parameters,
-          expires: req._originMeta.Expires
+          expires: req._originMeta.Expires.getTime()
         }
       })
       .waitFor(`optimize:${ req._params.target }`)

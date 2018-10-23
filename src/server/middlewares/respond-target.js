@@ -19,7 +19,7 @@ export default function respondTarget(req, res, next) {
   res.set('content-length', meta.ContentLength)
   res.set('last-modified', meta.LastModified)
   res.set('etag', meta.ETag)
-  res.set('cache-control', `max-age=${ ms('90d') / 1000 }`)
+  res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
 
   res.set('x-origin-path', staticPath.origin(req._params))
   res.set('x-target-path', staticPath.target(req._params))
