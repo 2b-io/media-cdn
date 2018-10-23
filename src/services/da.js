@@ -15,7 +15,8 @@ const getInfrastructure = async (identifier) => {
     identifier
   })
 }
-const getInfrastructureByProject = async ({ projectId }) => {
+
+const getInfrastructureByProjectId = async (projectId) => {
   return await Infrastructure.findOne({
     project: projectId
   })
@@ -64,7 +65,7 @@ const getProjectByIdentifier = async (identifier) => {
 export default {
   getCacheSetting,
   getInfrastructure,
-  getInfrastructureByProject,
+  getInfrastructureByProjectId,
   getPreset,
   getProject,
   getPullSetting,
