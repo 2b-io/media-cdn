@@ -77,9 +77,6 @@ const invalidByProject = async ({ identifier }) => {
   if (allObjects.length) {
     await cache.delete(allObjects)
   }
-  // delete on cloudfront
-  const { identifier: distributionId } = await da.getInfrastructureByProject({ projectId: project._id })
-  await cache.invalid({ patterns: [ '/*' ], distributionId })
 }
 
 export default async (req, res) => {
@@ -96,7 +93,7 @@ export default async (req, res) => {
       return res.status(201).json({ succeed: true })
     }
 
-    if (patterns[0] === '/*') {
+    if (patterns === '/*') {
       await invalidByProject({ identifier })
     } else {
       await invalidByPatterns({ identifier, patterns })

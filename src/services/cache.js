@@ -119,9 +119,25 @@ export default {
     })
   },
   async searchByProject({ identifier }) {
-    return await elasticSearch.searchAllObjects({
+    const originObjects = await elasticSearch.searchAllObjects({
       identifier
     })
+    const allObjects = await originObjects.reduce(
+      async (previousJob, { key: originKey }) => {
+        const previObjects = await previousJob || []
+        const nextObjects = await elasticSearch.searchAllObjects({
+          identifier,
+          params: {
+            regexp: {
+              key: `${ escape(originKey) }.*`
+            }
+          }
+        })
+        return nextObjects.concat(previObjects)
+      }, Promise.resolve()
+    )
+    
+    return allObjects
   },
   async delete(keys) {
     let keyFrom = 0
