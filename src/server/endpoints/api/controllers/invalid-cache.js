@@ -67,7 +67,7 @@ const invalidByPreset = async ({ identifier, presetHash }) => {
   // delete on cloudfront
   const { identifier: distributionId } = await da.getInfrastructureByProject({ projectId: project._id })
 
-  await cache.invalid({ patterns: ['/*'], distributionId })
+  await cache.invalid({ patterns: [ '/*' ], distributionId })
 }
 
 const invalidByProject = async ({ identifier }) => {
