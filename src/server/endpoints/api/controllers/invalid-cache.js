@@ -71,7 +71,6 @@ const invalidByPreset = async ({ identifier, presetHash }) => {
 }
 
 const invalidByProject = async ({ identifier }) => {
-  const project = await da.getProjectByIdentifier(identifier)
   const allObjects = await cache.searchByProject({ identifier })
   // delete on s3
   if (allObjects.length) {
