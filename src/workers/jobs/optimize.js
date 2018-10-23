@@ -10,7 +10,9 @@ export default async (payload) => {
 
     target = await optimizer.optimize(origin, payload.args, payload.parameters)
 
-    const upload = await cache.put(payload.target, target)
+    const upload = await cache.put(payload.target, target, {
+      expires: payload.expires
+    })
 
     return {
       ...target,

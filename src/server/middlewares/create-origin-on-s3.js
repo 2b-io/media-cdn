@@ -12,6 +12,14 @@ export default [
 
     try {
       req._originMeta = await cache.head(req._params.origin)
+
+      const { Expires: expires } = req._originMeta
+
+      if (!expires || Date.now() > new Date(expires)) {
+        console.log(`ORIGIN_EXPIRED ${ req._params.origin }`)
+
+        req._originExpired = true
+      }
     } catch (error) {
       console.log(`NOTFOUND_ORIGIN ${ req._params.origin }`)
     }
@@ -19,7 +27,7 @@ export default [
     next()
   },
   function crawlOrigin(req, res, next) {
-    if (req._originMeta) {
+    if (!req._originExpired && req._originMeta) {
       return next()
     }
 
@@ -31,7 +39,9 @@ export default [
         payload: {
           url: req._params.url,
           origin: req._params.origin,
-          headers: req._params.pullSetting.headers
+          headers: req._params.pullSetting.headers,
+          ttl: req._params.cacheSetting.ttl,
+          force: req._originExpired || req.query.f
         }
       })
       .waitFor(`crawl:${ req._params.origin }`)

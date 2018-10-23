@@ -32,7 +32,8 @@ export default async (file, args, parameters = {}) => {
   } = args
 
   // parameters for optimizing
-  const quality = parseInt(parameters.quality, 10)
+  const minQuality = parseInt(parameters.minQuality, 10)
+  const maxQuality = parseInt(parameters.maxQuality, 10)
   const speed = parseInt(parameters.speed, 10)
 
   const resize = !(width === 'auto' && height === 'auto')
@@ -59,7 +60,7 @@ export default async (file, args, parameters = {}) => {
   }
 
   await optimizePNG(resize ? output : file.path, output, [
-    '--quality', quality,
+    '--quality', `${ minQuality }-${ maxQuality }`,
     '--speed', speed
   ])
 
