@@ -33,7 +33,7 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
   const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
   const { pullURL } = await da.getPullSetting(project._id)
 
-  if(patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ){
+  if (patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ) {
     // delete all files in project
     return await invalidateAll(projectIdentifier, distributionId, options)
   }
@@ -123,8 +123,7 @@ export default async (req, res, next) => {
     await invalidateByPatterns(projectIdentifier, patterns, options)
 
     return res.status(201).json({ succeed: true })
-  }
-  catch (e) {
+  } catch (e) {
     next({
       statusCode: 500,
       reason: e

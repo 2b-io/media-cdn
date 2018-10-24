@@ -1,5 +1,3 @@
-import deserializeError from 'deserialize-error'
-
 import cache from 'services/cache'
 
 export default [
@@ -49,7 +47,7 @@ export default [
       .waitFor(`optimize:${ req._params.target }`)
       .sendTo('worker')
       .ttl(60e3)
-      .onReply((error, content) => {
+      .onReply((error) => {
         console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
 
         if (error) {

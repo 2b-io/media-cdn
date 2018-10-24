@@ -25,8 +25,8 @@ export default async (req, res, next) => {
     return res.status(201).json({ succeed: true })
   } catch (e) {
     return next({
-      code: 500,
-      error: e
+      statusCode: 500,
+      reason: e
     })
   }
 }

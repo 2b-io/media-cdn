@@ -1,4 +1,3 @@
-import ms from 'ms'
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
 

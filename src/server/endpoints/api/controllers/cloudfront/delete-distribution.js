@@ -1,10 +1,8 @@
-import serializeError from 'serialize-error'
-
 import cloudFront from 'services/cloudfront/distribution'
 import da from 'services/da'
 import domainService from 'services/domain'
 
-export default async (req, res) => {
+export default async (req, res, next) => {
   try {
     const { identifier } = req.params
 
@@ -15,6 +13,9 @@ export default async (req, res) => {
 
     res.sendStatus(204)
   } catch (e) {
-    res.status(500).json(serializeError(e))
+    next({
+      statusCode: 500,
+      reason: e
+    })
   }
 }

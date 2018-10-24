@@ -1,5 +1,3 @@
-import serializeError from 'serialize-error'
-
 import config from 'infrastructure/config'
 import cloudFront from 'services/cloudfront/distribution'
 
@@ -8,7 +6,7 @@ const {
   targetOriginDomain
 } = config.aws.cloudFront
 
-export default async (req, res) => {
+export default async (req, res, next) => {
   try {
     const { identifier } = req.body
 
@@ -28,6 +26,9 @@ export default async (req, res) => {
       domain
     })
   } catch (e) {
-    res.status(500).json(serializeError(e))
+    next({
+      statusCode: 500,
+      reason: e
+    })
   }
 }

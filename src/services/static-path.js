@@ -1,7 +1,3 @@
-import config from 'infrastructure/config'
-
-const { server: { base } } = config
-
 export default {
   origin: (params) => {
     const {

@@ -2,7 +2,6 @@ import escape from 'escape-string-regexp'
 import fs from 'fs-extra'
 import mime from 'mime'
 
-import { getObjects } from './media'
 import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
