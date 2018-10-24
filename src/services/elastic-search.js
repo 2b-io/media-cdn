@@ -5,7 +5,7 @@ const INDEX_NAME = `${ config.aws.elasticSearch.prefix }media`
 const TYPE_NAME = `${ config.aws.elasticSearch.prefix }media`
 const PAGE_SIZE = 10
 
-const searchWithParams = async ({ identifier, params, from, size }) => {
+const searchWithParams = async ({ projectIdentifier, params, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
@@ -17,7 +17,7 @@ const searchWithParams = async ({ identifier, params, from, size }) => {
           must: [
             {
               term: {
-                identifier
+                identifier: projectIdentifier
               }
             }, {
               ...params
@@ -29,7 +29,7 @@ const searchWithParams = async ({ identifier, params, from, size }) => {
   })
 }
 
-const searchWithoutParams = async ({ identifier, from, size }) => {
+const searchWithoutParams = async ({ projectIdentifier, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
@@ -38,7 +38,7 @@ const searchWithoutParams = async ({ identifier, from, size }) => {
     body: {
       query: {
         term: {
-          identifier
+          identifier: projectIdentifier
         }
       }
     }
