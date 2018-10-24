@@ -12,28 +12,30 @@ const normalizePattern = (path, pullURL) => {
   }
 }
 
-const invalidateAll = async (projectIdentifier, distributionId) => {
-  const allObjects = await cache.searchByProject(projectIdentifier)
+const invalidateAll = async (projectIdentifier, distributionId, options) => {
+  if (options.deleteOnS3) {
+    const allObjects = await cache.searchByProject(projectIdentifier)
 
-  if (allObjects.length) {
-    // delete on s3
-    await cache.delete(allObjects)
+    if (allObjects.length) {
+      // delete on s3
+      await cache.delete(allObjects)
+    }
   }
 
-  // delete on distribution
-  await cache.invalidate(distributionId, ['/*'])
+  if (options.deleteOnDistribution) {
+    // delete on distribution
+    await cache.invalidate(distributionId, [ '/*' ])
+  }
 }
 
-const invalidateByPatterns = async (projectIdentifier, patterns) => {
-
+const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
   const project = await da.getProjectByIdentifier(projectIdentifier)
   const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
   const { pullURL } = await da.getPullSetting(project._id)
 
   if(patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ){
-    // delete all file by project
-    await invalidateAll(projectIdentifier, distributionId)
-    return
+    // delete all files in project
+    return await invalidateAll(projectIdentifier, distributionId, options)
   }
 
   const normalizedPatterns = patterns
@@ -43,58 +45,61 @@ const invalidateByPatterns = async (projectIdentifier, patterns) => {
     .filter(Boolean)
 
   if (normalizedPatterns.length) {
-    const allObjects = await cache.searchByPatterns(projectIdentifier, normalizedPatterns)
+    if (options.deleteOnS3) {
+      const allObjects = await cache.searchByPatterns(projectIdentifier, normalizedPatterns)
 
-    if (allObjects.length) {
-      // delete on s3
-      await cache.delete(allObjects)
+      if (allObjects.length) {
+        // delete on s3
+        await cache.delete(allObjects)
+      }
     }
 
-  // delete on distribution
-  const cloudfrontPatterns = normalizedPatterns
-    .map(
-      (pattern) => {
-        const withoutQuerystring = pattern.split('?').shift()
+    if (options.deleteOnDistribution) {
+      // delete on distribution
+      const cloudfrontPatterns = normalizedPatterns
+        .map(
+          (pattern) => {
+            const withoutQuerystring = pattern.split('?').shift()
 
-        if (pattern.endsWith('*')) {
-          return {
-            universal: [
-              `/u/?url=${ withoutQuerystring }`,
-              `/u/?url=${ encodeURIComponent(withoutQuerystring) }`,
-              `/u/?url=${ encodeURIComponent(pattern) }`,
-            ],
-            pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
-              `${ pattern.replace(pullURL, '') }` :
-              null,
+            if (pattern.endsWith('*')) {
+              return {
+                universal: [
+                  `/u/?url=${ withoutQuerystring }`,
+                  `/u/?url=${ encodeURIComponent(withoutQuerystring) }`,
+                  `/u/?url=${ encodeURIComponent(pattern) }`,
+                ],
+                pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
+                  `${ pattern.replace(pullURL, '') }` :
+                  null,
+              }
+            } else {
+              return {
+                universal: [
+                  `/u/?url=${ withoutQuerystring }*`,
+                  `/u/?url=${ encodeURIComponent(withoutQuerystring) }*`,
+                  `/u/?url=${ encodeURIComponent(pattern) }*`,
+                ],
+                pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
+                  `${ pattern.replace(pullURL, '') }*` :
+                  null,
+              }
+            }
           }
-        } else {
-          return {
-            universal: [
-              `/u/?url=${ withoutQuerystring }*`,
-              `/u/?url=${ encodeURIComponent(withoutQuerystring) }*`,
-              `/u/?url=${ encodeURIComponent(pattern) }*`,
-            ],
-            pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
-              `${ pattern.replace(pullURL, '') }*` :
-              null,
-          }
-        }
-      }
-    )
-    .reduce(
-      (cloudfrontPatterns, pattern) => [
-        ...cloudfrontPatterns,
-        ...pattern.universal,
-        pattern.pretty
-      ], []
-    )
-    .filter(Boolean)
-    
-    await cache.invalidate(distributionId, cloudfrontPatterns)
+        )
+        .reduce(
+          (cloudfrontPatterns, pattern) => [
+            ...cloudfrontPatterns,
+            ...pattern.universal,
+            pattern.pretty
+          ], []
+        )
+        .filter(Boolean)
+
+      await cache.invalidate(distributionId, cloudfrontPatterns)
+    }
   } else {
     await cache.invalidate(distributionId, patterns)
   }
-
 }
 
 export default async (req, res, next) => {
@@ -110,7 +115,8 @@ export default async (req, res, next) => {
 
     if (!patterns.length) {
       return next({
-        code: 400
+        statusCode: 400,
+        reason: 'Invalid [patterns] parameter'
       })
     }
 
@@ -119,6 +125,10 @@ export default async (req, res, next) => {
     return res.status(201).json({ succeed: true })
   }
   catch (e) {
+    next({
+      statusCode: 500,
+      reason: e
+    })
     res.status(500).json(serializeError(e))
   }
 }
