@@ -12,7 +12,7 @@ const normalizePattern = (path, pullURL) => {
   }
 }
 
-const invalidateAll = async (projectIdentifier, distributionId, options) => {
+const invalidateAll = async (projectIdentifier, options) => {
   if (options.deleteOnS3) {
     const allObjects = await cache.searchByProject(projectIdentifier)
 
@@ -34,7 +34,7 @@ const invalidateAll = async (projectIdentifier, distributionId, options) => {
 const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, options) => {
   if (patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ) {
     // delete all files in project
-    return await invalidateAll(projectIdentifier, distributionId, options)
+    return await invalidateAll(projectIdentifier, options)
   }
 
   const normalizedPatterns = patterns
