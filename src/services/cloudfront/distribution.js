@@ -1,5 +1,9 @@
+import ms from 'ms'
+
 import cloudFront from 'infrastructure/cloud-front'
 import domainService from 'services/domain'
+
+const s = (text) => ms(text) / 1000
 
 const createDistributionConfig = ({
   enabled = true,
@@ -108,13 +112,67 @@ const createDistributionConfig = ({
           ErrorCode: 400,
           ResponsePagePath: '',
           ResponseCode: '',
-          ErrorCachingMinTTL: 30
+          ErrorCachingMinTTL: s('30s')
+        },
+        {
+          ErrorCode: 403,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('30s')
+        },
+        {
+          ErrorCode: 404,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('5m')
+        },
+        {
+          ErrorCode: 405,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('1d')
+        },
+        {
+          ErrorCode: 414,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('90d')
+        },
+        {
+          ErrorCode: 416,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('90d')
         },
         {
           ErrorCode: 500,
           ResponsePagePath: '',
           ResponseCode: '',
-          ErrorCachingMinTTL: 30
+          ErrorCachingMinTTL: s('30s')
+        },
+        {
+          ErrorCode: 501,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('1d')
+        },
+        {
+          ErrorCode: 502,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('15s')
+        },
+        {
+          ErrorCode: 503,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('15s')
+        },
+        {
+          ErrorCode: 504,
+          ResponsePagePath: '',
+          ResponseCode: '',
+          ErrorCachingMinTTL: s('30s')
         }
       ]
     },
