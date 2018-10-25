@@ -42,6 +42,8 @@ const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, option
       (pattern) => normalizePattern(pattern, pullURL)
     )
     .filter(Boolean)
+  const project = await da.getProjectByIdentifier(projectIdentifier)
+  const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
 
   if (normalizedPatterns.length) {
     if (options.deleteOnS3) {
@@ -52,9 +54,6 @@ const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, option
         await cache.delete(allObjects)
       }
     }
-
-    const project = await da.getProjectByIdentifier(projectIdentifier)
-    const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
 
     if (options.deleteOnDistribution) {
       // delete on distribution

@@ -90,6 +90,10 @@ export default {
       }, Promise.resolve()
     )
 
+    if (!originObjects.length) {
+      return []
+    }
+
     const allObjects = await originObjects.reduce(
       async (previousJob, { key: originKey }) => {
         const prevObjects = await previousJob || []
