@@ -28,6 +28,14 @@ const searchWithoutParams = async ({ projectIdentifier, from, size }) => {
 }
 
 const searchAllObjects = async ({ projectIdentifier, params }) => {
+  const projectExists = await elasticSearch.indices.exists({
+    index: projectIdentifier
+  })
+
+  if (!projectExists) {
+    return []
+  }
+
   let totalHits = 0
   let total = 0
   let sources = []
