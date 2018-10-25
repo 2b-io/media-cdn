@@ -53,11 +53,11 @@ const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, option
       }
     }
 
+    const project = await da.getProjectByIdentifier(projectIdentifier)
+    const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+
     if (options.deleteOnDistribution) {
       // delete on distribution
-      const project = await da.getProjectByIdentifier(projectIdentifier)
-      const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
-
       const cloudfrontPatterns = normalizedPatterns
         .map(
           (pattern) => {
