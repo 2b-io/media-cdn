@@ -2,6 +2,7 @@ import createDistribution from './controllers/cloudfront/create-distribution'
 import deleteDistribution from './controllers/cloudfront/delete-distribution'
 import getDistribution from './controllers/cloudfront/get-distribution'
 import updateDistribution from './controllers/cloudfront/update-distribution'
+import cloudWatch from './controllers/cloud-watch'
 import invalidatePresetCache from './controllers/invalidate-preset-cache'
 import invalidateProjectCache from './controllers/invalidate-project-cache'
 import uploadMedia from './controllers/upload-media'
@@ -16,6 +17,7 @@ export default (app) => {
 
   app.post('/distributions', createDistribution)
   app.get('/distributions/:identifier', getDistribution)
+  app.get('/distributions/report', cloudWatch.getMetricStatistics)
   app.put('/distributions/:identifier', updateDistribution)
   app.delete('/distributions/:identifier', deleteDistribution)
 
@@ -23,4 +25,6 @@ export default (app) => {
   app.get('/projects/:identifier/media', getListMedia)
   app.get('/projects/:identifier/media/:id', getMedia)
   app.delete('/projects/:identifier/media/:id', deleteMedia)
+
+
 }
