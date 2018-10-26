@@ -1,14 +1,15 @@
 import config from 'infrastructure/config'
 import elasticSearch from 'infrastructure/elastic-search'
 
-const TYPE_NAME = `${ config.aws.elasticSearch.prefix }media`
+const PREFIX = config.aws.elasticSearch.prefix
+const TYPE_NAME = `${ PREFIX }-media`
 const PAGE_SIZE = 10
 
 const searchWithParams = async ({ projectIdentifier, params, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
-    index: projectIdentifier,
+    index: `${ PREFIX }-${ projectIdentifier }`,
     type: TYPE_NAME,
     body: {
       query: {
@@ -22,14 +23,14 @@ const searchWithoutParams = async ({ projectIdentifier, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
-    index: projectIdentifier,
+    index: `${ PREFIX }-${ projectIdentifier }`,
     type: TYPE_NAME
   })
 }
 
 const searchAllObjects = async ({ projectIdentifier, params }) => {
   const projectExists = await elasticSearch.indices.exists({
-    index: projectIdentifier
+    index: `${ PREFIX }-${ projectIdentifier }`
   })
 
   if (!projectExists) {
