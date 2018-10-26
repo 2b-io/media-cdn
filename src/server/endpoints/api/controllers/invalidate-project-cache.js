@@ -68,9 +68,12 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
             if (pattern.endsWith('*')) {
               return {
                 universal: [
+                  `/u?url=${ withoutQuerystring }`,
+                  `/u?url=${ encodeURIComponent(withoutQuerystring) }`,
+                  `/u?url=${ encodeURIComponent(pattern) }`,
                   `/u/?url=${ withoutQuerystring }`,
                   `/u/?url=${ encodeURIComponent(withoutQuerystring) }`,
-                  `/u/?url=${ encodeURIComponent(pattern) }`,
+                  `/u/?url=${ encodeURIComponent(pattern) }`
                 ],
                 pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
                   `${ pattern.replace(pullURL, '') }` :
@@ -79,9 +82,12 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
             } else {
               return {
                 universal: [
+                  `/u?url=${ withoutQuerystring }*`,
+                  `/u?url=${ encodeURIComponent(withoutQuerystring) }*`,
+                  `/u?url=${ encodeURIComponent(pattern) }*`,
                   `/u/?url=${ withoutQuerystring }*`,
                   `/u/?url=${ encodeURIComponent(withoutQuerystring) }*`,
-                  `/u/?url=${ encodeURIComponent(pattern) }*`,
+                  `/u/?url=${ encodeURIComponent(pattern) }*`
                 ],
                 pretty: pullURL && pattern.indexOf(pullURL) === 0 ?
                   `${ pattern.replace(pullURL, '') }*` :
