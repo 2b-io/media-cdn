@@ -12,7 +12,7 @@ const normalizePattern = (path, pullURL) => {
   }
 }
 
-const invalidateAll = async (projectIdentifier, distributionId, options) => {
+const invalidateAll = async (projectIdentifier, options) => {
   if (options.deleteOnS3) {
     const allObjects = await cache.searchByProject(projectIdentifier)
 
@@ -24,18 +24,17 @@ const invalidateAll = async (projectIdentifier, distributionId, options) => {
 
   if (options.deleteOnDistribution) {
     // delete on distribution
+    const project = await da.getProjectByIdentifier(projectIdentifier)
+    const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+
     await cache.invalidate(distributionId, [ '/*' ])
   }
 }
 
-const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
-  const project = await da.getProjectByIdentifier(projectIdentifier)
-  const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
-  const { pullURL } = await da.getPullSetting(project._id)
-
+const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, options) => {
   if (patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ) {
     // delete all files in project
-    return await invalidateAll(projectIdentifier, distributionId, options)
+    return await invalidateAll(projectIdentifier, options)
   }
 
   const normalizedPatterns = patterns
@@ -43,6 +42,8 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
       (pattern) => normalizePattern(pattern, pullURL)
     )
     .filter(Boolean)
+  const project = await da.getProjectByIdentifier(projectIdentifier)
+  const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
 
   if (normalizedPatterns.length) {
     if (options.deleteOnS3) {
@@ -109,7 +110,8 @@ export default async (req, res, next) => {
         deleteOnS3: true,
         deleteOnDistribution: true
       },
-      patterns
+      patterns,
+      pullURL
     } = req.body
     const { projectIdentifier } = req.params
 
@@ -120,7 +122,7 @@ export default async (req, res, next) => {
       })
     }
 
-    await invalidateByPatterns(projectIdentifier, patterns, options)
+    await invalidateByPatterns(projectIdentifier, pullURL, patterns, options)
 
     return res.status(201).json({ succeed: true })
   } catch (e) {

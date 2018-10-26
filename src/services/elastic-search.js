@@ -1,7 +1,6 @@
 import config from 'infrastructure/config'
 import elasticSearch from 'infrastructure/elastic-search'
 
-const INDEX_NAME = `${ config.aws.elasticSearch.prefix }media`
 const TYPE_NAME = `${ config.aws.elasticSearch.prefix }media`
 const PAGE_SIZE = 10
 
@@ -9,21 +8,11 @@ const searchWithParams = async ({ projectIdentifier, params, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
-    index: INDEX_NAME,
+    index: projectIdentifier,
     type: TYPE_NAME,
     body: {
       query: {
-        bool: {
-          must: [
-            {
-              term: {
-                identifier: projectIdentifier
-              }
-            }, {
-              ...params
-            }
-          ]
-        }
+        ...params
       }
     }
   })
@@ -33,19 +22,20 @@ const searchWithoutParams = async ({ projectIdentifier, from, size }) => {
   return await elasticSearch.search({
     from,
     size,
-    index: INDEX_NAME,
-    type: TYPE_NAME,
-    body: {
-      query: {
-        term: {
-          identifier: projectIdentifier
-        }
-      }
-    }
+    index: projectIdentifier,
+    type: TYPE_NAME
   })
 }
 
 const searchAllObjects = async ({ projectIdentifier, params }) => {
+  const projectExists = await elasticSearch.indices.exists({
+    index: projectIdentifier
+  })
+
+  if (!projectExists) {
+    return []
+  }
+
   let totalHits = 0
   let total = 0
   let sources = []

@@ -106,7 +106,7 @@ const createDistributionConfig = ({
       Items: []
     },
     CustomErrorResponses: {
-      Quantity: 2,
+      Quantity: 11,
       Items: [
         {
           ErrorCode: 400,
