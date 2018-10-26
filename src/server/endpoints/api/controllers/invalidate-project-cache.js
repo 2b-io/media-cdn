@@ -31,19 +31,20 @@ const invalidateAll = async (projectIdentifier, options) => {
   }
 }
 
-const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, options) => {
+const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
   if (patterns.indexOf('*') !== -1 || patterns.indexOf('/*') !== -1 ) {
     // delete all files in project
     return await invalidateAll(projectIdentifier, options)
   }
+
+  const project = await da.getProjectByIdentifier(projectIdentifier)
+  const { pullURL } = await da.getPullSetting(project._id)
 
   const normalizedPatterns = patterns
     .map(
       (pattern) => normalizePattern(pattern, pullURL)
     )
     .filter(Boolean)
-  const project = await da.getProjectByIdentifier(projectIdentifier)
-  const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
 
   if (normalizedPatterns.length) {
     if (options.deleteOnS3) {
@@ -56,6 +57,8 @@ const invalidateByPatterns = async (projectIdentifier, pullURL, patterns, option
     }
 
     if (options.deleteOnDistribution) {
+      const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+
       // delete on distribution
       const cloudfrontPatterns = normalizedPatterns
         .map(
@@ -110,8 +113,7 @@ export default async (req, res, next) => {
         deleteOnS3: true,
         deleteOnDistribution: true
       },
-      patterns,
-      pullURL
+      patterns
     } = req.body
     const { projectIdentifier } = req.params
 
@@ -122,7 +124,7 @@ export default async (req, res, next) => {
       })
     }
 
-    await invalidateByPatterns(projectIdentifier, pullURL, patterns, options)
+    await invalidateByPatterns(projectIdentifier, patterns, options)
 
     return res.status(201).json({ succeed: true })
   } catch (e) {
