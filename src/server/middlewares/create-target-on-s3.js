@@ -51,10 +51,11 @@ export default [
         console.log(`OPTIMIZE_TARGET ${ req._params.origin } -> ${ req._params.target }... ${ Date.now() - s }ms`)
 
         if (error) {
-          return next({
-            statusCode: 500,
-            reason: error
-          })
+          const originUrl = req._originMeta.Metadata[ 'origin-url' ]
+          res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
+          res.redirect(originUrl)
+
+          return
         }
 
         next()
