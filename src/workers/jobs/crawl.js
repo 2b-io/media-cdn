@@ -34,7 +34,8 @@ const crawlByWorker = async (payload) => {
     const upload = await cache.put(payload.origin, file, {
       meta: {
         'origin-url': payload.url
-      }
+      },
+      ttl: payload.ttl
     })
 
     return {
@@ -48,10 +49,13 @@ const crawlByWorker = async (payload) => {
   }
 }
 
-
 export default async (payload) => {
   try {
-    let meta = await cache.head(payload.origin)
+    if (payload.force) {
+      throw 'Force crawl'
+    }
+
+    const meta = await cache.head(payload.origin)
 
     return {
       contentType: meta.ContentType,

@@ -1,8 +1,8 @@
 import delay from 'delay'
 
 export default (retryTimes = 1, baseInterval = 100, exponentialBackoff = true) => (func) => async (...args) => {
-  let result;
-  let executeTimes = 0;
+  let result
+  let executeTimes = 0
   let executeError = false
 
   do {

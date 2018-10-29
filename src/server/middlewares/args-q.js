@@ -1,4 +1,4 @@
-export default async (req, res, next) => {
+export default function parseArgsFromQuery(req, res, next) {
   const { query } = req
 
   req._params.args = {

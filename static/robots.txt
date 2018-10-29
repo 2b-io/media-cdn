@@ -1,5 +1,2 @@
 User-agent: *
-Allow: /u/
-Allow: /p/
-Allow: /s/
-Disallow: /
+Disallow: /api

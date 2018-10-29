@@ -1,23 +1,26 @@
 import jpeg from './jpeg'
 import png from './png'
-import webp from './webp'
+// import webp from './webp'
+import svg from './svg'
+import gif from './gif'
 
 const scenarios = {
   'image/jpeg': jpeg,
+  'image/gif': gif,
   'image/png': png,
-  'image/webp': webp
+  // 'image/webp': webp,
+  'image/svg+xml': svg
 }
 
 export default {
-  optimize: async (file, args) => {
+  async optimize(file, args, parameters) {
     const { contentType } = file
-
     const scenario = scenarios[contentType]
 
     if (!scenario) {
       return file
     }
 
-    return await scenario(file, args)
+    return await scenario(file, args, parameters)
   }
 }

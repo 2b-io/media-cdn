@@ -1,9 +1,10 @@
 import da from 'services/da'
 
-export default async (req, res, next) => {
-  const { slug } = req._params
-
-  const project = req._params.project = await da.getProject(slug)
+export default async function getProject(req, res, next) {
+  const {
+    infrastructure,
+    project
+  } = await da.getProject(req.hostname)
 
   if (!project) {
     return next({
@@ -11,6 +12,9 @@ export default async (req, res, next) => {
       reason: 'Project not found'
     })
   }
+
+  req._params.infrastructure = infrastructure
+  req._params.project = project
 
   next()
 }

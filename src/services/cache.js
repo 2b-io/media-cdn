@@ -1,13 +1,16 @@
+import escape from 'escape-string-regexp'
 import fs from 'fs-extra'
 import mime from 'mime'
-import ms from 'ms'
 
-import cloudFront from 'infrastructure/cloudfront'
+import cloudFront from 'infrastructure/cloud-front'
 import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
+import elasticSearch from 'services/elastic-search'
 import localpath from 'services/localpath'
 
 const { version = '0.0.1' } = config
+
+const MAX_KEYS = 1000
 
 export const cloudPath = (key) => `${ version }/${ key }`
 
@@ -20,13 +23,20 @@ export default {
     }).promise()
   },
   async put(key, file, options = {}) {
+    const { expires, meta, ttl } = options
+
     return await s3.upload({
       Bucket: s3.config.bucket,
       Key: cloudPath(key),
       ContentType: file.contentType || 'application/octet-stream',
-      CacheControl: `max-age=${ ms('7d') / 1000 }`,
       Body: fs.createReadStream(file.path),
-      Metadata: options.meta || {}
+      Expires: expires ?
+        new Date(expires) : (
+          ttl ?
+            new Date(Date.now() + ttl * 1000) :
+            undefined
+        ),
+      Metadata: meta || {}
     }).promise()
   },
   async get(key, etag) {
@@ -47,14 +57,11 @@ export default {
 
     return res
   },
-  async invalid(patterns = []) {
-    const date = new Date()
-    const reference = String(date.getTime())
-
+  async invalidate(distributionId, patterns = []) {
     const params = {
-      DistributionId: config.aws.cloudFront.distributionId,
+      DistributionId: distributionId,
       InvalidationBatch: {
-        CallerReference: reference,
+        CallerReference: Date.now().toString(),
         Paths: {
           Quantity: patterns.length,
           Items: patterns
@@ -64,90 +71,75 @@ export default {
 
     return await cloudFront.createInvalidation(params).promise()
   },
-  async search(prefix, patterns) {
-    const allObjects = await s3.listObjectsV2({
-      Bucket: s3.config.bucket,
-      Prefix: prefix
-    }).promise()
+  async searchByPatterns(projectIdentifier, patterns) {
+    const originObjects = await patterns.reduce(
+      async (previousJob, pattern) => {
+        const prevObjects = await previousJob || []
+        const nextObjects = await elasticSearch.searchAllObjects({
+          projectIdentifier,
+          params: {
+            regexp: {
+              originUrl: pattern.endsWith('*') ?
+                `${ escape(pattern.substring(0, pattern.length - 1)) }.*` :
+                `${ escape(pattern) }.*`
+            }
+          }
+        })
 
-    if (!allObjects.Contents.length) {
+        return [ ...prevObjects, ...nextObjects ]
+      }, Promise.resolve()
+    )
+
+    if (!originObjects.length) {
       return []
     }
 
-    // filter top-level objects
-    const originObjects = allObjects.Contents
-      .filter(
-        (object) => object.Key.split('/').length === 3
-      )
+    const allObjects = await originObjects.reduce(
+      async (previousJob, { key: originKey }) => {
+        const prevObjects = await previousJob || []
+        const nextObjects = await elasticSearch.searchAllObjects({
+          projectIdentifier,
+          params: {
+            regexp: {
+              key: `${ escape(originKey) }.*`
+            }
+          }
+        })
 
-    // get attached data of each origin object
-    const attachedData = await Promise.all(
-      originObjects
-        .map(
-          (object) => s3.headObject({
-            Bucket: s3.config.bucket,
-            Key: object.Key
-          }).promise()
-        )
+        return [ ...prevObjects, ...nextObjects ]
+      }, Promise.resolve()
     )
 
-    // merge attached data
-    const originObjectsWithData = originObjects.map(
-      (origin, index) => ({
-        ...origin,
-        data: attachedData[ index ]
-      })
-    )
-
-    // find by patterns
-    return patterns
-      .map(
-        (pattern) => {
-          const regex = new RegExp(pattern.replace(/\*/g, '(.+)'))
-
-          return originObjectsWithData
-            .filter(
-              (object) => regex.test(object.data.Metadata[ 'origin-url' ])
-            )
-            .map(
-              (object) => object.Key
-            )
+    return allObjects
+  },
+  async searchByPresetHash(projectIdentifier, presetHash) {
+    return await elasticSearch.searchAllObjects({
+      projectIdentifier,
+      params: {
+        term: {
+          preset: presetHash
         }
-      )
-      .reduce(
-        (all, keys) => [ ...all, ...keys ]
-      )
-      .filter(
-        (key, index, keys) => keys.indexOf(key) === index
-      )
+      }
+    })
+  },
+  async searchByProject(projectIdentifier) {
+    return await elasticSearch.searchAllObjects({
+      projectIdentifier
+    })
   },
   async delete(keys) {
-    const relatedObjects = await Promise.all(
-      keys.map(
-        (key) => s3.listObjectsV2({
-          Bucket: s3.config.bucket,
-          Prefix: key
-        }).promise()
-      )
-    )
+    let keyFrom = 0
+    do {
+      const subKeys = keys.slice(keyFrom, keyFrom + MAX_KEYS)
+      await s3.deleteObjects({
+        Bucket: s3.config.bucket,
+        Delete: {
+          Objects: subKeys.map(({ key }) => ({ Key: key }))
+        }
+      }).promise()
 
-    const relatedKeys = relatedObjects
-      .map(
-        ({ Contents }) => Contents.map(
-          (object) => object.Key
-        )
-      )
-      .reduce(
-        (allKeys, keys) => [ ...allKeys, ...keys ],
-        []
-      )
-
-    return await s3.deleteObjects({
-      Bucket: s3.config.bucket,
-      Delete: {
-        Objects: relatedKeys.map((key) => ({ Key: key }))
-      }
-    }).promise()
+      keyFrom = keyFrom + subKeys.length
+    } while (keyFrom < keys.length)
   },
   stream(key, etag) {
     return s3.getObject({

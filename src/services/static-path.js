@@ -1,30 +1,27 @@
-import config from 'infrastructure/config'
-
-const { server: { base } } = config
-
 export default {
   origin: (params) => {
-    const { origin, ext } = params
+    const {
+      infrastructure: { cname },
+      project: { identifier },
+      origin,
+      ext
+    } = params
 
-    return ext ?
-      `${ base }/s/${ origin }.${ ext }` :
-      `${ base }/s/${ origin }`
+    const path = origin.replace(identifier, '')
+
+    return `https://${ cname }/s${ path }.${ ext }`
   },
   target: (params) => {
     const {
-      origin, ext,
-      args: {
-        mode,
-        width = 'auto',
-        height = 'auto'
-      },
-      preset: {
-        hash
-      }
+      infrastructure: { cname },
+      project: { identifier },
+      preset,
+      target
     } = params
 
-    return ext ?
-      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }.${ ext }` :
-      `${ base }/s/${ origin }/${ hash }/${ mode }_${ width }x${ height }`
+    const path = target.replace(identifier, '')
+    const ext = preset ? '' : `.${ params.ext }`
+
+    return `https://${ cname }/s${ path }${ ext }`
   }
 }
