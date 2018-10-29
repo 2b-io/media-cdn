@@ -21,11 +21,13 @@ const optimizePNG = async (input, output, args) => {
   } catch (error) {
     console.error('OPTIMIZE_TARGET', error)
 
-    if (error.code == 99) {
+    if (error.code === 99) {
       await fs.move(input, output)
+      
+      return
     }
 
-    return
+    throw error
   }
 
   await fs.remove(output)
