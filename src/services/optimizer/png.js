@@ -12,11 +12,22 @@ const optimizePNG = async (input, output, args) => {
   const dir = path.join(path.dirname(output), 'png')
   await fs.ensureDir(dir)
   const outputPng = path.join(dir, uuid.v4())
-  await pify(execFile)(pngquant, [
-    ...args,
-    '-o', outputPng,
-    input
-  ])
+  try {
+    await pify(execFile)(pngquant, [
+      ...args,
+      '-o', outputPng,
+      input
+    ])
+  } catch (error) {
+    console.error('OPTIMIZE_TARGET', error)
+
+    if (error.code == 99) {
+      await fs.move(input, output)
+    }
+
+    return
+  }
+
   await fs.remove(output)
   await fs.move(outputPng, output)
 }
