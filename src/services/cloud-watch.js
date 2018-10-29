@@ -1,18 +1,19 @@
 import cloudWatch from 'infrastructure/cloud-watch'
 
-const getMetricDownload = async (params) => {
+const metricDownload = async (params) => {
   const cloudWatchParams = {
     Namespace: 'AWS/CloudFront',
-    MetricName: 'BytesUploaded',
+    MetricName: 'BytesDownloaded',
     Statistics: [
       'Sum',
     ],
     ...params
   }
-  return await cloudWatch.getMetricStatistics(params).promise()
+
+  return await cloudWatch.getMetricStatistics(cloudWatchParams).promise()
 }
 
-const getMetricUpload = async (params) => {
+const metricUpload = async (params) => {
   const cloudWatchParams = {
     Namespace: 'AWS/CloudFront',
     MetricName: 'BytesUploaded',
@@ -21,9 +22,10 @@ const getMetricUpload = async (params) => {
     ],
     ...params
   }
-  return await cloudWatch.getMetricStatistics(params).promise()
+
+  return await cloudWatch.getMetricStatistics(cloudWatchParams).promise()
 }
 export default {
-  getMetricDownload
-  getMetricUpload
+  metricDownload,
+  metricUpload
 }

@@ -1,13 +1,9 @@
 import cloudWatch from 'services/cloud-watch'
 
-const getMetricDownload = async (req, res, next) => {
+const metricDownload = async (req, res, next) => {
   try {
-    const {
-      params
-    } = req.params
-
-    const metricData = await cloudWatch.getMetricDownload(params)
-
+    const { params } = req.body
+    const metricData = await cloudWatch.metricDownload(params)
     res.status(200).json(metricData)
   } catch (e) {
     next({
@@ -17,13 +13,10 @@ const getMetricDownload = async (req, res, next) => {
   }
 }
 
-const getMetricUpload = async (req, res, next) => {
+const metricUpload = async (req, res, next) => {
   try {
-    const {
-      params
-    } = req.params
-
-    const metricData = await cloudWatch.getMetricUpload(params)
+    const { params } = req.body
+    const metricData = await cloudWatch.metricUpload(params)
 
     res.status(200).json(metricData)
   } catch (e) {
@@ -34,6 +27,6 @@ const getMetricUpload = async (req, res, next) => {
   }
 }
 export default {
-  getMetricDownload,
-  getMetricUpload
+  metricDownload,
+  metricUpload
 }

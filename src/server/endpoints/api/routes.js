@@ -17,8 +17,8 @@ export default (app) => {
 
   app.post('/distributions', createDistribution)
   app.get('/distributions/:identifier', getDistribution)
-  app.get('/distributions/reportUpload', cloudWatch.getMetricUpload)
-  app.get('/distributions/reportDownload', cloudWatch.getMetricUpload)
+  app.post('/distributions/metric/upload', cloudWatch.metricUpload)
+  app.post('/distributions/metric/download', cloudWatch.metricDownload)
   app.put('/distributions/:identifier', updateDistribution)
   app.delete('/distributions/:identifier', deleteDistribution)
 
