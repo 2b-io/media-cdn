@@ -1,9 +1,35 @@
 import cloudWatch from 'services/cloud-watch'
 
-const metricDownload = async (req, res, next) => {
+const formatMediaData = async (responseData) => {
+  return await {
+    name: responseData.Label,
+    datapoints:responseData.Datapoints.map(({
+      Timestamp,
+      Sum
+    }) => (
+        {
+          value: Sum,
+          timestamp: Date.parse(Timestamp)
+        }
+      ))
+  }
+}
+
+const metric = async (req, res, next) => {
   try {
-    const { params } = req.body
-    const metricData = await cloudWatch.metricDownload(params)
+    const { distributionIdentifier, name } = req.params
+    const { startTime, endTime, period } = req.query
+
+    const responseData = await cloudWatch.metric({
+      distributionIdentifier,
+      name,
+      period,
+      startTime,
+      endTime
+    })
+
+    const metricData = await formatMediaData(responseData)
+
     res.status(200).json(metricData)
   } catch (e) {
     next({
@@ -13,20 +39,6 @@ const metricDownload = async (req, res, next) => {
   }
 }
 
-const metricUpload = async (req, res, next) => {
-  try {
-    const { params } = req.body
-    const metricData = await cloudWatch.metricUpload(params)
-
-    res.status(200).json(metricData)
-  } catch (e) {
-    next({
-      statusCode: 500,
-      reason: e
-    })
-  }
-}
 export default {
-  metricDownload,
-  metricUpload
+  metric
 }
