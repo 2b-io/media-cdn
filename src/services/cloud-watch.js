@@ -2,7 +2,6 @@ import cloudWatch from 'infrastructure/cloud-watch'
 
 const METRICNAME = {
   BYTES_DOWNLOADED: 'BytesDownloaded',
-  BYTES_UPLOADED: 'BytesUploaded',
   REQUESTS: 'Requests'
 }
 
@@ -12,31 +11,26 @@ const cloudWatchParams = ({
   startTime,
   period,
   distributionIdentifier
-}) => {
-  const StartTime = new Date(Number(startTime)).toISOString()
-  const EndTime = new Date(Number(endTime)).toISOString()
-
-  return {
-    Namespace: 'AWS/CloudFront',
-    MetricName: METRICNAME[ name ],
-    StartTime,
-    EndTime,
-    Period: period,
-    Dimensions: [
-      {
-        Name: 'DistributionId',
-        Value: distributionIdentifier
-      },
-      {
-        Name: 'Region',
-        Value: 'Global'
-      }
-    ],
-    Statistics: [
-      'Sum',
-    ],
-  }
-}
+}) => ({
+  Namespace: 'AWS/CloudFront',
+  MetricName: METRICNAME[ name ],
+  StartTime: new Date(Number(startTime)).toISOString(),
+  EndTime: new Date(Number(endTime)).toISOString(),
+  Period: period,
+  Dimensions: [
+    {
+      Name: 'DistributionId',
+      Value: distributionIdentifier
+    },
+    {
+      Name: 'Region',
+      Value: 'Global'
+    }
+  ],
+  Statistics: [
+    'Sum',
+  ],
+})
 
 const metric = async (params) => {
   return await cloudWatch.getMetricStatistics(cloudWatchParams(params)).promise()

@@ -25,6 +25,4 @@ export default (app) => {
   app.get('/projects/:identifier/media', getListMedia)
   app.get('/projects/:identifier/media/:id', getMedia)
   app.delete('/projects/:identifier/media/:id', deleteMedia)
-
-
 }

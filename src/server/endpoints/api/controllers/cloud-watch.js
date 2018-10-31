@@ -1,6 +1,6 @@
 import cloudWatch from 'services/cloud-watch'
 
-const formatMediaData = async (responseData) => {
+const formatResponseData = async (responseData) => {
   return await {
     name: responseData.Label,
     datapoints: responseData.Datapoints.map(({
@@ -28,7 +28,7 @@ const metric = async (req, res, next) => {
       endTime
     })
 
-    const metricData = await formatMediaData(responseData)
+    const metricData = await formatResponseData(responseData)
 
     res.status(200).json(metricData)
   } catch (e) {
