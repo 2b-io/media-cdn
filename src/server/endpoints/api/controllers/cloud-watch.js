@@ -3,15 +3,15 @@ import cloudWatch from 'services/cloud-watch'
 const formatMediaData = async (responseData) => {
   return await {
     name: responseData.Label,
-    datapoints:responseData.Datapoints.map(({
+    datapoints: responseData.Datapoints.map(({
       Timestamp,
       Sum
     }) => (
-        {
-          value: Sum,
-          timestamp: Date.parse(Timestamp)
-        }
-      ))
+      {
+        value: Sum,
+        timestamp: Date.parse(Timestamp)
+      }
+    ))
   }
 }
 
