@@ -3,7 +3,7 @@ import cloudWatch from 'infrastructure/cloud-watch'
 const METRICNAME = {
   BYTES_DOWNLOADED: 'BytesDownloaded',
   BYTES_UPLOADED: 'BytesUploaded',
-  BYTES_REQUESTS: 'Requests'
+  REQUESTS: 'Requests'
 }
 
 const cloudWatchParams = ({
