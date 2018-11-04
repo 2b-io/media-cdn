@@ -18,19 +18,18 @@ const formatResponseData = async (responseData) => {
       Sum,
       Average
     }) => {
-        if (responseData.Label === 'Requests') {
-          return {
-            value: Sum ? Sum : Average,
-            timestamp: Date.parse(Timestamp)
-          }
-        } else {
-          return {
-            value: Sum,
-            timestamp: Date.parse(Timestamp)
-          }
+      if (responseData.Label === 'Requests') {
+        return {
+          value: Sum ? Sum : Average,
+          timestamp: Date.parse(Timestamp)
+        }
+      } else {
+        return {
+          value: Sum,
+          timestamp: Date.parse(Timestamp)
         }
       }
-    )
+    })
   }
 }
 
