@@ -1,19 +1,49 @@
 import cloudWatch from 'infrastructure/cloud-watch'
 
-const METRICNAME = {
+const METRIC_NAME = {
   BYTES_DOWNLOADED: 'BytesDownloaded',
   REQUESTS: 'Requests'
 }
 
-const cloudWatchParams = ({
+const METRIC_LABEL = {
+  BytesDownloaded: 'BYTES_DOWNLOADED',
+  Requests: 'REQUESTS'
+}
+
+const formatResponseData = async (responseData) => {
+  return await {
+    name: METRIC_LABEL[ responseData.Label ],
+    datapoints: responseData.Datapoints.map(({
+      Timestamp,
+      Sum,
+      Average
+    }) => {
+        if (responseData.Label === 'Requests') {
+          return {
+            value: Sum ? Sum : Average,
+            timestamp: Date.parse(Timestamp)
+          }
+        } else {
+          return {
+            value: Sum,
+            timestamp: Date.parse(Timestamp)
+          }
+        }
+      }
+    )
+  }
+}
+
+const formatRequestParams = ({
   name,
   endTime,
   startTime,
   period,
-  distributionIdentifier
+  distributionIdentifier,
+  statistics = [ 'Sum' ]
 }) => ({
   Namespace: 'AWS/CloudFront',
-  MetricName: METRICNAME[ name ],
+  MetricName: METRIC_NAME[ name ],
   StartTime: new Date(Number(startTime)).toISOString(),
   EndTime: new Date(Number(endTime)).toISOString(),
   Period: period,
@@ -27,15 +57,17 @@ const cloudWatchParams = ({
       Value: 'Global'
     }
   ],
-  Statistics: [
-    'Sum',
-  ],
+  Statistics: statistics
 })
 
-const metric = async (params) => {
-  return await cloudWatch.getMetricStatistics(cloudWatchParams(params)).promise()
+const getMetric = async (params) => {
+  const responseData = await cloudWatch.getMetricStatistics(
+    formatRequestParams(params)
+  ).promise()
+
+  return await formatResponseData(responseData)
 }
 
 export default {
-  metric
+  getMetric
 }
