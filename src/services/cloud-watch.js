@@ -11,40 +11,35 @@ const METRIC_LABEL = {
   BytesDownloaded: 'BYTES_DOWNLOADED',
   Requests: 'REQUESTS'
 }
+
 // TODO: validate time
 const generateRangeTimes = (startTime, endTime, period) => {
-  const firstDate = new Date(Number(startTime))
-  const secondDate = new Date(Number(endTime))
+  let timePoint = startTime
   let dates = []
 
   if (period === ms('1d') / 1000) {
-    while (firstDate < secondDate - ms('1d')) {
-      firstDate.setDate(firstDate.getDate() + 1)
-      dates.push(firstDate.getTime())
+    while (timePoint < endTime) {
+      dates.push(timePoint)
+      timePoint += ms('1d')
     }
 
     return dates
   }
 
   if (period === ms('1h') / 1000) {
-    while (firstDate < secondDate - ms('1h')) {
-      firstDate.setHours(firstDate.getHours() + 1)
-      dates.push(firstDate.getTime())
+    while (timePoint < endTime) {
+      dates.push(timePoint)
+      timePoint += ms('1h')
     }
 
-    return [ ...dates, endTime ]
+    return dates
   }
 
   return []
 }
 
 const formatResponseData = (responseData, { startTime, endTime, period }) => {
-  const originRangeTimes = generateRangeTimes(startTime, endTime, Number(period))
-
-  const datapoints = originRangeTimes.map((time) => ({
-    timestamp: time,
-    value: 0
-  }))
+  const originRangeTimes = generateRangeTimes(Number(startTime), Number(endTime), Number(period))
 
   const indices = responseData.Datapoints.reduce(
     (indices, datapoint) => ({
@@ -54,16 +49,14 @@ const formatResponseData = (responseData, { startTime, endTime, period }) => {
     {}
   )
 
-  const mergedDatapoints = datapoints.map(
-    (datapoint) => ({
-      ...datapoint,
-      value: indices[ datapoint.timestamp ] || 0
-    })
-  )
+  const datapoints = originRangeTimes.map((time) => ({
+    timestamp: time,
+    value: indices[ time ] || 0
+  }))
 
   return {
     name: METRIC_LABEL[ responseData.Label ],
-    datapoints: mergedDatapoints
+    datapoints
   }
 }
 
