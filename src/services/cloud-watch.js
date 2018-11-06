@@ -81,7 +81,7 @@ const formatRequestParams = ({
   Dimensions: [
     {
       Name: 'DistributionId',
-      Value: 'distributionIdentifier'
+      Value: distributionIdentifier
     },
     {
       Name: 'Region',
