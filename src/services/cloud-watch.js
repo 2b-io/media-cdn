@@ -23,7 +23,7 @@ const generateRangeTimes = (startTime, endTime, period) => {
       dates.push(firstDate.getTime())
     }
 
-    return dates
+    return [ startTime, ...dates ]
   }
 
   if (period === ms('1h') / 1000) {
@@ -32,7 +32,7 @@ const generateRangeTimes = (startTime, endTime, period) => {
       dates.push(firstDate.getTime())
     }
 
-    return [ ...dates, endTime ]
+    return [ startTime, ...dates, endTime ]
   }
 
   return []
