@@ -18,19 +18,21 @@ const generateRangeTimes = (startTime, endTime, period) => {
   let dates = []
 
   if (period === ms('1d') / 1000) {
-    while (firstDate < secondDate) {
+    while (firstDate < secondDate - ms('1d')) {
       firstDate.setDate(firstDate.getDate() + 1)
       dates.push(firstDate.getTime())
     }
+
     return dates
   }
 
   if (period === ms('1h') / 1000) {
-    while (firstDate < secondDate) {
+    while (firstDate < secondDate - ms('1h')) {
       firstDate.setHours(firstDate.getHours() + 1)
       dates.push(firstDate.getTime())
     }
-    return dates
+
+    return [ ...dates, endTime ]
   }
 
   return []
