@@ -44,7 +44,7 @@ export default async (file, args, parameters = {}) => {
     mergePaths = true,
     removeNonInheritableGroupAttrs = true,
     cleanupIDs = true,
-    removeStyleElement = true,
+    removeStyleElement = false,
   } = parameters
 
   const plugins = [

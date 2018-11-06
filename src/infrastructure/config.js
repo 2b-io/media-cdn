@@ -38,6 +38,11 @@ export default {
       accessKeyId: process.env.AWS_ROUTE53_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_ROUTE53_SECRET_ACCESS_KEY,
       hostedZoneId: process.env.AWS_ROUTE53_HOSTED_ZONE_ID
+    },
+    cloudWatch: {
+      region: process.env.AWS_CLOUDWATCH_REGION,
+      accessKeyId: process.env.AWS_CLOUDWATCH_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_CLOUDWATCH_SECRET_ACCESS_KEY
     }
   },
   mongodb: process.env.MONGO,
