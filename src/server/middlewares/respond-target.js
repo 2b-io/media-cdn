@@ -1,3 +1,5 @@
+import useragent from 'useragent'
+
 import cache from 'services/cache'
 import staticPath from 'services/static-path'
 
@@ -9,6 +11,18 @@ export default function respondTarget(req, res, next) {
       status: 500,
       reason: 'Optimize target failed'
     })
+  }
+
+  if (meta.ContentType === 'image/webp') {
+    const { firefox, ie } = useragent.is(req.headers['user-agent'])
+
+    if (firefox || ie) {
+      const originUrl = req._originMeta.Metadata[ 'origin-url' ]
+      res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
+      res.redirect(originUrl)
+
+      return
+    }
   }
 
   console.log(`PIPE_TARGET ${ req._params.target }`)
