@@ -18,7 +18,7 @@ const generateRangeTimes = (startTime, endTime, period) => {
   let dates = []
 
   if (period === ms('1d') / 1000) {
-    while (timePoint < endTime) {
+    while (timePoint < endTime && timePoint < Date.now()) {
       dates.push(timePoint)
       timePoint += ms('1d')
     }
@@ -27,7 +27,7 @@ const generateRangeTimes = (startTime, endTime, period) => {
   }
 
   if (period === ms('1h') / 1000) {
-    while (timePoint < endTime) {
+    while (timePoint < endTime && timePoint < Date.now()) {
       dates.push(timePoint)
       timePoint += ms('1h')
     }
