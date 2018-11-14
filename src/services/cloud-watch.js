@@ -32,7 +32,7 @@ const generateRangeTimes = (startTime, endTime, period) => {
       timePoint += ms('1h')
     }
 
-    return dates
+    return [ ...dates, endTime ]
   }
 
   return []
