@@ -1,9 +1,13 @@
-import da from 'services/da'
+import createPresetService from 'services/preset'
 
 export default async function getPreset(req, res, next) {
-  const { contentType, project: { _id } } = req._params
+  const {
+    contentType,
+    project
+  } = req._params
 
-  req._params.preset = await da.getPreset(contentType, _id)
+  const presetService = createPresetService()
+  req._params.preset = await presetService.get(project.identifier, contentType)
 
   next()
 }

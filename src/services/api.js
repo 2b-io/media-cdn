@@ -17,12 +17,17 @@ class ApiService {
       .filter(Boolean)
       .join(',')
 
-    const response = await request(method, `${ config.apiUrl }${ path }`)
-      .set('Content-Type', 'application/json')
-      .set('Authorization', `MEDIA_CDN ${ authParams }`)
-      .send(body)
+    try {
+      const response = await request(method, `${ config.apiUrl }${ path }`)
+        .set('Content-Type', 'application/json')
+        .set('Authorization', `MEDIA_CDN ${ authParams }`)
+        .send(body)
 
-    return response.body
+      return response.body
+    } catch(e) {
+      return null
+    }
+
   }
 }
 
