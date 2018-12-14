@@ -1,15 +1,15 @@
-import PullSetting from 'models/pull-setting'
+import ApiService from 'services/api'
 
-export const get = async (project) => {
-  return await PullSetting.findOne({
-    project
-  }).lean()
+class PullSettingService extends ApiService {
+  async get(projectIdentifier) {
+    return await this.callApi('get', `/projects/${ projectIdentifier }/pull-setting`)
+  }
+
+  async update(projectIdentifier, body) {
+    return await this.callApi('put', `/projects/${ projectIdentifier }/pull-setting`, body)
+  }
 }
 
-export const update = async (project, data) => {
-  return await PullSetting.findOneAndUpdate(
-    { project },
-    { ...data },
-    { new: true }
-  ).lean()
+export default (accountIdentifier) => {
+  return new PullSettingService('webapp', accountIdentifier)
 }
