@@ -1,9 +1,10 @@
-import da from 'services/da'
+import createCacheSettingService from 'services/cache-setting'
 
 export default async function getCacheSetting(req, res, next) {
   const { project } = req._params
 
-  const cacheSetting = req._params.cacheSetting = await da.getCacheSetting(project._id)
+  const CacheSettingService = createCacheSettingService()
+  const cacheSetting = req._params.cacheSetting = await CacheSettingService.get(project.identifier)
 
   if (!cacheSetting) {
     return next({

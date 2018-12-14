@@ -46,6 +46,7 @@ export default {
     }
   },
   mongodb: process.env.MONGO,
+  apiUrl: process.env.API_URL,
   scraperUrl: process.env.SCRAPER_URL,
   tmpDir: process.env.TMP_DIR || path.resolve(rootDir, '../tmp')
 }
