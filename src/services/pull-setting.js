@@ -1,15 +1,14 @@
-import ApiService from 'services/api'
+import apiService from 'services/api'
 
-class PullSettingService extends ApiService {
-  async get(projectIdentifier) {
-    return await this.callApi('get', `/projects/${ projectIdentifier }/pull-setting`)
-  }
-
-  async update(projectIdentifier, body) {
-    return await this.callApi('put', `/projects/${ projectIdentifier }/pull-setting`, body)
-  }
+const get = async (projectIdentifier) => {
+  return await apiService.callApi('get', `/projects/${ projectIdentifier }/pull-setting`)
 }
 
-export default (accountIdentifier) => {
-  return new PullSettingService('webapp', accountIdentifier)
+const update = async (projectIdentifier, body) => {
+    return await apiService.callApi('put', `/projects/${ projectIdentifier }/pull-setting`, body)
+  }
+
+export default {
+  get,
+  update
 }

@@ -1,11 +1,9 @@
-import ApiService from 'services/api'
+import apiService from 'services/api'
 
-class ProjectService extends ApiService {
-  async get(projectIdentifier) {
-    return await this.callApi('get', `/projects/${ projectIdentifier }`)
-  }
+const get = async (projectIdentifier) => {
+  return await apiService.callApi('get', `/projects/${ projectIdentifier }`)
 }
 
-export default (accountIdentifier) => {
-  return new ProjectService('webapp', accountIdentifier)
+export default {
+  get
 }

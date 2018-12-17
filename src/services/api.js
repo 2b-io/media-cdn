@@ -2,33 +2,15 @@ import request from 'superagent'
 
 import config from 'infrastructure/config'
 
-class ApiService {
-  constructor(appIdentifier, accountIdentifier) {
-    this.appIdentifier = appIdentifier
-    this.accountIdentifier = accountIdentifier
-  }
+const callApi = async (method, path, body) => {
+  const response = await request(method, `${ config.apiUrl }${ path }`)
+    .set('Content-Type', 'application/json')
+    .set('Authorization', `MEDIA_CDN app=cdn`)
+    .send(body)
 
-  async callApi(method, path, body) {
-    const authParams = Object.entries({
-      app: this.appIdentifier,
-      account: this.accountIdentifier
-    })
-      .map((entry) => entry[ 1 ] && entry.join('='))
-      .filter(Boolean)
-      .join(',')
-
-    try {
-      const response = await request(method, `${ config.apiUrl }${ path }`)
-        .set('Content-Type', 'application/json')
-        .set('Authorization', `MEDIA_CDN ${ authParams }`)
-        .send(body)
-
-      return response.body
-    } catch(e) {
-      return null
-    }
-
-  }
+  return response.body
 }
 
-export default ApiService
+export default {
+  callApi
+}

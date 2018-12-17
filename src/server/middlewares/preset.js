@@ -1,4 +1,4 @@
-import createPresetService from 'services/preset'
+import presetService from 'services/preset'
 
 export default async function getPreset(req, res, next) {
   const {
@@ -6,8 +6,13 @@ export default async function getPreset(req, res, next) {
     project
   } = req._params
 
-  const presetService = createPresetService()
-  req._params.preset = await presetService.get(project.identifier, contentType)
-
-  next()
+  try {
+    req._params.preset = await presetService.get(project.identifier, contentType)
+  } catch (e) {
+    if(e.status === 404) {
+      req._params.preset = null
+    }
+  } finally {
+    next()
+  }
 }

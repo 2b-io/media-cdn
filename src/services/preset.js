@@ -1,11 +1,9 @@
-import ApiService from 'services/api'
+import apiService from 'services/api'
 
-class PresetService extends ApiService {
-  async get(projectIdentifier, contentType) {
-    return await this.callApi('get', `/projects/${ projectIdentifier }/presets/${ encodeURIComponent(contentType) }`)
-  }
+const get = async (projectIdentifier, contentType) => {
+  return await apiService.callApi('get', `/projects/${ projectIdentifier }/presets/${ encodeURIComponent(contentType) }`)
 }
 
-export default (accountIdentifier) => {
-  return new PresetService('webapp', accountIdentifier)
+export default {
+  get
 }

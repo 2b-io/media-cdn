@@ -1,13 +1,11 @@
-import da from 'services/da'
-import createProjectService from 'services/project'
-import createInfrastructureService from 'services/infrastructure'
+import projectService from 'services/project'
+import infrastructureService from 'services/infrastructure'
 
 export default async function getProject(req, res, next) {
-  const projectIdentifier = req.hostname.split('.', 1)
+  const projectIdentifier = req.hostname.split('.', 1)[ 0 ]
 
-  const projectService = createProjectService()
   const project = await projectService.get(projectIdentifier)
-  const infrastructureService = createInfrastructureService()
+
   const infrastructure = await infrastructureService.get(projectIdentifier)
 
   if (!project) {
