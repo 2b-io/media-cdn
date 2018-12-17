@@ -3,6 +3,7 @@ import { URL } from 'url'
 
 import cache from 'services/cache'
 import da from 'services/da'
+import projectService from 'services/project'
 
 const normalizePattern = (path, pullURL) => {
   try {
@@ -24,7 +25,7 @@ const invalidateAll = async (projectIdentifier, options) => {
 
   if (options.deleteOnDistribution) {
     // delete on distribution
-    const project = await da.getProjectByIdentifier(projectIdentifier)
+    const project = await projectService.get(projectIdentifier)
     const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
 
     await cache.invalidate(distributionId, [ '/*' ])
@@ -37,7 +38,7 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
     return await invalidateAll(projectIdentifier, options)
   }
 
-  const project = await da.getProjectByIdentifier(projectIdentifier)
+  const project = await projectService.get(projectIdentifier)
   const { pullURL } = await da.getPullSetting(project._id)
 
   const normalizedPatterns = patterns

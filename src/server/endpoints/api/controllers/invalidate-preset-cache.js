@@ -1,8 +1,9 @@
 import cache from 'services/cache'
 import da from 'services/da'
+import projectService from 'services/project'
 
 const invalidateByPreset = async (projectIdentifier, presetHash) => {
-  const project = await da.getProjectByIdentifier(projectIdentifier)
+  const project = await projectService.get(projectIdentifier)
   const allObjects = await cache.searchByPresetHash(projectIdentifier, presetHash)
 
   // delete on s3

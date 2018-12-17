@@ -1,10 +1,12 @@
-import da from 'services/da'
+import projectService from 'services/project'
+import infrastructureService from 'services/infrastructure'
 
 export default async function getProject(req, res, next) {
-  const {
-    infrastructure,
-    project
-  } = await da.getProject(req.hostname)
+  const projectIdentifier = req.hostname.split('.', 1)[ 0 ]
+
+  const project = await projectService.get(projectIdentifier)
+
+  const infrastructure = await infrastructureService.get(projectIdentifier)
 
   if (!project) {
     return next({
