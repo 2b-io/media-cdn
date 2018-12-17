@@ -11,8 +11,9 @@ export default async function getPreset(req, res, next) {
   } catch (e) {
     if(e.status === 404) {
       req._params.preset = null
+    } else {
+      throw e
     }
-  } finally {
-    next()
   }
+  next()
 }

@@ -5,8 +5,8 @@ const get = async (projectIdentifier) => {
 }
 
 const update = async (projectIdentifier, body) => {
-    return await apiService.callApi('put', `/projects/${ projectIdentifier }/pull-setting`, body)
-  }
+  return await apiService.callApi('put', `/projects/${ projectIdentifier }/pull-setting`, body)
+}
 
 export default {
   get,
