@@ -2,8 +2,8 @@ import serializeError from 'serialize-error'
 import { URL } from 'url'
 
 import cache from 'services/cache'
-import da from 'services/da'
-import projectService from 'services/project'
+import infrastructureService from 'services/infrastructure'
+import pullSettingService from 'services/pull-setting'
 
 const normalizePattern = (path, pullURL) => {
   try {
@@ -22,11 +22,9 @@ const invalidateAll = async (projectIdentifier, options) => {
       await cache.delete(allObjects)
     }
   }
-
   if (options.deleteOnDistribution) {
     // delete on distribution
-    const project = await projectService.get(projectIdentifier)
-    const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+    const { ref: distributionId } = await infrastructureService.get(projectIdentifier)
 
     await cache.invalidate(distributionId, [ '/*' ])
   }
@@ -38,8 +36,7 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
     return await invalidateAll(projectIdentifier, options)
   }
 
-  const project = await projectService.get(projectIdentifier)
-  const { pullURL } = await da.getPullSetting(project._id)
+  const { pullURL } = await pullSettingService.get(projectIdentifier)
 
   const normalizedPatterns = patterns
     .map(
@@ -58,7 +55,7 @@ const invalidateByPatterns = async (projectIdentifier, patterns, options) => {
     }
 
     if (options.deleteOnDistribution) {
-      const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+      const { ref: distributionId } = await infrastructureService.get(projectIdentifier)
 
       // delete on distribution
       const cloudfrontPatterns = normalizedPatterns
