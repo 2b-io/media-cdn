@@ -1,9 +1,7 @@
 import cache from 'services/cache'
-import da from 'services/da'
-import projectService from 'services/project'
+import infrastructureService from 'services/infrastructure'
 
 const invalidateByPreset = async (projectIdentifier, presetHash) => {
-  const project = await projectService.get(projectIdentifier)
   const allObjects = await cache.searchByPresetHash(projectIdentifier, presetHash)
 
   // delete on s3
@@ -12,7 +10,7 @@ const invalidateByPreset = async (projectIdentifier, presetHash) => {
   }
 
   // delete on cloudfront
-  const { identifier: distributionId } = await da.getInfrastructureByProjectId(project._id)
+  const { ref: distributionId } = await infrastructureService.get(projectIdentifier)
 
   await cache.invalidate(distributionId, [ '/*' ])
 }
