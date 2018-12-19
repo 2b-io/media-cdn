@@ -28,7 +28,7 @@ app.use((req, res) => {
   res.sendStatus(404)
 })
 
-app.use((error, req, res) => {
+app.use((error, req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
   res.set('Pragma', 'no-cache')
   res.set('Expires', '0')
