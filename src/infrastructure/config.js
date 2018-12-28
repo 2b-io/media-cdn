@@ -25,5 +25,6 @@ export default {
   },
   apiUrl: process.env.API_URL,
   scraperUrl: process.env.SCRAPER_URL,
-  tmpDir: process.env.TMP_DIR || path.resolve(rootDir, '../tmp')
+  tmpDir: process.env.TMP_DIR || path.resolve(rootDir, '../tmp'),
+  cacheDuration: process.env.CACHE_DURATION
 }
