@@ -24,6 +24,7 @@ export default {
     }
   },
   apiUrl: process.env.API_URL,
+  apiSecretKey: process.env.API_SECRET_KEY,
   scraperUrl: process.env.SCRAPER_URL,
   tmpDir: process.env.TMP_DIR || path.resolve(rootDir, '../tmp')
 }
