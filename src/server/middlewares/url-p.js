@@ -9,7 +9,7 @@ export default function parseUrlFromPath(req, res, next) {
       Object.keys(req.query).length ?
         '?' + querystring.stringify(req.query) : ''
     ),
-    pullSetting.pullURL
+    pullSetting.pullUrl
   ).toString()
   req._params = {
     ...req._params,
