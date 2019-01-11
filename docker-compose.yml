@@ -10,10 +10,10 @@ services:
     ports:
       - "3002:3002"
     networks:
-      infra_cdn:
+      api:
         aliases:
           - media-cdn
 
 networks:
-  infra_cdn:
+  api:
     external: true
