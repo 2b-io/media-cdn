@@ -5,9 +5,7 @@ const rootDir = path.resolve(__dirname, '..')
 export default {
   __rootDir: rootDir,
   development: process.env.NODE_ENV === 'development',
-  version: process.env.VERSION,
   server: {
-    base: process.env.BASE_URL,
     bind: process.env.SERVER_BIND,
     port: process.env.SERVER_PORT
   },
@@ -20,7 +18,8 @@ export default {
       bucket: process.env.AWS_S3_BUCKET,
       region: process.env.AWS_S3_REGION,
       accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY
+      secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
+      version: process.env.AWS_S3_VERSION
     }
   },
   apiUrl: process.env.API_URL,

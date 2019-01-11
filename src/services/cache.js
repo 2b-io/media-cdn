@@ -5,7 +5,7 @@ import config from 'infrastructure/config'
 import s3 from 'infrastructure/s3'
 import localpath from 'services/localpath'
 
-const { version = '0.0.1' } = config
+const { version = '0.0.1' } = config.aws.s3
 
 const MAX_KEYS = 1000
 
