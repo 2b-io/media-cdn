@@ -1,6 +1,7 @@
 import mime from 'mime'
 
 import cache from 'services/cache'
+import mimeAliases from 'services/mime-aliases'
 
 export default [
   async function checkExistOrigin(req, res, next) {
@@ -99,8 +100,9 @@ export default [
     }
 
     const { ContentType: contentType } = req._originMeta
-    const ext = mime.getExtension(contentType)
-    req._params.contentType = contentType
+    const mimeType = mimeAliases[ contentType ] || contentType
+    const ext = mime.getExtension(mimeType)
+    req._params.contentType = mimeType
     req._params.ext = ext
 
     next()
