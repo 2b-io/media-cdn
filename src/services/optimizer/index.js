@@ -1,3 +1,5 @@
+import mimeAliases from 'services/mime-aliases'
+
 import jpeg from './jpeg'
 import png from './png'
 // import webp from './webp'
@@ -15,7 +17,7 @@ const scenarios = {
 export default {
   async optimize(file, args, parameters) {
     const { contentType } = file
-    const scenario = scenarios[contentType]
+    const scenario = scenarios[ mimeAliases[ contentType ] ]
 
     if (!scenario) {
       return file
