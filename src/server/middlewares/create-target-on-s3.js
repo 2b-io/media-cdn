@@ -1,5 +1,4 @@
 import cache from 'services/cache'
-import config from 'infrastructure/config'
 
 export default [
   async function checkExistTarget(req, res, next) {
@@ -93,22 +92,5 @@ export default [
         next()
       })
       .send()
-  },
-  async function checkSizeTarget(req, res, next) {
-    const { ContentLength: sizeOrigin } = req._originMeta
-    const { ContentLength: sizeTarget } = req._targetMeta
-
-    if (sizeTarget > sizeOrigin) {
-      const originUrl = req._originMeta.Metadata[ 'origin-url' ]
-      res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
-      res.redirect(originUrl)
-      // Remove file optimize because file optimize larger than the original image size
-      const targetOrigin = `${ config.version }/${ req._params.target }`
-      await cache.delete([ { key: targetOrigin} ])
-
-      return
-    }
-
-    next()
-  },
+  }
 ]
