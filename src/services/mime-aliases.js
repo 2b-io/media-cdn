@@ -10,8 +10,8 @@ const mimeAliases = {
   'image/gif': 'image/gif',
 
   // SVG
-  'image/svg': 'image/svg',
-  'image/svg+xml': 'image/svg',
+  'image/svg': 'image/svg+xml',
+  'image/svg+xml': 'image/svg+xml',
 
   // WEBP
   'image/webp': 'image/webp'
