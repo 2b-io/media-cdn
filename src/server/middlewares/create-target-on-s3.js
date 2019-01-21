@@ -55,7 +55,7 @@ export default [
 
           console.error('ERROR_OPTIMIZE_ORIGIN', req._params.origin)
           console.error('ERROR_OPTIMIZE_TARGET', req._params.target)
-          console.error('ERROR_originUrl', originUrl)
+          console.error('ERROR_ORIGIN_URL', originUrl)
           console.error('ERROR', error)
 
           res.set('cache-control', 'max-age=0')
