@@ -2,21 +2,9 @@ import cache from 'services/cache'
 import config from 'infrastructure/config'
 import staticPath from 'services/static-path'
 
-export default function respondTarget(req, res, next) {
-  let meta, fileRespond
-  const { ContentLength: sizeOrigin } = req._originMeta
-  const { ContentLength: sizeTarget } = req._targetMeta
-
-  if (sizeTarget > sizeOrigin) {
-    fileRespond = req._params.origin
-    meta = req._originMeta
-    // Remove file optimize
-    const targetKey = `${ config.version }/${ req._params.target }`
-    cache.delete([ { key: targetKey} ])
-  } else {
-    fileRespond = req._params.target
-    meta = req._targetMeta
-  }
+export default async function respondTarget(req, res, next) {
+  let meta = req._targetMeta
+  let respondPath = req._params.target
 
   if (!meta) {
     return next({
@@ -25,7 +13,20 @@ export default function respondTarget(req, res, next) {
     })
   }
 
-  console.log(`PIPE_TARGET ${ fileRespond }`)
+  const { ContentLength: sizeOrigin } = req._originMeta
+  const { ContentLength: sizeTarget } = req._targetMeta
+
+  if (sizeTarget > sizeOrigin) {
+    respondPath = req._params.origin
+    meta = req._originMeta
+    
+    // Delete origin file
+    await cache.delete([ {
+      key: `${ config.version }/${ req._params.target }`
+    } ])
+  }
+
+  console.log(`PIPE_TARGET ${ respondPath }`)
 
   res.set('accept-ranges', meta.AcceptRanges)
   res.set('content-type', meta.ContentType)
@@ -37,7 +38,7 @@ export default function respondTarget(req, res, next) {
   res.set('x-origin-path', staticPath.origin(req._params))
   res.set('x-target-path', staticPath.target(req._params))
 
-  cache.stream(fileRespond)
+  cache.stream(respondPath)
     .on('error', (error) => {
       return next({
         statusCode: 500,
