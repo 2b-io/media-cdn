@@ -52,7 +52,13 @@ export default [
 
         if (error) {
           const originUrl = req._originMeta.Metadata[ 'origin-url' ]
-          res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
+
+          console.error('ERROR_OPTIMIZE_ORIGIN', req._params.origin)
+          console.error('ERROR_OPTIMIZE_TARGET', req._params.target)
+          console.error('ERROR_ORIGIN_URL', originUrl)
+          console.error('ERROR', error)
+
+          res.set('cache-control', 'max-age=0')
           res.redirect(originUrl)
 
           return
