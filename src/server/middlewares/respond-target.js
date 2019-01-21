@@ -1,4 +1,4 @@
-import cache from 'services/cache'
+import cache, { cloudPath } from 'services/cache'
 import config from 'infrastructure/config'
 import staticPath from 'services/static-path'
 
@@ -19,10 +19,10 @@ export default async function respondTarget(req, res, next) {
   if (sizeTarget > sizeOrigin) {
     respondPath = req._params.origin
     meta = req._originMeta
-    
-    // Delete origin file
+
+    // Delete target file
     await cache.delete([ {
-      key: `${ config.version }/${ req._params.target }`
+      key: cloudPath(req._params.target)
     } ])
   }
 
