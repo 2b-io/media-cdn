@@ -6,7 +6,7 @@ export default async (payload) => {
   let origin, target
 
   try {
-    origin = await cache.get(payload.origin, payload.meta ? payload.meta.ETag : undefined)
+    origin = await cache.get(payload.origin)
 
     target = await optimizer.optimize(origin, payload.args, payload.parameters)
 
