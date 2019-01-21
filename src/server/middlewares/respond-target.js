@@ -32,7 +32,6 @@ export default async function respondTarget(req, res, next) {
   res.set('content-type', meta.ContentType)
   res.set('content-length', meta.ContentLength)
   res.set('last-modified', meta.LastModified)
-  res.set('etag', meta.ETag)
   res.set('cache-control', `max-age=${ req._params.cacheSetting.ttl }`)
 
   res.set('x-origin-path', staticPath.origin(req._params))
