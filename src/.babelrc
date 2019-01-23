@@ -1,19 +1,18 @@
 {
   "presets": [
-    [ "env", {
-      "target": {
-        "node": "current"
+    [ "@babel/preset-env", {
+      "targets": {
+        "node": "8.10"
       }
-    } ],
-    "stage-2"
+    } ]
   ],
   "plugins": [
     [ "module-resolver", {
       "root": [ "./src" ],
     } ],
-    [ "transform-runtime", {
-      "polyfill": false,
+    [ "@babel/plugin-transform-runtime", {
       "regenerator": true
-    } ]
+    } ],
+    "@babel/plugin-proposal-object-rest-spread"
   ]
 }

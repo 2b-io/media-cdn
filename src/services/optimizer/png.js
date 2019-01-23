@@ -23,7 +23,7 @@ const optimizePNG = async (input, output, args) => {
 
     if (error.code === 99) {
       await fs.move(input, output)
-      
+
       return
     }
 
@@ -54,18 +54,16 @@ export default async (file, args, parameters = {}) => {
   if (resize) {
     const image = sharp(file.path)
 
-    image.resize(
-      width === 'auto' ? null : width,
-      height === 'auto' ? null : height
-    )
-
-    if (mode === 'cover') {
-      image.min()
-    } else if (mode === 'contain') {
-      image.max()
-    } else if (mode === 'crop') {
-      image.crop()
-    }
+    image.resize({
+      width: width === 'auto' ? null : width,
+      height: height === 'auto' ? null : height,
+      fit: mode === 'crop' ?
+        sharp.fit.cover : (
+          mode === 'cover' ?
+            sharp.fit.outside :
+            sharp.fit.inside
+        )
+    })
 
     image.png()
 

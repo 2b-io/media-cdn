@@ -1,5 +1,4 @@
 import cache, { cloudPath } from 'services/cache'
-import config from 'infrastructure/config'
 import staticPath from 'services/static-path'
 
 export default async function respondTarget(req, res, next) {
