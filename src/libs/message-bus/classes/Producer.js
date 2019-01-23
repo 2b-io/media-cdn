@@ -105,7 +105,7 @@ class Producer extends Connection {
       this.ttl(timer)
     ])
 
-    timer.cancel()
+    timer.clear()
 
     return reply
   }
