@@ -50,10 +50,12 @@ export default [
       .ttl(60e3)
       .onReply((error) => {
         if (error) {
-          return next({
-            statusCode: 500,
-            reason: error
-          })
+          console.error('CRAWL_ORIGIN ERROR', error)
+
+          res.set('cache-control', 'max-age=0')
+          res.redirect(req._params.url)
+
+          return
         }
 
         next()
