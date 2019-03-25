@@ -12,11 +12,10 @@ const MAX_KEYS = 1000
 export const cloudPath = (key) => `${ version }/${ key }`
 
 export default {
-  async head(key, etag) {
+  async head(key) {
     return await s3.headObject({
       Bucket: s3.config.bucket,
-      Key: cloudPath(key),
-      IfMatch: etag
+      Key: cloudPath(key)
     }).promise()
   },
   async put(key, file, options = {}) {
@@ -36,14 +35,13 @@ export default {
       Metadata: meta || {}
     }).promise()
   },
-  async get(key, etag) {
+  async get(key) {
     const downloadPath = await localpath()
     const res = {}
 
     const data = await s3.getObject({
       Bucket: s3.config.bucket,
-      Key: cloudPath(key),
-      IfMatch: etag
+      Key: cloudPath(key)
     }).promise()
 
     res.contentType = data.ContentType
@@ -68,11 +66,10 @@ export default {
       keyFrom = keyFrom + subKeys.length
     } while (keyFrom < keys.length)
   },
-  stream(key, etag) {
+  stream(key) {
     return s3.getObject({
       Bucket: s3.config.bucket,
-      Key: cloudPath(key),
-      IfMatch: etag
+      Key: cloudPath(key)
     }).createReadStream()
   }
 }

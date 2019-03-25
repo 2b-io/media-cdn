@@ -19,7 +19,9 @@ const crawlByScraper = async (payload) => {
   })
 
   if (!response.ok) {
-    throw 'Crawl failed'
+    const error = await response.json()
+
+    throw error
   }
 
   return await response.json()
