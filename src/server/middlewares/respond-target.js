@@ -18,11 +18,6 @@ export default async function respondTarget(req, res, next) {
   if (sizeTarget > sizeOrigin) {
     respondPath = req._params.origin
     meta = req._originMeta
-
-    // Delete target file
-    await cache.delete([ {
-      key: cloudPath(req._params.target)
-    } ])
   }
 
   console.log(`PIPE_TARGET ${ respondPath }`)
