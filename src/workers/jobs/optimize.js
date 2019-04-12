@@ -1,22 +1,39 @@
 import fs from 'fs-extra'
 import cache from 'services/cache'
 import optimizer from 'services/optimizer'
-
 export default async (payload) => {
-  let origin, target
+  let origin, target, fileUpload
 
   try {
     origin = await cache.get(payload.origin)
 
     target = await optimizer.optimize(origin, payload.args, payload.parameters)
 
-    const upload = await cache.put(payload.target, target, {
-      expires: payload.expires
-    })
+    const sizeOrigin = fs.statSync(origin.path)[ "size" ]
+    const sizeTarget = fs.statSync(target.path)[ "size" ]
 
-    return {
-      ...target,
-      meta: upload
+    if (sizeTarget > sizeOrigin) {
+      console.log('SIZE_TARGET > SIZE_ORIGIN')
+
+      fileUpload = await cache.put(payload.target, origin, {
+        expires: payload.expires
+      })
+
+      console.log('UPLOAD_ORIGIN -> TARGET')
+
+      return {
+        ...origin,
+        meta: fileUpload
+      }
+    } else {
+      fileUpload = await cache.put(payload.target, target, {
+        expires: payload.expires
+      })
+
+      return {
+        ...target,
+        meta: fileUpload
+      }
     }
   } finally {
     if (origin) {

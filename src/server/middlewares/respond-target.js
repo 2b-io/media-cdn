@@ -12,20 +12,6 @@ export default async function respondTarget(req, res, next) {
     })
   }
 
-  const { ContentLength: sizeOrigin } = req._originMeta
-  const { ContentLength: sizeTarget } = req._targetMeta
-
-  if (sizeTarget > sizeOrigin) {
-    console.log('SIZE_TARGET > SIZE_ORIGIN')
-
-    respondPath = req._params.origin
-    meta = req._originMeta
-
-    console.log('COPY_ORIGIN => TARGET')
-
-    await cache.copy(respondPath, req._params.target)
-  }
-
   console.log(`PIPE_TARGET ${ respondPath }`)
 
   res.set('accept-ranges', meta.AcceptRanges)
