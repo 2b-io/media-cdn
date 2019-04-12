@@ -71,5 +71,12 @@ export default {
       Bucket: s3.config.bucket,
       Key: cloudPath(key)
     }).createReadStream()
+  },
+  async copy(path, newPath) {
+    return await s3.copyObject({
+      Bucket: s3.config.bucket,
+      CopySource: `${ s3.config.bucket }/${ version }/${ path }`,
+      Key: cloudPath(newPath)
+    }).promise()
   }
 }
