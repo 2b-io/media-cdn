@@ -12,19 +12,6 @@ export default async function respondTarget(req, res, next) {
     })
   }
 
-  const { ContentLength: sizeOrigin } = req._originMeta
-  const { ContentLength: sizeTarget } = req._targetMeta
-
-  if (sizeTarget > sizeOrigin) {
-    respondPath = req._params.origin
-    meta = req._originMeta
-
-    // Delete target file
-    await cache.delete([ {
-      key: cloudPath(req._params.target)
-    } ])
-  }
-
   console.log(`PIPE_TARGET ${ respondPath }`)
 
   res.set('accept-ranges', meta.AcceptRanges)
