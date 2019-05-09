@@ -10,25 +10,42 @@ import uuid from 'uuid'
 
 import localpath from 'services/localpath'
 
+
+const resizeByRatio = async (file, originRatio, ratio, width, height, output) => {
+  if (originRatio < ratio) {
+    return await gm(file.path).resize(width, null).writeAsync(output)
+  }
+
+  return await gm(file.path).resize(null, height).writeAsync(output)
+}
+
 const optimizePngByGM = async (file, resize, width = null, height = null, mode, output) => {
   promise.promisifyAll(gm.prototype)
 
-  const { size: { width: originWidth, height: originHeight }  } = await gm(file.path).identifyAsync()
+  const { size: { width: originWidth, height: originHeight } } = await gm(file.path).identifyAsync()
 
   const originRatio = originWidth / originHeight
   const ratio = width / height
 
   if (resize) {
     if (mode === 'cover') {
-      if (originRatio < ratio) {
-        return await gm(file.path).resize(width, null).writeAsync(output)
-      } else {
-        return await gm(file.path).resize(null, height).writeAsync(output)
-      }
+      return await resizeByRatio(file, originRatio, ratio, width, height, output)
     }
 
     if (mode === 'contain') {
       return await gm(file.path).resize(width, height).writeAsync(output)
+    }
+
+    if (mode === 'crop') {
+      const dir = path.join(path.dirname(output), 'png')
+      await fs.ensureDir(dir)
+      const tmpFile = path.join(dir, uuid.v4())
+
+      await resizeByRatio(file, originRatio, ratio, width, height, tmpFile)
+
+      await gm(tmpFile).gravity('Center').crop(width, height).writeAsync(output)
+
+      await fs.remove(tmpFile)
     }
   }
 }
@@ -106,12 +123,6 @@ export default async (file, args, parameters = {}, optimizeByGm) => {
     await image.toFile(output)
   }
 
-  // if (true) {
-  //   promise.promisifyAll(gm.prototype)
-  //   const data = await gm(file.path).identifyAsync()
-  // }
-  //
-  // console.log('data', data)
   await optimizePNG(resize ? output : file.path, output, [
     '--quality', `${ minQuality }-${ maxQuality }`,
     '--speed', speed
