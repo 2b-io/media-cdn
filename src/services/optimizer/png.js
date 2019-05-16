@@ -10,8 +10,7 @@ import uuid from 'uuid'
 
 import localpath from 'services/localpath'
 
-
-const resizeByRatio = async (file, originRatio, ratio, width, height, output) => {
+const formatRatio = async (file, originRatio, ratio, width, height, output) => {
   if (originRatio < ratio) {
     return await gm(file.path).resize(width, null).writeAsync(output)
   }
@@ -19,7 +18,7 @@ const resizeByRatio = async (file, originRatio, ratio, width, height, output) =>
   return await gm(file.path).resize(null, height).writeAsync(output)
 }
 
-const optimizePngByGM = async (file, resize, width = null, height = null, mode, output) => {
+const processPngByGM = async (file, resize, width = null, height = null, mode, output) => {
   promise.promisifyAll(gm.prototype)
 
   const { size: { width: originWidth, height: originHeight } } = await gm(file.path).identifyAsync()
@@ -29,11 +28,17 @@ const optimizePngByGM = async (file, resize, width = null, height = null, mode, 
 
   if (resize) {
     if (mode === 'cover') {
-      return await resizeByRatio(file, originRatio, ratio, width, height, output)
+      // to do optimize png
+      await formatRatio(file, originRatio, ratio, width, height, output)
+
+      return
     }
 
     if (mode === 'contain') {
-      return await gm(file.path).resize(width, height).writeAsync(output)
+      // to do optimize png
+      await gm(file.path).resize(width, height).writeAsync(output)
+
+      return
     }
 
     if (mode === 'crop') {
@@ -41,15 +46,19 @@ const optimizePngByGM = async (file, resize, width = null, height = null, mode, 
       await fs.ensureDir(dir)
       const tmpFile = path.join(dir, uuid.v4())
 
-      await resizeByRatio(file, originRatio, ratio, width, height, tmpFile)
-
+      await formatRatio(file, originRatio, ratio, width, height, tmpFile)
+      // to do optimize png
       await gm(tmpFile).gravity('Center').crop(width, height).writeAsync(output)
 
       await fs.remove(tmpFile)
+
+      return
     }
   }
-}
 
+  // to do process quality png
+  await gm(file.path).writeAsync(output)
+}
 
 const optimizePNG = async (input, output, args) => {
   const dir = path.join(path.dirname(output), 'png')
@@ -95,7 +104,7 @@ export default async (file, args, parameters = {}, optimizeByGm) => {
   const resize = !(width === 'auto' && height === 'auto')
 
   if (optimizeByGm) {
-    await optimizePngByGM(file, resize, width, height, mode, output)
+    await processPngByGM(file, resize, width, height, mode, output)
 
     return {
       contentType: file.contentType,
