@@ -51,13 +51,13 @@ const processJpegByGM = async (file, quality, resize, width = null, height = nul
     }
   }
 
-  if (originQuality > quality) {
-    await gm(file.path).quality(quality).writeAsync(output)
+  if (originQuality < quality) {
+    await fs.move(file.path, output)
 
     return
   }
 
-  await gm(file.path).compress('JPEG2000').writeAsync(output)
+  await gm(file.path).quality(quality).writeAsync(output)
 }
 
 export default async (file, args, parameters = {}, optimizeByGm) => {
