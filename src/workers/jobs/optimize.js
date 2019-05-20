@@ -8,7 +8,7 @@ export default async (payload) => {
   try {
     origin = await cache.get(payload.origin)
 
-    target = await optimizer.optimize(origin, payload.args, payload.parameters)
+    target = await optimizer.optimize(origin, payload.args, payload.parameters, payload.optimizeByGm)
 
     const upload = await cache.put(payload.target, target, {
       expires: payload.expires

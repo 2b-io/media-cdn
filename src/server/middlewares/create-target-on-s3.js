@@ -41,7 +41,8 @@ export default [
           target: req._params.target,
           args: req._params.args,
           parameters: req._params.preset.parameters,
-          expires: req._originMeta.Expires.valueOf()
+          expires: req._originMeta.Expires.valueOf(),
+          optimizeByGm: req.query.gm
         }
       })
       .waitFor(`optimize:${ req._params.target }`)

@@ -15,7 +15,7 @@ const scenarios = {
 }
 
 export default {
-  async optimize(file, args, parameters) {
+  async optimize(file, args, parameters, optimizeByGm) {
     const { contentType } = file
     const scenario = scenarios[ mimeAliases[ contentType ] ]
 
@@ -23,6 +23,6 @@ export default {
       return file
     }
 
-    return await scenario(file, args, parameters)
+    return await scenario(file, args, parameters, optimizeByGm)
   }
 }
