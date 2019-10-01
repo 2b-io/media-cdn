@@ -6,6 +6,7 @@ import config from 'infrastructure/config'
 
 import pretty from 'server/endpoints/pretty'
 import universal from 'server/endpoints/universal'
+import store from 'server/endpoints/store'
 
 const app = express()
 
@@ -22,6 +23,7 @@ pretty.disable('x-powered-by')
 universal.disable('x-powered-by')
 
 app.use('/u', universal)
+app.use('/s', store)
 app.use('/', pretty)
 
 app.use((req, res) => {
