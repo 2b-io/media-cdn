@@ -9,7 +9,7 @@
   "dependencies": {
     "amqplib": "0.5.3",
     "array-flatten": "2.1.2",
-    "aws-sdk": "2.392.0",
+    "aws-sdk": "2.814.0",
     "body-parser": "1.18.3",
     "debug": "4.1.1",
     "deferred": "0.7.10",
