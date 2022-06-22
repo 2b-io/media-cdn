@@ -20,7 +20,7 @@
     "express": "4.16.4",
     "fs-extra": "7.0.1",
     "gifsicle": "4.0.1",
-    "got": "9.6.0",
+    "got": "11.8.5",
     "image-size": "0.7.1",
     "imagemin": "6.1.0",
     "imagemin-svgo": "7.0.0",
